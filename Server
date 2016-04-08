@@ -1,1 +1,74 @@
-Här skriver vi koden för servern
+Här skriver vi koden för servern, 
+
+
+with Ada.Text_IO;                  use Ada.Text_IO;
+with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
+with Ada.Command_Line;             use Ada.Command_Line;
+with TJa.Sockets;                  use TJa.Sockets;
+  
+
+
+
+procedure Server is
+   
+   type Socket_Array is
+     array (1..4) of Socket_Type;
+   
+   
+   Socket1, Socket2, Socket3, Socket4 : Socket_Type;
+   Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
+   Listener                           : Listener_Type;
+   Num_Players, G                     : Integer;
+   
+   --------------------------------------------------
+   procedure Add_Player(Listener : in Listener_Type;
+			                  Socket   : in out Socket_Type) is
+      
+   begin
+      
+      Wait_For_Connection(Listener, Socket);
+      
+   end Add_Player;
+   --------------------------------------------------
+   
+begin
+   -- "öppna dörren". För tillfället endast lokalt, ändra sedan.
+   Initiate(Listener, Integer'Value(Argument(1)), Localhost => true);
+   
+   
+   -- vänta på spelare 1
+   Wait_For_Connection(Listener, Socket1);
+   
+   Get(Socket1, Num_Players); -- vänta in att spelare ett bestämmer hur många som ska spela.
+   
+   
+   
+   -- lägg till wait_for_connections för så många spelare som angetts!
+   
+   if Num_Players > 1 then
+   
+    for I in 2..Num_Players loop
+      
+        Add_Player(Listener, Sockets(I));
+  
+        Put("Player ");
+        Put(I, 0);
+        Put(" joined the game.");
+        
+    end loop;
+   end if;
+   
+   
+   -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
+   for J in 1..Num_Players loop
+      
+      Put(Sockets(J), G);
+     
+   end loop;
+   
+   
+   
+   -- Nu kan själva spelet börja! 
+   
+
+end Server;
