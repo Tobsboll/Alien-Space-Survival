@@ -1,3 +1,154 @@
+with Ada.Text_IO;            use Ada.Text_IO;
+with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
+with Ada.Characters.Latin_1; use Ada.Characters.Latin_1; -- Till Clear_window & Goto-XY
 
-hejsan
-halooooo
+
+procedure Space1 is
+   
+   
+   type Shot_XY_Type is array(1 .. 2) of Integer;
+   type Shot_Type is array (1 .. 1) of Shot_XY_Type;
+   
+   -----------------------------------------------------------------
+   
+   procedure Clear_Window is
+      
+   begin
+      Put(Esc);
+      Put("[H");
+      Put(Esc);
+      Put("[2J");
+      Flush;
+   end Clear_Window;
+   
+   -----------------------------------------------------------------
+   
+   procedure Goto_XY(X,Y : in Positive) is
+      
+   begin
+      Put(Esc);
+      Put('[');
+      Put(Y, Width => 0);
+      Put(';');
+      Put(X, Width => 0);
+      Put('H');
+      Flush;
+   end Goto_XY;
+   
+   -----------------------------------------------------------------
+   
+   procedure Shot_XY(Shot : in out Shot_Type) is
+      
+   begin
+      for I in Shot_Type'Range loop
+	 
+	 if Shot(I)(2) > 2 then
+	    Goto_XY(Shot(I)(1),Shot(I)(2));
+	    Put("o     o");
+	    Shot(I)(2) := Shot(I)(2) - 1;
+	 end if; 
+	 
+      end loop;
+   end Shot_XY;   
+   
+   -----------------------------------------------------------------
+   procedure Lay_Out is
+      
+   begin 
+      Clear_Window;      
+      Put_Line("                        SPACE INVADER                        ");
+      Put_Line(" ___________________________________________________________ ");
+      for I in 1 .. 30 loop
+	 Put_Line("|                                                           |");
+      end loop;   
+   end Lay_Out;
+   
+   -----------------------------------------------------------------
+   -----------------------------------------------------------------
+   -----------------------------------------------------------------
+   
+   
+   -------------------
+   ---- Variablar ----
+   -------------------
+   Input : Boolean;
+   Loop_Times : Integer := 0;
+   Time : Duration;
+   
+   Ship_X, Ship_Y : Integer;
+   Shot : Shot_Type;
+   
+   C : Character := 'o';
+   
+begin
+   
+   Ship_X := 30;
+   Ship_Y := 33;
+   Lay_Out;
+   
+   ------------------------
+   ------ Shot Reset ------
+   ------------------------
+   for I in Shot_Type'Range loop
+      Shot(I)(1) := 0;
+      Shot(I)(2) := 0;
+   end loop;
+   ------------------------
+   ------------------------
+   
+   loop
+      Loop_Times := Loop_Times + 1;
+      Time := 0.01;
+      Input := True;
+      
+      ---------------------------
+      ---- Skriver ut banan -----
+      ---------------------------
+      Lay_Out;
+      
+      ---------------------------
+      -- Skriver ut antal loop --
+      ---------------------------      
+      Put("Loop Times: ");
+      Put(Loop_Times, Width => 0);
+      
+      ---------------------------
+      --- Skriver ut Skeppet ----
+      ---------------------------
+      Goto_XY(Ship_X,Ship_Y);
+      Put_line("|_.^._|");
+      
+      ---------------------------
+      --- Skriver ut skotten ----
+      ---------------------------
+      Shot_XY(Shot);
+      
+      ---------------------------
+      ------ Hämtar Input -------
+      ---------------------------
+      Get_Immediate(C,Input);
+      Time := Time - Time;
+      
+      ---------------------------
+      ---- Räknar ut ny data ----
+      ---------------------------
+      if C /= 'o' then
+	 if C = 'd' then
+	    Ship_X := Ship_X + 1 ;
+	 elsif C = 'a' then
+	    Ship_X := Ship_X - 1 ;
+	 elsif C = ' ' then
+	    for I in Shot_Type'Range loop
+	       if Shot(I)(2) < 3 then
+		  Shot(I)(2) := Ship_Y-1;
+		  Shot(I)(1) := Ship_X;
+		  exit;
+	       end if;
+	    end loop;
+	 end if;
+	 C := 'o';
+      end if;
+      
+      delay(Time);
+   end loop;
+end Space1;
