@@ -1,0 +1,34 @@
+  
+     type X_Led is array(1 .. 62) of Character;
+     type World is array(1 .. 30) of X_Led;
+     
+     type XY_Type is array(1 .. 2) of Integer;
+     type Shot_Type is array (1 .. 5) of XY_Type;
+  
+     type Ship_spec is 
+        record
+  	 XY      : XY_Type; 
+  	 Lives   : Integer; 
+  	 S       : Shot_Type;
+        end record;
+     
+     type Player_Type is
+        record
+  	 Playing    : Boolean;
+  	 Name       : String(1..24);
+  	 NameLength : Integer;
+  	 Ship       : Ship_Spec;
+  	 Score      : Integer;
+        end record;
+     
+     type Enemies is array (1 .. 50) of Ship_Spec;
+     
+     type Game_Data is
+        record
+  	 Layout   : World;
+  	 Player_1 : Player_Type;
+  	 Player_2 : Player_Type;
+  	 Player_3 : Player_Type;
+  	 Player_4 : Player_Type;
+  	 Wave     : Enemies;
+      end record; 
