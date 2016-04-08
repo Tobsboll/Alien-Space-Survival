@@ -18,7 +18,7 @@ procedure Server is
    Socket1, Socket2, Socket3, Socket4 : Socket_Type;
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
    Listener                           : Listener_Type;
-   Num_Players, G                     : Integer;
+   Num_Players,                       : Integer;
    
    --------------------------------------------------
    procedure Add_Player(Listener : in Listener_Type;
@@ -62,7 +62,7 @@ begin
    -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
    for J in 1..Num_Players loop
       
-      Put(Sockets(J), G);
+      Put_Line(Sockets(J), "G");
      
    end loop;
    
