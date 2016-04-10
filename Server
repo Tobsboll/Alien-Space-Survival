@@ -21,12 +21,18 @@ procedure Server is
    Num_Players,                       : Integer;
    
    --------------------------------------------------
-   procedure Add_Player(Listener : in Listener_Type;
-			                  Socket   : in out Socket_Type) is
+   procedure Add_Player(Listener   : in Listener_Type;
+			Socket     : in out Socket_Type;
+			Player_Num : in Integer) is
       
    begin
       
       Wait_For_Connection(Listener, Socket);
+      
+      New_Line;
+      Put("Player ");
+      Put(Player_Num, 0);
+      Put(" joined the game.");
       
    end Add_Player;
    --------------------------------------------------
@@ -49,12 +55,8 @@ begin
    
     for I in 2..Num_Players loop
       
-        Add_Player(Listener, Sockets(I));
-  
-        Put("Player ");
-        Put(I, 0);
-        Put(" joined the game.");
-        
+        Add_Player(Listener, Sockets(I), I);
+ 
     end loop;
    end if;
    
