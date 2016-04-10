@@ -124,6 +124,12 @@ begin
       Shot_XY(Shot);
       
       ---------------------------
+      ---   Så man hinner se  ---
+      --- innan "Clear_Window ---
+      ---------------------------
+      delay(Time);
+      
+      ---------------------------
       ------ Hämtar Input -------
       ---------------------------
       Get_Immediate(C,Input);
