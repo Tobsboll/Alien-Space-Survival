@@ -1,6 +1,3 @@
-Här skriver vi koden för servern, 
-
-
 with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
@@ -18,24 +15,93 @@ procedure Server is
    Socket1, Socket2, Socket3, Socket4 : Socket_Type;
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
    Listener                           : Listener_Type;
-   Num_Players,                       : Integer;
+   Num_Players, G                     : Integer;
+   
+   
    
    --------------------------------------------------
-   procedure Add_Player(Listener   : in Listener_Type;
-			Socket     : in out Socket_Type;
-			Player_Num : in Integer) is
+        type X_Led is array(1 .. 62) of Character;
+     type World is array(1 .. 30) of X_Led;
+     
+     type XY_Type is array(1 .. 2) of Integer;
+     type Shot_Type is array (1 .. 5) of XY_Type;
+  
+     type Ship_spec is 
+        record
+  	 XY      : XY_Type; 
+  	 Lives   : Integer; 
+  	 S       : Shot_Type;
+        end record;
+     
+     type Player_Type is
+        record
+  	 Playing    : Boolean;
+  	 Name       : String(1..24);
+  	 NameLength : Integer;
+  	 Ship       : Ship_Spec;
+  	 Score      : Integer;
+        end record;
+     
+     type Enemies is array (1 .. 50) of Ship_Spec;
+     
+     type Game_Data is
+        record
+  	 Layout   : World;
+  	 Player_1 : Player_Type;
+  	 Player_2 : Player_Type;
+  	 Player_3 : Player_Type;
+  	 Player_4 : Player_Type;
+  	 Wave     : Enemies;
+      end record; 
+   --------------------------------------------------
+   
+   
+   
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   procedure Add_Player(Listener : in Listener_Type;
+			Socket   : in out Socket_Type;
+		        Player_Num : in integer) is
       
    begin
       
       Wait_For_Connection(Listener, Socket);
       
-      New_Line;
       Put("Player ");
       Put(Player_Num, 0);
       Put(" joined the game.");
       
    end Add_Player;
    --------------------------------------------------
+   
+   --------------------------------------------------
+   procedure Remove_Player(Socket     : in out Socket_Type; 
+			   Player_Num : in Integer) is
+      
+   begin
+      
+      Close(Socket);
+      
+      New_Line;
+      Put("Player ");
+      Put(Player_Num, 0);
+      Put(" has left the game");
+      
+   
+   end Remove_Player;
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   procedure Update_Enemies is
+      
+   begin -- procedure som tar input och uppdaterar 
+      null;
+      
+   end Update_Enemies;
+   --------------------------------------------------
+   
+   Game_Data : Game_Type;
    
 begin
    -- "öppna dörren". För tillfället endast lokalt, ändra sedan.
@@ -48,29 +114,42 @@ begin
    Get(Socket1, Num_Players); -- vänta in att spelare ett bestämmer hur många som ska spela.
    
    
+   Put("Waiting for players...");
+   
    
    -- lägg till wait_for_connections för så många spelare som angetts!
-   
-   if Num_Players > 1 then
-   
-    for I in 2..Num_Players loop
+   for I in 2..Num_Players loop
       
-        Add_Player(Listener, Sockets(I), I);
- 
-    end loop;
-   end if;
+      Add_Player(Listener, Sockets(I), I);
+      
+   end loop;
+   
+   New_Line;
+   Put("All players have joined the game.");
    
    
    -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
    for J in 1..Num_Players loop
       
-      Put_Line(Sockets(J), "G");
+      Put(Sockets(J),"G");
      
    end loop;
    
+     -- Nu kan själva spelet börja!
+   
+  -- Update_Enemies; -- har bara lagt till det som jag själv ansvarar för här, alla spelets underprogram som servern kör ska ligga här
    
    
-   -- Nu kan själva spelet börja! 
+   
+   
+   --Efter spelets slut.
+   
+   for I in 1..Num_Players loop
+      
+      Remove_Player(Sockets(I), I);
+      
+   end loop; 
    
 
 end Server;
+
