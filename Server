@@ -16,6 +16,7 @@ procedure Server is
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
    Listener                           : Listener_Type;
    Num_Players                        : Integer;
+   Keyboard_Input                     : Integer;
    
    --------------------------------------------------
    type X_Led is array(1 .. 62) of Character;
@@ -95,7 +96,8 @@ procedure Server is
    procedure Update_Enemies is
       
    begin -- procedure som tar input och uppdaterar 
-      null;
+      
+      
       
    end Update_Enemies;
    --------------------------------------------------
@@ -138,7 +140,23 @@ begin
    
    -- Nu kan själva spelet börja!
    
-  -- Update_Enemies; -- har bara lagt till det som jag själv ansvarar för här, alla spelets underprogram som servern kör ska ligga här
+   
+   
+   
+   -- loop som plockar input från alla spelare och filtrerar den.
+   for I in 1..Num_Players loop
+      
+      Get(Socket(I), Keyboard_Input);
+      Skip_Line;
+      
+      --filtrera
+     -- if       -- INTE KLART
+      
+   end loop;
+   
+   
+   
+  -- Update_Enemies;
    
    Put("Spelet är igång!");
    Skip_Line;
@@ -154,4 +172,3 @@ begin
    
 
 end Server;
-
