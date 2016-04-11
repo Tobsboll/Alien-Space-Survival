@@ -15,37 +15,35 @@ procedure Server is
    Socket1, Socket2, Socket3, Socket4 : Socket_Type;
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
    Listener                           : Listener_Type;
-   Num_Players, G                     : Integer;
-   
-   
+   Num_Players                        : Integer;
    
    --------------------------------------------------
-        type X_Led is array(1 .. 62) of Character;
-     type World is array(1 .. 30) of X_Led;
-     
-     type XY_Type is array(1 .. 2) of Integer;
-     type Shot_Type is array (1 .. 5) of XY_Type;
-  
-     type Ship_spec is 
-        record
+   type X_Led is array(1 .. 62) of Character;
+   type World is array(1 .. 30) of X_Led;
+   
+   type XY_Type is array(1 .. 2) of Integer;
+   type Shot_Type is array (1 .. 5) of XY_Type;
+   
+   type Ship_spec is 
+      record
   	 XY      : XY_Type; 
   	 Lives   : Integer; 
   	 S       : Shot_Type;
-        end record;
-     
-     type Player_Type is
-        record
+      end record;
+   
+   type Player_Type is
+      record
   	 Playing    : Boolean;
   	 Name       : String(1..24);
   	 NameLength : Integer;
   	 Ship       : Ship_Spec;
   	 Score      : Integer;
-        end record;
-     
-     type Enemies is array (1 .. 50) of Ship_Spec;
-     
-     type Game_Data is
-        record
+      end record;
+   
+   type Enemies is array (1 .. 50) of Ship_Spec;
+   
+   type Game_Data is
+      record
   	 Layout   : World;
   	 Player_1 : Player_Type;
   	 Player_2 : Player_Type;
@@ -71,6 +69,7 @@ procedure Server is
       Put("Player ");
       Put(Player_Num, 0);
       Put(" joined the game.");
+      New_Line;
       
    end Add_Player;
    --------------------------------------------------
@@ -101,20 +100,22 @@ procedure Server is
    end Update_Enemies;
    --------------------------------------------------
    
-   Game_Data : Game_Type;
+--   Game_Data : Game_Type;
    
 begin
+   
    -- "öppna dörren". För tillfället endast lokalt, ändra sedan.
    Initiate(Listener, Integer'Value(Argument(1)), Localhost => true);
    
-   
+   Put_Line("Servern är igång, väntar på connection");
    -- vänta på spelare 1
-   Wait_For_Connection(Listener, Socket1);
+   -- Wait_For_Connection(Listener, Socket1);
+   Add_Player(Listener, Sockets(1), 1);
    
-   Get(Socket1, Num_Players); -- vänta in att spelare ett bestämmer hur många som ska spela.
+   Get(Sockets(1), Num_Players); -- vänta in att spelare ett bestämmer hur många som ska spela.
    
    
-   Put("Waiting for players...");
+   Put_line("Waiting for players...");
    
    
    -- lägg till wait_for_connections för så många spelare som angetts!
@@ -131,15 +132,16 @@ begin
    -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
    for J in 1..Num_Players loop
       
-      Put(Sockets(J),"G");
-     
+      Put_Line(Sockets(J),Num_Players);
+      
    end loop;
    
-     -- Nu kan själva spelet börja!
+   -- Nu kan själva spelet börja!
    
   -- Update_Enemies; -- har bara lagt till det som jag själv ansvarar för här, alla spelets underprogram som servern kör ska ligga här
    
-   
+   Put("Spelet är igång!");
+   Skip_Line;
    
    
    --Efter spelets slut.
