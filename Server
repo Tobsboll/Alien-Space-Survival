@@ -1,3 +1,4 @@
+
 with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
@@ -16,7 +17,7 @@ procedure Server is
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
    Listener                           : Listener_Type;
    Num_Players                        : Integer;
-   Keyboard_Input                     : Integer;
+   Keyboard_Input                     : Character;
    
    --------------------------------------------------
    type X_Led is array(1 .. 62) of Character;
@@ -97,7 +98,7 @@ procedure Server is
       
    begin -- procedure som tar input och uppdaterar 
       
-      
+      null;
       
    end Update_Enemies;
    --------------------------------------------------
@@ -132,11 +133,7 @@ begin
    
    
    -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
-   for J in 1..Num_Players loop
-      
-      Put_Line(Sockets(J),Num_Players);
-      
-   end loop;
+
    
    -- Nu kan själva spelet börja!
    
@@ -144,23 +141,47 @@ begin
    
    
    -- loop som plockar input från alla spelare och filtrerar den.
-   for I in 1..Num_Players loop
+
+
+ 
+   
+   
+   -- Update_Enemies;
+   
+   for J in 1..Num_Players loop
       
-      Get(Socket(I), Keyboard_Input);
-      Skip_Line;
-      
-      --filtrera
-     -- if       -- INTE KLART
+      Put_Line(Sockets(J), Num_Players);
       
    end loop;
-   
-   
-   
-  -- Update_Enemies;
    
    Put("Spelet är igång!");
    Skip_Line;
    
+   loop
+   --------------------------------------------------
+   for I in 1..Num_Players loop
+      
+      Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
+      Skip_Line;
+      
+      if Keyboard_Input /= 'o' then
+	 
+	 Put("Player ");
+	 Put(I);
+	 Put(" pressed: ");
+	 
+	 if Keyboard_Input = 'w' then Put("Up Arrow");
+	 elsif Keyboard_Input = 's' then Put("Down arrow");
+	 elsif Keyboard_Input = 'a' then Put("Left arrow");
+	 elsif Keyboard_Input = 'd' then Put("Right arrow");
+	 elsif Keyboard_input = ' ' then Put("Fire"); 	
+	 elsif Keyboard_Input = 'e' then exit; -- betyder "ingen input" för servern.
+	 end if;
+      end if;
+      
+   end loop;
+   --------------------------------------------------
+   end loop;
    
    --Efter spelets slut.
    
