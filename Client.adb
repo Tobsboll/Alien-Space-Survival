@@ -95,7 +95,7 @@ begin
    
       
 
-   
+   ------------------------------ GÖR UNDERPROGRAM AV HELA LOBBYPROCESSEN
    
    Put("Join eller Create, J eller C: ");
 
@@ -122,7 +122,7 @@ begin
       end if;
    end loop;
    
-
+---------------------------------------------------
 
     
 
