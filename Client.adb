@@ -15,13 +15,16 @@ procedure Klient is
       Input : Boolean;
       
    begin
+      
+      Set_Buffer_Mode(Off);
+      
       Input := True;
       
       while Input loop
 	 
 	 Get_Immediate(Keyboard_Input, Input);
 	 
-	 if Is_Up_Arrow(Keyboard_input) or Is_Down_Arrow(Keyboard_input) or Is_Left_Arrow(Keyboard_input) or Is_Right_Arrow(Keyboard_input) or To_Character(Keyboard_input) = ' ' then 
+	 if Is_Up_Arrow(Keyboard_input) or Is_Down_Arrow(Keyboard_input) or Is_Left_Arrow(Keyboard_input) or Is_Right_Arrow(Keyboard_input) or (Is_Character(Keyboard_input) and To_Character(Keyboard_Input) = ' ') or Is_Esc(Keyboard_input)  then 
 	    exit;
 	 end if; -- gör att den endast går vidare i koden efter giltig input
       end loop;
@@ -37,7 +40,8 @@ procedure Klient is
       elsif Is_Down_Arrow(Keyboard_input) then Put_Line(Socket, 's');
       elsif Is_Left_Arrow(Keyboard_input) then Put_Line(Socket, 'a');
       elsif Is_Right_Arrow(Keyboard_input) then Put_Line(Socket, 'd');
-      elsif To_Character(Keyboard_input) = ' ' then Put_Line(Socket, ' '); 	
+      elsif Is_Character(Keyboard_input) then Put_Line(Socket, ' '); -- nu är det så att vi skjuter på alla bokstavsknappar!!	
+      else Put_Line(Socket, 'O'); -- betyder "ingen input" för servern.
       end if;
       
    end Send_Input;
@@ -107,23 +111,28 @@ begin
 
       
    Get(Socket, NumPlayers);
-   Skip_Line;
-   Skip_Line;
+ -- Skip_Line;
+  Skip_Line;
       
-   
+   Put("Vi kom förbi geten");
    
    --------------------------------------------------
    --Game loop.
    
    loop
-   
+         
     Get_Input(Keyboard_input);
     
-    if To_Key_Code_type(Keyboard_Input) = Key_Esc then
+    if To_Key_Code_type(Keyboard_Input) = Key_Esc then-- måste ändras
+       
+       Put("Exiting...");
+       Put_Line(Socket, 'e');
        exit;
     end if;
     
     Send_Input(Keyboard_Input, Socket);
+    
+    delay(0.01);
     
    end loop;
    
@@ -135,4 +144,3 @@ begin
 
 
 end Klient;
-
