@@ -103,6 +103,37 @@ procedure Server is
    end Update_Enemies;
    --------------------------------------------------
    
+   --------------------------------------------------
+   procedure Print_Player_Input(Sockets : in Socket_Array) is
+      
+   begin
+      
+      for I in 1..Num_Players loop
+	 
+	 Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
+	 Skip_Line(Sockets(I));
+	 
+	 if Keyboard_Input /= 'o' then -- = om det fanns nollskild, giltig input.
+	    
+	    New_Line;
+	    Put("Player ");
+	    Put(I, 0);
+	    Put(" pressed: ");
+	    
+	    if Keyboard_Input = 'w' then Put("Up Arrow");
+	    elsif Keyboard_Input = 's' then Put("Down arrow");
+	    elsif Keyboard_Input = 'a' then Put("Left arrow");
+	    elsif Keyboard_Input = 'd' then Put("Right arrow");
+	    elsif Keyboard_input = ' ' then Put("Fire"); 	
+	    elsif Keyboard_Input = 'e' then exit; -- betyder "ingen input" för servern.
+	    end if;
+	 end if;
+	 
+      end loop;
+      
+   end Print_Player_Input;
+   --------------------------------------------------
+   
 --   Game_Data : Game_Type;
    
 begin
@@ -111,15 +142,17 @@ begin
    Initiate(Listener, Integer'Value(Argument(1)), Localhost => true);
    
    Put_Line("Servern är igång, väntar på connection");
+   
+   --------------------------------------------------
+   --PLAYER SETUP
+   --------------------------------------------------
+   
    -- vänta på spelare 1
-   -- Wait_For_Connection(Listener, Socket1);
    Add_Player(Listener, Sockets(1), 1);
    
-   Get(Sockets(1), Num_Players); -- vänta in att spelare ett bestämmer hur många som ska spela.
-   
+   Get(Sockets(1), Num_Players); -- spelare 1 bestämmer hur många som ska spela.
    
    Put_line("Waiting for players...");
-   
    
    -- lägg till wait_for_connections för så många spelare som angetts!
    for I in 2..Num_Players loop
@@ -133,21 +166,6 @@ begin
    
    
    -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
-
-   
-   -- Nu kan själva spelet börja!
-   
-   
-   
-   
-   -- loop som plockar input från alla spelare och filtrerar den.
-
-
- 
-   
-   
-   -- Update_Enemies;
-   
    for J in 1..Num_Players loop
       
       Put_Line(Sockets(J), Num_Players);
@@ -155,33 +173,27 @@ begin
    end loop;
    
    Put("Spelet är igång!");
-   Skip_Line;
+   --------------------------------------------------
+   --------------------------------------------------
    
-   loop
+   
+   -- Skip_Line;
+   
+   
    --------------------------------------------------
-   for I in 1..Num_Players loop
+   --GAME LOOP
+   --------------------------------------------------
+   
+   --i nuläget kan man skjuta på alla knappar som är en character ^^
+   
+   loop 
       
-      Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
-      Skip_Line;
-      
-      if Keyboard_Input /= 'o' then
-	 
-	 Put("Player ");
-	 Put(I);
-	 Put(" pressed: ");
-	 
-	 if Keyboard_Input = 'w' then Put("Up Arrow");
-	 elsif Keyboard_Input = 's' then Put("Down arrow");
-	 elsif Keyboard_Input = 'a' then Put("Left arrow");
-	 elsif Keyboard_Input = 'd' then Put("Right arrow");
-	 elsif Keyboard_input = ' ' then Put("Fire"); 	
-	 elsif Keyboard_Input = 'e' then exit; -- betyder "ingen input" för servern.
-	 end if;
-      end if;
+      Print_Player_Input(Sockets);
       
    end loop;
+   
    --------------------------------------------------
-   end loop;
+   --------------------------------------------------
    
    --Efter spelets slut.
    
