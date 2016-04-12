@@ -5,6 +5,8 @@ with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with TJa.Sockets;         use TJa.Sockets;
 with TJa.Keyboard;        use TJa.Keyboard;
 with TJa.Keyboard.Keys;   use TJa.Keyboard.Keys;
+with Ada.Strings;         use Ada.Strings;
+
 
 procedure Klient is
    
@@ -24,10 +26,20 @@ procedure Klient is
 	 
 	 Get_Immediate(Keyboard_Input, Input);
 	 
-	 if Is_Up_Arrow(Keyboard_input) or Is_Down_Arrow(Keyboard_input) or Is_Left_Arrow(Keyboard_input) or Is_Right_Arrow(Keyboard_input) or (Is_Character(Keyboard_input) and To_Character(Keyboard_Input) = ' ') or Is_Esc(Keyboard_input)  then 
+	 if Is_Up_Arrow(Keyboard_input) 
+	   or Is_Down_Arrow(Keyboard_input) 
+	   or Is_Left_Arrow(Keyboard_input) 
+	   or Is_Right_Arrow(Keyboard_input) 
+	  or Is_Character(Keyboard_input) -- and
+	--	 or To_Character(Keyboard_input) = ' ' 
+	   or Is_Esc(Keyboard_input)  then 
 	    exit;
-	 end if; -- gör att den endast går vidare i koden efter giltig input
+	 end if;
+       	 
       end loop;
+      
+   exception
+      when Ada.Strings.INDEX_ERROR => null;
       
    end Get_Input;
    --------------------------------------------------
@@ -40,9 +52,14 @@ procedure Klient is
       elsif Is_Down_Arrow(Keyboard_input) then Put_Line(Socket, 's');
       elsif Is_Left_Arrow(Keyboard_input) then Put_Line(Socket, 'a');
       elsif Is_Right_Arrow(Keyboard_input) then Put_Line(Socket, 'd');
-      elsif Is_Character(Keyboard_input) then Put_Line(Socket, ' '); -- nu är det så att vi skjuter på alla bokstavsknappar!!	
-      else Put_Line(Socket, 'O'); -- betyder "ingen input" för servern.
+      elsif Is_Character(Keyboard_input) then Put_Line(Socket, ' '); 
+      
+      else Put_Line(Socket, 'o'); -- betyder "ingen input" för servern.
       end if;
+      
+   exception
+      when Ada.Strings.INDEX_ERROR => null;
+	 
       
    end Send_Input;
    --------------------------------------------------
@@ -113,17 +130,17 @@ begin
    Get(Socket, NumPlayers);
  -- Skip_Line;
   Skip_Line;
-      
-   Put("Vi kom förbi geten");
    
    --------------------------------------------------
    --Game loop.
-   
+  --------------------------------------------------
+  
+  
    loop
          
-    Get_Input(Keyboard_input);
+    Get_Input(Keyboard_input); -- verkar kunna få någon slags laggproblmatik med spelare 2, vet inte om det kanske är någon buffer som fylls någonstans?
     
-    if To_Key_Code_type(Keyboard_Input) = Key_Esc then-- måste ändras
+    if Is_Esc(Keyboard_Input) then-- måste ändras
        
        Put("Exiting...");
        Put_Line(Socket, 'e');
@@ -132,7 +149,7 @@ begin
     
     Send_Input(Keyboard_Input, Socket);
     
-    delay(0.01);
+  --  delay(0.01);
     
    end loop;
    
