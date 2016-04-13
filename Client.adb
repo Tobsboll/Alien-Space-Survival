@@ -19,6 +19,7 @@ procedure Klient is
    begin
       
       Set_Buffer_Mode(Off);
+    --  Set_Echo_Mode(Off);
       
       Input := True;
       
@@ -30,8 +31,8 @@ procedure Klient is
 	   or Is_Down_Arrow(Keyboard_input) 
 	   or Is_Left_Arrow(Keyboard_input) 
 	   or Is_Right_Arrow(Keyboard_input) 
-	  or Is_Character(Keyboard_input) -- and
-	--	 or To_Character(Keyboard_input) = ' ' 
+	  or Is_Character(Keyboard_input)-- and
+      	 --  To_Character(Keyboard_input) = ' ') 
 	   or Is_Esc(Keyboard_input)  then 
 	    exit;
 	 end if;
@@ -95,7 +96,7 @@ begin
    
       
 
-   ------------------------------ GÖR UNDERPROGRAM AV HELA LOBBYPROCESSEN
+   
    
    Put("Join eller Create, J eller C: ");
 
@@ -122,7 +123,7 @@ begin
       end if;
    end loop;
    
----------------------------------------------------
+
 
     
 
@@ -137,8 +138,11 @@ begin
   
   
    loop
-         
-    Get_Input(Keyboard_input); -- verkar kunna få någon slags laggproblmatik med spelare 2, vet inte om det kanske är någon buffer som fylls någonstans?
+      
+      -- put world // Andreas
+      -- put Ships // Andreas
+      
+    Get_Input(Keyboard_input);
     
     if Is_Esc(Keyboard_Input) then-- måste ändras
        
@@ -149,7 +153,8 @@ begin
     
     Send_Input(Keyboard_Input, Socket);
     
-  --  delay(0.01);
+    delay(0.01); -- senare bra om vi gör så att server och
+                 -- klient synkar exakt!
     
    end loop;
    
