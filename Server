@@ -94,11 +94,25 @@ procedure Server is
    --------------------------------------------------
    
    --------------------------------------------------
-   procedure Update_Enemies is
+   procedure Update_Enemies(Loop_Counter : in Integer;
+			    Ship_Coordinate : in out XY_type) is
+      
+    -- Ship_Coordinate : XY_Type;
       
    begin -- procedure som tar input och uppdaterar 
       
-      null;
+      -- gör den just nu som en animation, senare kan den ev trigga på
+      -- om andra fiender dör osv.
+      
+    -- if Loop_Counter = 0 then -- räknar gameloops.
+	 
+	 Ship_Coordinate(1) := 30;
+	 Ship_Coordinate(2) := 10;
+	 
+	
+     -- end if;
+      
+      -- rörelsemönster ska skrivas här, förslagsvis underprogram "zigzag slowly" etc.
       
    end Update_Enemies;
    --------------------------------------------------
@@ -110,10 +124,18 @@ procedure Server is
       
       for I in 1..Num_Players loop
 	 
+	 
+	 
 	 Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
+	 
+	 
+	 
 	 Skip_Line(Sockets(I));
 	 
-	 if Keyboard_Input /= 'o' then -- = om det fanns nollskild, giltig input.
+	 
+	 
+	 if Keyboard_Input /= 'o' then -- = om det fanns nollskild, giltig input.        
+	  
 	    
 	    New_Line;
 	    Put("Player ");
@@ -134,7 +156,9 @@ procedure Server is
    end Print_Player_Input;
    --------------------------------------------------
    
---   Game_Data : Game_Type;
+   
+   --   Game_Data : Game_Type;
+   Loop_Counter : Integer;
    
 begin
    
@@ -186,9 +210,21 @@ begin
    
    --i nuläget kan man skjuta på alla knappar som är en character ^^
    
+   Loop_Counter := 0;
+   
    loop 
       
-      Print_Player_Input(Sockets);
+      Print_Player_Input(Sockets); -- för test av input
+      
+      --update world /Andreas
+      --update ship /andreas
+      
+      
+   --   Update_Enemies(Loop_counter); / Tobias
+      
+      Loop_Counter := Loop_Counter + 1;
+      
+      
       
    end loop;
    
