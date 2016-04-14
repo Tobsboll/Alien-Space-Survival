@@ -33,6 +33,18 @@ procedure Server is
   	 S       : Shot_Type;
       end record;
    
+   type Enemy_Ship_Spec is
+      record
+	 XY    : XY_Type;
+	 Lives : Integer;
+	 Shot  : Shot_Type;
+	 Movement_Type : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
+	                          --, då kan vi ha olika typer av fiender på skärmen samtidigt.
+	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
+	                               -- åt höger eller vänster.
+      end record;
+   
+   
    type Player_Type is
       record
   	 Playing    : Boolean;
@@ -95,9 +107,7 @@ procedure Server is
    
    --------------------------------------------------
    procedure Update_Enemies(Loop_Counter : in Integer;
-			    Movement_Selector : in Integer;
-			    Ship_Coordinate : in out XY_Type;
-			    Direction_Selector : in out Integer) is
+			    Ship_Post    : Enemy_Ship_Spec) is
       
       -- Movement_selector:
       -- 1) stand still
@@ -122,24 +132,24 @@ procedure Server is
       
       -- om movement_selector är 1 så står skeppet still, vilket innebär att koden här helt enkelt hoppas över.
       
-      if Movement_Selector = 2 then 
+      if Ship_Post.Movement_Selector = 2 then 
 	 
-	 if Direction_selector = 1 then -- move right
+	 if Ship_Post.Direction_Selector = 1 then -- move right
 	    
-	    if Ship_Coordinate(1) < (World_X_Length-1) then
-               Ship_Coordinate(1) := Ship_Coordinate(1) + 1;
+	    if Ship_Post.XY(1) < (World_X_Length-1) then
+               Ship_Post.XY(1) := Ship_Post.XY(1) + 1;
 	       
-	    elsif Ship_Coordinate(1) = (World_X_Length-1) then
-	       Direction_Selector := 2;   
+	    elsif Ship_Post.XY(1) = (World_X_Length-1) then
+	       Ship_Post.Direction_Selector := 2;   
 	    end if;
 	    
-	 elsif Direction_Selector = 2 then -- move left
+	 elsif Ship_Post.Direction_Selector = 2 then -- move left
 	    
-	    if Ship_Coordinate(1) > 1  then
-               Ship_Coordinate(1) := Ship_Coordinate(1) -1;
+	    if Ship_Post.XY(1) > 1  then
+               Ship_Post.XY(1) := Ship_Coordinate(1) -1;
 	       
-	    elsif Ship_Coordinate(1) = 1 then
-	       Direction_Selector := 1;   
+	    elsif Ship_Post.XY(1) = 1 then
+	       Ship_Post.Direction_Selector := 1;   
 	    end if;
 	  
 	 end if;
@@ -147,9 +157,9 @@ procedure Server is
       
       
       
-      if Movement_Selector = 3 then
+      if Ship_Post.Movement_Selector = 3 then
 	 
-	 Ship_Coordinate(2) := Ship_Coordinate(2) + 1;
+	 Ship_Post.XY(2) := Ship_Post.XY(2) + 1;
 	 
       end if;
       
@@ -259,8 +269,12 @@ begin
       --update world /Andreas
       --update ship /andreas
       
-      
-   --   Update_Enemies(Loop_counter, Movement_selector, present_coordinate, Direction_Selector); / Tobias
+      for I in 1..Game_Data.Wave'Last -- för varje skepp i hela vågen
+	
+	if Active_Ship(Game_Data.Wave(I)) then -- om det finns ett aktivt skepp på den här platsen
+					       -- i arrayen med fiendeskepp.
+	
+   --   Update_Enemies(Loop_counter, Game_Data.Wave(I)); / Tobias
       
       Loop_Counter := Loop_Counter + 1;
       
