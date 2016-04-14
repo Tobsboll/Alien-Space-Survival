@@ -3,11 +3,29 @@ with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
 with TJa.Sockets;                  use TJa.Sockets;
-  
+with Ada.Numerics.Discrete_Random; 
 
 
 
 procedure Server is
+   
+   
+   --------------------------------------------------
+   --Tobias randomgenerator för fiendeskepp
+   --------------------------------------------------
+   subtype One_To_Twenty is Integer range 1..20;
+   
+   
+   package One_To_Twenty_Random is
+      new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_Twenty);
+     use One_To_Twenty_Random;
+   
+   
+   --------------------------------------------------
+   -- Slut
+   --------------------------------------------------
+   
+   
    
    type Socket_Array is
      array (1..4) of Socket_Type;
@@ -20,8 +38,11 @@ procedure Server is
    Keyboard_Input                     : Character;
    
    --------------------------------------------------
-   type X_Led is array(1 .. 62) of Character;
-   type World is array(1 .. 30) of X_Led;
+   World_X_Length : constant Integer := 62;
+   World_Y_Length : constant Integer := 30;
+   
+   type X_Led is array(1 .. World_X_Length) of Character;
+   type World is array(1 .. World_Y_Length) of X_Led;
    
    type XY_Type is array(1 .. 2) of Integer;
    type Shot_Type is array (1 .. 5) of XY_Type;
@@ -35,13 +56,14 @@ procedure Server is
    
    type Enemy_Ship_Spec is
       record
-	 XY    : XY_Type;
-	 Lives : Integer;
-	 Shot  : Shot_Type;
-	 Movement_Type : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
-	                          --, då kan vi ha olika typer av fiender på skärmen samtidigt.
+	 XY                 : XY_Type;
+	 Lives              : Integer;
+	 Shot               : Shot_Type;
+	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
+	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
 	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
 	                               -- åt höger eller vänster.
+	 Active             : Boolean;  
       end record;
    
    
@@ -54,7 +76,7 @@ procedure Server is
   	 Score      : Integer;
       end record;
    
-   type Enemies is array (1 .. 50) of Ship_Spec;
+   type Enemies is array (1 .. 50) of Enemy_Ship_Spec;
    
    type Game_Data is
       record
@@ -106,8 +128,18 @@ procedure Server is
    --------------------------------------------------
    
    --------------------------------------------------
-   procedure Update_Enemies(Loop_Counter : in Integer;
-			    Ship_Post    : Enemy_Ship_Spec) is
+   function Active_Ship(Enemy_Ship : Enemy_Ship_spec) return Boolean is
+      
+   begin
+      
+      return Enemy_Ship.Active;
+      
+   end Active_Ship;
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   procedure Update_Enemy_Position(Loop_Counter : in Integer;
+			           Ship_Post    : in out Enemy_Ship_Spec) is
       
       -- Movement_selector:
       -- 1) stand still
@@ -116,7 +148,6 @@ procedure Server is
       -- etc.
       
       Start_Position : constant XY_Type := (30,10);
-      World_X_Length : Integer;
       
    begin -- procedure som tar input och uppdaterar 
       
@@ -125,14 +156,14 @@ procedure Server is
 	                       -- Kan senare ersättas med en startanimation att de flyger ner från
 	                       -- toppen eller liknande.
 	 
-	 Ship_Coordinate := Start_Position;
+	 Ship_Post.XY := Start_Position;
 	 
       end if;
       
       
       -- om movement_selector är 1 så står skeppet still, vilket innebär att koden här helt enkelt hoppas över.
       
-      if Ship_Post.Movement_Selector = 2 then 
+      if Ship_Post.Movement_Selector = 2 then -- sida till sida
 	 
 	 if Ship_Post.Direction_Selector = 1 then -- move right
 	    
@@ -146,7 +177,7 @@ procedure Server is
 	 elsif Ship_Post.Direction_Selector = 2 then -- move left
 	    
 	    if Ship_Post.XY(1) > 1  then
-               Ship_Post.XY(1) := Ship_Coordinate(1) -1;
+               Ship_Post.XY(1) := Ship_Post.XY(1) -1;
 	       
 	    elsif Ship_Post.XY(1) = 1 then
 	       Ship_Post.Direction_Selector := 1;   
@@ -164,7 +195,18 @@ procedure Server is
       end if;
       
       
-   end Update_Enemies;
+   end Update_Enemy_position;
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   procedure Enemy_Shots(Shot_Probability : in One_To_Twenty;
+			 Enemy_Ship  : in out Enemy_Ship_spec) is
+      
+   begin -- ska sköta uppdateringen av skeppens koordinater.
+      
+null;
+      
+   end Enemy_Shots;
    --------------------------------------------------
    
    --------------------------------------------------
@@ -174,19 +216,11 @@ procedure Server is
       
       for I in 1..Num_Players loop
 	 
-	 
-	 
 	 Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
-	 
-	 
-	 
 	 Skip_Line(Sockets(I));
 	 
-	 
-	 
 	 if Keyboard_Input /= 'o' then -- = om det fanns nollskild, giltig input.        
-	  
-	    
+	   
 	    New_Line;
 	    Put("Player ");
 	    Put(I, 0);
@@ -207,7 +241,7 @@ procedure Server is
    --------------------------------------------------
    
    
-   --   Game_Data : Game_Type;
+   Game         : Game_Data;
    Loop_Counter : Integer;
    
 begin
@@ -258,9 +292,9 @@ begin
    --GAME LOOP
    --------------------------------------------------
    
-   --i nuläget kan man skjuta på alla knappar som är en character ^^
-   
    Loop_Counter := 0;
+   
+   
    
    loop 
       
@@ -269,17 +303,26 @@ begin
       --update world /Andreas
       --update ship /andreas
       
-      for I in 1..Game_Data.Wave'Last -- för varje skepp i hela vågen
+      for I in 1..Game.Wave'Last loop
+	 -- för varje skepp i hela vågen
 	
-	if Active_Ship(Game_Data.Wave(I)) then -- om det finns ett aktivt skepp på den här platsen
+	if Active_Ship(Game.Wave(I)) then -- om det finns ett aktivt skepp på den här platsen
 					       -- i arrayen med fiendeskepp.
 	
-   --   Update_Enemies(Loop_counter, Game_Data.Wave(I)); / Tobias
-      
+	  Update_Enemy_position(Loop_counter, Game.Wave(I)); --/ Tobias
+	  
+         --  Shot_Probability := Random(G); --ska räkna ut sannolikheten
+	                                     -- för att en alien skjuter / Tobias
+	  
+	--  Enemy_Shots(Shot_Probability, Game.Wave(I)); -- uppdaterar skott /Tobias
+	  
+	end if;
+
+	   
+      end loop;
+    
       Loop_Counter := Loop_Counter + 1;
-      
-      
-      
+       
    end loop;
    
    --------------------------------------------------
