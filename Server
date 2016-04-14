@@ -95,24 +95,64 @@ procedure Server is
    
    --------------------------------------------------
    procedure Update_Enemies(Loop_Counter : in Integer;
-			    Ship_Coordinate : in out XY_type) is
+			    Movement_Selector : in Integer;
+			    Ship_Coordinate : in out XY_Type;
+			    Direction_Selector : in out Integer) is
       
-    -- Ship_Coordinate : XY_Type;
+      -- Movement_selector:
+      -- 1) stand still
+      -- 2) move from side to side
+      -- 3) move forwards
+      -- etc.
+      
+      Start_Position : constant XY_Type := (30,10);
+      World_X_Length : Integer;
       
    begin -- procedure som tar input och uppdaterar 
       
-      -- gör den just nu som en animation, senare kan den ev trigga på
-      -- om andra fiender dör osv.
       
-    -- if Loop_Counter = 0 then -- räknar gameloops.
+      if Loop_Counter = 0 then -- första gången spawnar skeppet på en angiven startposition.
+	                       -- Kan senare ersättas med en startanimation att de flyger ner från
+	                       -- toppen eller liknande.
 	 
-	 Ship_Coordinate(1) := 30;
-	 Ship_Coordinate(2) := 10;
+	 Ship_Coordinate := Start_Position;
 	 
-	
-     -- end if;
+      end if;
       
-      -- rörelsemönster ska skrivas här, förslagsvis underprogram "zigzag slowly" etc.
+      
+      -- om movement_selector är 1 så står skeppet still, vilket innebär att koden här helt enkelt hoppas över.
+      
+      if Movement_Selector = 2 then 
+	 
+	 if Direction_selector = 1 then -- move right
+	    
+	    if Ship_Coordinate(1) < (World_X_Length-1) then
+               Ship_Coordinate(1) := Ship_Coordinate(1) + 1;
+	       
+	    elsif Ship_Coordinate(1) = (World_X_Length-1) then
+	       Direction_Selector := 2;   
+	    end if;
+	    
+	 elsif Direction_Selector = 2 then -- move left
+	    
+	    if Ship_Coordinate(1) > 1  then
+               Ship_Coordinate(1) := Ship_Coordinate(1) -1;
+	       
+	    elsif Ship_Coordinate(1) = 1 then
+	       Direction_Selector := 1;   
+	    end if;
+	  
+	 end if;
+      end if;
+      
+      
+      
+      if Movement_Selector = 3 then
+	 
+	 Ship_Coordinate(2) := Ship_Coordinate(2) + 1;
+	 
+      end if;
+      
       
    end Update_Enemies;
    --------------------------------------------------
@@ -220,7 +260,7 @@ begin
       --update ship /andreas
       
       
-   --   Update_Enemies(Loop_counter); / Tobias
+   --   Update_Enemies(Loop_counter, Movement_selector, present_coordinate, Direction_Selector); / Tobias
       
       Loop_Counter := Loop_Counter + 1;
       
