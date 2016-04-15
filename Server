@@ -320,7 +320,13 @@ begin
 
 	   
       end loop;
-    
+
+
+      -- Skickar information till klienterna. // Eric
+      for I in 1..Num_Players loop
+	 Put_Data(Sockets(I),Gane);
+      end loop;
+	    
       Loop_Counter := Loop_Counter + 1;
        
    end loop;
