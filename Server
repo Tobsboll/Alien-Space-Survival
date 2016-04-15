@@ -4,7 +4,7 @@ with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
 with TJa.Sockets;                  use TJa.Sockets;
 with Ada.Numerics.Discrete_Random; 
-
+with Space_Map;
 
 
 procedure Server is
@@ -41,8 +41,14 @@ procedure Server is
    World_X_Length : constant Integer := 62;
    World_Y_Length : constant Integer := 30;
    
-   type X_Led is array(1 .. World_X_Length) of Character;
-   type World is array(1 .. World_Y_Length) of X_Led;
+   -- Packet som hanterar banan.
+   package Bana is
+      new Space_map(X_Width => World_X_Length,
+		    Y_Height => World_Y_Length);
+   use Bana;
+   
+--   type X_Led is array(1 .. World_X_Length) of Character;
+--   type World is array(1 .. World_Y_Length) of X_Led;
    
    type XY_Type is array(1 .. 2) of Integer;
    type Shot_Type is array (1 .. 5) of XY_Type;
@@ -76,20 +82,116 @@ procedure Server is
   	 Score      : Integer;
       end record;
    
+   type Player_Array is array (1..4) of Player_Type;   
+   
    type Enemies is array (1 .. 50) of Enemy_Ship_Spec;
    
    type Game_Data is
       record
-  	 Layout   : World;
-  	 Player_1 : Player_Type;
-  	 Player_2 : Player_Type;
-  	 Player_3 : Player_Type;
-  	 Player_4 : Player_Type;
+  	 Layout   : World;          -- Banan är i packetet så att både klienten och servern 
+	                            -- hanterar samma datatyp / Eric
+  	 Players  : Player_Array;   -- Underlättade informationsöverföringen mellan klient och server. / Eric
   	 Wave     : Enemies;
       end record; 
    --------------------------------------------------
    
-   
+   ---------------------------------------------------------------
+   -- Skickar all Spelinformation till klienterna. / Eric
+   ----------------------------------------------------------------
+   procedure Put_Game_Data(Socket : Socket_Type;
+		           Data : in Game_Data) is
+      
+      
+      -- Skickar spelarens skeppdata    
+      -------------------------------------------------
+      procedure Put_Ship_Data(Socket : in Socket_Type;
+			      Ship   : in Ship_Spec) is
+      begin
+	 
+	 Put_Line(Socket,Ship.XY(1));
+	 Put_Line(Socket,Ship.XY(2));
+	 Put_Line(Socket,Ship.Lives);
+	 
+	 for I in Shot_Type'Range loop
+	    Put_Line(Socket,Ship.S(I)(1));
+	    Put_Line(Socket,Ship.S(I)(2));
+	 end loop;
+	 
+      end Put_Ship_Data;
+      -------------------------------------------------
+      
+      
+   begin
+      -- Skickar Banan till klienterna
+      for I in World'Range loop
+	 for J in X_Led'Range loop
+	    Put_line(Socket, Data.Layout(I)(J));
+	 end loop;
+      end loop;
+      
+      
+      --------------------------------------------------------
+      -- Skickar spelarnas Information
+      --------------------------------------------------------
+      for I in Player_Array'Range loop
+	 -- Skickar om spelaren spelar eller inte.
+	 if Data.Players(I).Playing = True then
+	    
+	    Put_Line(Socket,1);
+	    
+	    
+	    -- Skickar Spelarens namn
+	    Put_Line(Socket,Data.Players(I).Name(1..Data.Players(I).NameLength) );
+	    
+	    
+	    -- Skickar spelarens skeppdata
+	    Put_Ship_Data(Socket,Data.Players(I).Ship);
+	    
+	    
+	    -- Skickar spelarens poäng
+	    Put_Line(Socket,Data.Players(I).Score);
+	    
+	    
+	    -- Skickar inget mer om spelaren inte spelar.
+	 elsif Data.Players(I).Playing = False then
+	    Put_Line(Socket,0);
+	 end if;
+
+      end loop;
+      
+      
+      ---------------------------------------------------------
+      -- Skickar Fiende vågen
+      ----------------------------------------------------------
+      for I in Enemies'Range loop
+	 if Data.Wave(I).Active = True then
+	    
+	    Put_Line(Socket, 1);
+	    
+	    Put_Line(Socket,Data.Wave(I).XY(1));
+	    Put_Line(Socket,Data.Wave(I).XY(2));
+	    
+	    Put_Line(Socket,Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
+	    
+	    
+	    for J in Shot_Type'Range loop
+	       Put_Line(Socket,Data.Wave(I).Shot(J)(1));
+	       Put_Line(Socket,Data.Wave(I).Shot(J)(2));
+	    end loop;
+	    
+	    Put_Line(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
+	    Put_Line(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
+	    
+	 elsif Data.Wave(I).Active = False then
+	    
+	    Put_Line(Socket, 0);
+	    
+	 end if;
+      end loop;
+      
+      
+   end Put_Game_Data;
+   --------------------------------------------------
    
    --------------------------------------------------
    
@@ -294,13 +396,25 @@ begin
    
    Loop_Counter := 0;
    
-   
+   Generate_World(Game.Layout);  -- Genererar en helt ny bana med raka väggar. / Eric
    
    loop 
       
+      for I in 1..Num_Players loop
+	 Put_Line(Sockets(I),Loop_Counter);  -- Skickar Serverns loop_Count till klienterna / Eric
+      end loop;
+      
+      delay(0.1);      -- En delay så att servern inte fyller socket bufferten till klienterna. / Eric
+      
+      if Loop_Counter mod 4 = 0 then
+	 New_Top_Row(Game.Layout);          -- Genererar två nya väggar längst upp på banan på var sida.
+	 Move_Rows_Down(Game.Layout);       -- Flyttar ner hela banan ett steg.
+      end if;
+      
       Print_Player_Input(Sockets); -- för test av input
       
-      --update world /Andreas
+      --update world /Andreas  // Fanns med i packetet som jag gjorde tidigare, 
+                              --  det är dom två procedurerna "New_Top_Row" & "Move_Rows_Down" / Eric
       --update ship /andreas
       
       for I in 1..Game.Wave'Last loop
@@ -322,9 +436,9 @@ begin
       end loop;
 
 
-      -- Skickar information till klienterna. // Eric
+      -- Skickar information till klienterna. / Eric
       for I in 1..Num_Players loop
-	 Put_Data(Sockets(I),Gane);
+	 Put_Game_Data(Sockets(I),Gane);
       end loop;
 	    
       Loop_Counter := Loop_Counter + 1;
