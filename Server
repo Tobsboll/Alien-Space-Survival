@@ -411,7 +411,7 @@ begin
 	 Move_Rows_Down(Game.Layout);       -- Flyttar ner hela banan ett steg.
       end if;
       
-      Print_Player_Input(Sockets); -- för test av input
+--      Print_Player_Input(Sockets); -- för test av input   -- Funkar inte än / Eric
       
       --update world /Andreas  // Fanns med i packetet som jag gjorde tidigare, 
                               --  det är dom två procedurerna "New_Top_Row" & "Move_Rows_Down" / Eric
@@ -438,7 +438,7 @@ begin
 
       -- Skickar information till klienterna. / Eric
       for I in 1..Num_Players loop
-	 Put_Game_Data(Sockets(I),Gane);
+	 Put_Game_Data(Sockets(I),Game);
       end loop;
 	    
       Loop_Counter := Loop_Counter + 1;
