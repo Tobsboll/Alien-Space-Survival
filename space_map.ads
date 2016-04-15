@@ -7,14 +7,28 @@ generic
    
 package Space_Map is
    
-   type World is private;
-   type Astroid_Type is private;
+   type X_Led is array(1 .. X_width) of Character;
+   type World is array(1 .. Y_height) of X_Led;
    
+   type Astroid_Spec is
+      record
+	 X    : Integer;
+	 Y    : Integer := 0;
+	 Form : Integer;
+      end record;
+   
+   type Astroid_Type is array(1 .. (Y_Height*Difficult)/Num_Players) of Astroid_spec; 
+   
+   
+   -- Används till att hålla koll vart väggen är när genereringen utförs
+   --------------------------------------------------------------------------
+   Left_Border  : Integer := X_Led'First;
+   Right_Border : Integer := X_Led'Last;
    
    ----------------------------------------------------------
    -- Genererar en helt vanlig bana som har raka väggar
    ----------------------------------------------------------
-   procedure Generate(Map : out World); -- Behöver en variabel som innehåller banan.
+   procedure Generate_World(Map : out World); -- Behöver en variabel som innehåller banan.
    
    
    ----------------------------------------------------------------
@@ -110,25 +124,5 @@ package Space_Map is
 			 X   : in Integer;
 			 Y   : in Integer);
    
-private
-   
-   type X_Led is array(1 .. X_width) of Character;
-   type World is array(1 .. Y_height) of X_Led;
-   
-   type Astroid_Spec is
-      record
-	 X    : Integer;
-	 Y    : Integer := 0;
-	 Form : Integer;
-      end record;
-   
-   type Astroid_Type is array(1 .. (Y_Height*Difficult)/Num_Players) of Astroid_spec; 
-   
-   
-   -- Används till att hålla koll vart väggen är när genereringen utförs
-   --------------------------------------------------------------------------
-   Left_Border  : Integer := X_Led'First;
-   Right_Border : Integer := X_Led'Last;
-   
-   
+
 end Space_Map;
