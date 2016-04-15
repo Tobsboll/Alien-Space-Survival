@@ -32,7 +32,7 @@ package body Space_Map is
    ----------------------------------------------------------
    -- Genererar en helt vanlig bana som har raka väggar
    ----------------------------------------------------------
-   procedure Generate(Map : out World) is
+   procedure Generate_World(Map : out World) is
       
    begin  
       for I in World'Range loop
@@ -46,7 +46,7 @@ package body Space_Map is
 	    end if;
 	 end loop;
       end loop;
-   end Generate;
+   end Generate_World;
    
    
    ----------------------------------------------------------
