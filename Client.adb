@@ -318,7 +318,7 @@ begin
        exit;
     end if;
     
-    Send_Input(Keyboard_Input, Socket);
+--    Send_Input(Keyboard_Input, Socket);    -- Funkade inte o köra scriptet / Eric
     
     delay(0.01); -- senare bra om vi gör så att server och
                  -- klient synkar exakt!
