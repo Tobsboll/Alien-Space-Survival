@@ -1,4 +1,5 @@
 
+
 with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
@@ -65,6 +66,7 @@ procedure Server is
 	 XY                 : XY_Type;
 	 Lives              : Integer;
 	 Shot               : Shot_Type;
+	 Shot_Difficulty    : Integer;
 	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
 	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
 	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
@@ -240,13 +242,37 @@ procedure Server is
    --------------------------------------------------
    
    --------------------------------------------------
+   procedure  Spawn_Wave(Num_Spawning      : in Integer;
+			 Enemy_Ship_Array  : in out Enemies;
+			 Num_Lives         : in Integer;
+			 Shot_Difficulty   : in Integer;
+			 Movement_Selector : in Integer) is
+      
+   begin
+      
+      for I in 1..Num_Spawning loop -- måste eventuellt senare lagra startsiffran så vi inte skriver över gamla fiender som fortfarande lever!!
+	 
+	 Enemy_Ship_Array(I).Active := True; -- aktiverar ett skepp på den här platsen i arrayen
+	 Enemy_Ship_Array(I).Lives  := Num_Lives; -- ger den ett antal liv
+	 Enemy_Ship_Array(I).Shot_Difficulty  := Shot_Difficulty; -- ger skeppet en gräns att passera för skott
+	 Enemy_Ship_Array(I).Movement_Selector := Movement_Selector; -- ger ett rörelsemönster.
+	 
+      end loop;
+     
+   end Spawn_Wave;
+   --------------------------------------------------
+   
+   --------------------------------------------------
    procedure Update_Enemy_Position(Loop_Counter : in Integer;
-			           Ship_Post    : in out Enemy_Ship_Spec) is
+			           Ship         : in out Enemy_Ship_Spec) is
       
       -- Movement_selector:
       -- 1) stand still
       -- 2) move from side to side
       -- 3) move forwards
+      -- 4) move zigzag forwards
+      -- 5) move in circles
+      -- 6) move down and spread out on line
       -- etc.
       
       Start_Position : constant XY_Type := (30,10);
@@ -258,31 +284,36 @@ procedure Server is
 	                       -- Kan senare ersättas med en startanimation att de flyger ner från
 	                       -- toppen eller liknande.
 	 
-	 Ship_Post.XY := Start_Position;
+	 Ship.XY := Start_Position;
 	 
       end if;
       
       
       -- om movement_selector är 1 så står skeppet still, vilket innebär att koden här helt enkelt hoppas över.
       
-      if Ship_Post.Movement_Selector = 2 then -- sida till sida
+      if Ship.XY(2) = World_Y_Length-1 then -- ta bort skeppet om det är på väg att lämna banan 
+	 Ship.Active := False;
+      end if;
+      
+      
+      if Ship.Movement_Selector = 2 then -- sida till sida
 	 
-	 if Ship_Post.Direction_Selector = 1 then -- move right
+	 if Ship.Direction_Selector = 1 then -- move right
 	    
-	    if Ship_Post.XY(1) < (World_X_Length-1) then
-               Ship_Post.XY(1) := Ship_Post.XY(1) + 1;
-	       
-	    elsif Ship_Post.XY(1) = (World_X_Length-1) then
-	       Ship_Post.Direction_Selector := 2;   
+	    if Ship.XY(1) < (World_X_Length-1) then                  -- här måste sannolikt delay läggas
+               Ship.XY(1) := Ship.XY(1) + 1;                         -- in, typ if Loop_Counter mod 5 = 0
+	                                                             -- eller liknande
+	    elsif Ship.XY(1) = (World_X_Length-1) then
+	       Ship.Direction_Selector := 2;   
 	    end if;
 	    
-	 elsif Ship_Post.Direction_Selector = 2 then -- move left
+	 elsif Ship.Direction_Selector = 2 then -- move left
 	    
-	    if Ship_Post.XY(1) > 1  then
-               Ship_Post.XY(1) := Ship_Post.XY(1) -1;
+	    if Ship.XY(1) > 1  then
+               Ship.XY(1) := Ship.XY(1) -1;
 	       
-	    elsif Ship_Post.XY(1) = 1 then
-	       Ship_Post.Direction_Selector := 1;   
+	    elsif Ship.XY(1) = 1 then
+	       Ship.Direction_Selector := 1;   
 	    end if;
 	  
 	 end if;
@@ -290,11 +321,15 @@ procedure Server is
       
       
       
-      if Ship_Post.Movement_Selector = 3 then
+      if Ship.Movement_Selector = 3 then
 	 
-	 Ship_Post.XY(2) := Ship_Post.XY(2) + 1;
+	 Ship.XY(2) := Ship.XY(2) + 1;
 	 
       end if;
+      
+      
+      
+      
       
       
    end Update_Enemy_position;
@@ -343,10 +378,20 @@ null;
    --------------------------------------------------
    
    
-   Game         : Game_Data;
-   Loop_Counter : Integer;
+   Game                   : Game_Data;
+   Loop_Counter           : Integer;
+   Chance_For_Alien_shot  : Generator;
+   Alien_Shot_Probability : Integer;
+   Num_To_Spawn           : Integer;
+   Num_Lives              : Integer;
+   Shot_Difficulty        : Integer;
+   Movement_Selector      : Integer;
+   First_Wave_Limit       : Integer;
+   Second_Wave_Limit      : Integer;
    
 begin
+   
+   Reset(Chance_For_Alien_shot); -- resetar generatorn för finedeskeppens
    
    -- "öppna dörren". För tillfället endast lokalt, ändra sedan.
    Initiate(Listener, Integer'Value(Argument(1)), Localhost => true);
@@ -398,11 +443,17 @@ begin
    
    Generate_World(Game.Layout);  -- Genererar en helt ny bana med raka väggar. / Eric
    
+   
+   
    loop 
+      
+   
       
       for I in 1..Num_Players loop
 	 Put_Line(Sockets(I),Loop_Counter);  -- Skickar Serverns loop_Count till klienterna / Eric
       end loop;
+      
+
       
       delay(0.1);      -- En delay så att servern inte fyller socket bufferten till klienterna. / Eric
       
@@ -411,24 +462,37 @@ begin
 	 Move_Rows_Down(Game.Layout);       -- Flyttar ner hela banan ett steg.
       end if;
       
+
+      
 --      Print_Player_Input(Sockets); -- för test av input   -- Funkar inte än / Eric
       
       --update world /Andreas  // Fanns med i packetet som jag gjorde tidigare, 
                               --  det är dom två procedurerna "New_Top_Row" & "Move_Rows_Down" / Eric
       --update ship /andreas
       
-      for I in 1..Game.Wave'Last loop
+      
+      if Loop_Counter = First_Wave_Limit then                             -- Vid vissa tidpunkter spawnas
+	 Spawn_Wave(Num_To_Spawn, Game.Wave, Num_Lives, Shot_Difficulty, Movement_selector);      
+	                                                                  -- nya fiendewaves som rör sig på olika
+	                                                                  -- sätt och skjuter olika mycket och
+      elsif Loop_Counter = Second_Wave_Limit then                         -- är olika svåra att döda. / Tobias
+	 Spawn_Wave(Num_To_Spawn, Game.Wave, Num_Lives, Shot_Difficulty, Movement_selector);
+	 
+	 end if; -- osv
+      
+      
+      for I in Enemies'Range loop
 	 -- för varje skepp i hela vågen
 	
 	if Active_Ship(Game.Wave(I)) then -- om det finns ett aktivt skepp på den här platsen
 					       -- i arrayen med fiendeskepp.
-	
+ 
 	  Update_Enemy_position(Loop_counter, Game.Wave(I)); --/ Tobias
 	  
-         --  Shot_Probability := Random(G); --ska räkna ut sannolikheten
-	                                     -- för att en alien skjuter / Tobias
+          Alien_Shot_Probability := Random(Chance_For_Alien_shot); --ska räkna ut sannolikheten
+								   -- för att en alien skjuter / Tobias
 	  
-	--  Enemy_Shots(Shot_Probability, Game.Wave(I)); -- uppdaterar skott /Tobias
+	--  Enemy_Shots(Alien_Shot_Probability, Game.Wave(I)); -- uppdaterar skott /Tobias
 	  
 	end if;
 
@@ -436,11 +500,13 @@ begin
       end loop;
 
 
+      
       -- Skickar information till klienterna. / Eric
       for I in 1..Num_Players loop
 	 Put_Game_Data(Sockets(I),Game);
       end loop;
-	    
+
+      
       Loop_Counter := Loop_Counter + 1;
        
    end loop;
