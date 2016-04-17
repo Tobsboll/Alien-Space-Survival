@@ -1,5 +1,5 @@
 
-
+with TJa.Keyboard;                 use TJa.Keyboard;
 with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
@@ -19,7 +19,7 @@ procedure Server is
    
    package One_To_Twenty_Random is
       new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_Twenty);
-     use One_To_Twenty_Random;
+   use One_To_Twenty_Random;
    
    
    --------------------------------------------------
@@ -31,25 +31,26 @@ procedure Server is
    type Socket_Array is
      array (1..4) of Socket_Type;
    
-   
    Socket1, Socket2, Socket3, Socket4 : Socket_Type;
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
    Listener                           : Listener_Type;
-   Num_Players                        : Integer;
+   --   Num_Players                        : Integer;
    Keyboard_Input                     : Character;
+   
+   --Flyttade variablerna till declarations längre ner        OBS!
    
    --------------------------------------------------
    World_X_Length : constant Integer := 62;
    World_Y_Length : constant Integer := 30;
    
-   -- Packet som hanterar banan.
+   -- Paket som hanterar banan.
    package Bana is
       new Space_map(X_Width => World_X_Length,
 		    Y_Height => World_Y_Length);
    use Bana;
    
---   type X_Led is array(1 .. World_X_Length) of Character;
---   type World is array(1 .. World_Y_Length) of X_Led;
+   --   type X_Led is array(1 .. World_X_Length) of Character;
+   --   type World is array(1 .. World_Y_Length) of X_Led;
    
    type XY_Type is array(1 .. 2) of Integer;
    type Shot_Type is array (1 .. 5) of XY_Type;
@@ -58,7 +59,7 @@ procedure Server is
       record
   	 XY      : XY_Type; 
   	 Lives   : Integer; 
-  	 S       : Shot_Type;
+  	 S       : Shot_Type; --??
       end record;
    
    type Enemy_Ship_Spec is
@@ -96,6 +97,9 @@ procedure Server is
   	 Wave     : Enemies;
       end record; 
    --------------------------------------------------
+   
+   
+   
    
    ---------------------------------------------------------------
    -- Skickar all Spelinformation till klienterna. / Eric
@@ -227,7 +231,7 @@ procedure Server is
       Put(Player_Num, 0);
       Put(" has left the game");
       
-   
+      
    end Remove_Player;
    --------------------------------------------------
    
@@ -258,7 +262,7 @@ procedure Server is
 	 Enemy_Ship_Array(I).Movement_Selector := Movement_Selector; -- ger ett rörelsemönster.
 	 
       end loop;
-     
+      
    end Spawn_Wave;
    --------------------------------------------------
    
@@ -315,7 +319,7 @@ procedure Server is
 	    elsif Ship.XY(1) = 1 then
 	       Ship.Direction_Selector := 1;   
 	    end if;
-	  
+	    
 	 end if;
       end if;
       
@@ -341,42 +345,76 @@ procedure Server is
       
    begin -- ska sköta uppdateringen av skeppens koordinater.
       
-null;
+      null;
       
    end Enemy_Shots;
    --------------------------------------------------
    
    --------------------------------------------------
-   procedure Print_Player_Input(Sockets : in Socket_Array) is
+   procedure Get_Player_Input(Sockets : in Socket_Array;
+			      Num_Players : in Integer; --Num_Players ej längre global
+			      Data : in out Game_Data
+			     ) is
       
    begin
       
       for I in 1..Num_Players loop
 	 
 	 Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
-	 Skip_Line(Sockets(I));
+	 Skip_Line(Sockets(I)); -- DETTA kan bli problem om server går långsammare än klienterna!! /Andreas
 	 
 	 if Keyboard_Input /= 'o' then -- = om det fanns nollskild, giltig input.        
-	   
-	    New_Line;
-	    Put("Player ");
-	    Put(I, 0);
-	    Put(" pressed: ");
 	    
-	    if Keyboard_Input = 'w' then Put("Up Arrow");
-	    elsif Keyboard_Input = 's' then Put("Down arrow");
-	    elsif Keyboard_Input = 'a' then Put("Left arrow");
-	    elsif Keyboard_Input = 'd' then Put("Right arrow");
-	    elsif Keyboard_input = ' ' then Put("Fire"); 	
+	    
+	    if Keyboard_Input = 'w' then 
+	       Data.Players(I).Ship.XY(2) := Data.Players(I).Ship.XY(2) - 1;
+	    elsif Keyboard_Input = 's' then 
+	       Data.Players(I).Ship.XY(2) := Data.Players(I).Ship.XY(2) + 1;
+	    elsif Keyboard_Input = 'a' then
+	       Data.Players(I).Ship.XY(1) := Data.Players(I).Ship.XY(1) - 1;
+	    elsif Keyboard_Input = 'd' then 
+	       Data.Players(I).Ship.XY(1) := Data.Players(I).Ship.XY(1) + 1;
+	       -- elsif Keyboard_input = ' ' then Put("Fire"); 	                          NOOO SHOTING MAN..
+	       
 	    elsif Keyboard_Input = 'e' then exit; -- betyder "ingen input" för servern.
 	    end if;
 	 end if;
 	 
       end loop;
       
-   end Print_Player_Input;
-   --------------------------------------------------
+   end Get_Player_Input;
    
+   
+   --------------------------------------------------
+   --|  DEFAULT VALUES
+   --------------------------------------------------
+   procedure Set_Default_Values (Num_Players : in Integer;
+				 Game        : in out Game_Data
+				   --World_X_Length, World_Y_Length : in Integer   --GLOBALA VARIABLER
+				) is
+      Xpos : Integer;
+      Interval : constant Integer := World_X_Length/(1+Num_Players);
+   begin
+      --------------------------------------------------
+      --| Ships
+      --------------------------------------------------
+      Xpos := 0;
+      
+      for K in 1..Num_Players loop
+	 Game.Players(K).Ship.XY(2) := World_Y_Length - 1;  -- + border_Length
+	 Game.Players(K).Ship.XY(1) := Xpos + Interval; -- + border_Length;
+	 Game.Players(K).Playing := True; 
+	 Xpos := Xpos + Interval;
+      end loop;
+      
+   end Set_Default_Values;
+
+   ----------------------------------------------------------------------------------------------------
+   --|
+   --| DECLARATIONS
+   --|
+   ----------------------------------------------------------------------------------------------------				 
+   Num_Players                        : Integer;
    
    Game                   : Game_Data;
    Loop_Counter           : Integer;
@@ -404,16 +442,12 @@ begin
    
    -- vänta på spelare 1
    Add_Player(Listener, Sockets(1), 1);
-   
    Get(Sockets(1), Num_Players); -- spelare 1 bestämmer hur många som ska spela.
-   
    Put_line("Waiting for players...");
    
    -- lägg till wait_for_connections för så många spelare som angetts!
    for I in 2..Num_Players loop
-      
       Add_Player(Listener, Sockets(I), I);
-      
    end loop;
    
    New_Line;
@@ -422,9 +456,7 @@ begin
    
    -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
    for J in 1..Num_Players loop
-      
       Put_Line(Sockets(J), Num_Players);
-      
    end loop;
    
    Put("Spelet är igång!");
@@ -435,84 +467,102 @@ begin
    -- Skip_Line;
    
    
-   --------------------------------------------------
-   --GAME LOOP
-   --------------------------------------------------
+   
+   
+   ----------------------------------------------------------------------------------------------------
+   --|
+   --| Game loop
+   --|
+   ----------------------------------------------------------------------------------------------------
+   
+   Set_Default_Values(Num_Players, Game);
+   
    
    Loop_Counter := 0;
    
    Generate_World(Game.Layout);  -- Genererar en helt ny bana med raka väggar. / Eric
    
-   
+   Set_Buffer_Mode(Off);
+   Set_Echo_Mode(Off);
    
    loop 
       
-   
       
-      for I in 1..Num_Players loop
-	 Put_Line(Sockets(I),Loop_Counter);  -- Skickar Serverns loop_Count till klienterna / Eric
-      end loop;
       
-
-      
-      delay(0.1);      -- En delay så att servern inte fyller socket bufferten till klienterna. / Eric
-      
-      if Loop_Counter mod 4 = 0 then
-	 New_Top_Row(Game.Layout);          -- Genererar två nya väggar längst upp på banan på var sida.
-	 Move_Rows_Down(Game.Layout);       -- Flyttar ner hela banan ett steg.
-      end if;
+      --  for I in 1..Num_Players loop
+      --  	 Put_Line(Sockets(I),Loop_Counter);  -- Skickar Serverns loop_Count till klienterna / Eric
+      --  end loop;
       
 
       
---      Print_Player_Input(Sockets); -- för test av input   -- Funkar inte än / Eric
+      delay(0.01);      -- En delay så att servern inte fyller socket bufferten till klienterna. / Eric
+      
+      
+      --------------------------------------------------
+      --| SCROLLING MAP 
+      --| "Level 2" => därför ej nödvändig än
+      --------------------------------------------------
+      --  if Loop_Counter mod 4 = 0 then
+      --  	 New_Top_Row(Game.Layout);          -- Genererar två nya väggar längst upp på banan på var sida.
+      --  	 Move_Rows_Down(Game.Layout);       -- Flyttar ner hela banan ett steg.
+      --  end if;
+      
+
+      
+      --      Print_Player_Input(Sockets); -- för test av input   -- Funkar inte än / Eric
       
       --update world /Andreas  // Fanns med i packetet som jag gjorde tidigare, 
-                              --  det är dom två procedurerna "New_Top_Row" & "Move_Rows_Down" / Eric
+      --  det är dom två procedurerna "New_Top_Row" & "Move_Rows_Down" / Eric
       --update ship /andreas
       
       
-      if Loop_Counter = First_Wave_Limit then                             -- Vid vissa tidpunkter spawnas
-	 Spawn_Wave(Num_To_Spawn, Game.Wave, Num_Lives, Shot_Difficulty, Movement_selector);      
-	                                                                  -- nya fiendewaves som rör sig på olika
-	                                                                  -- sätt och skjuter olika mycket och
-      elsif Loop_Counter = Second_Wave_Limit then                         -- är olika svåra att döda. / Tobias
-	 Spawn_Wave(Num_To_Spawn, Game.Wave, Num_Lives, Shot_Difficulty, Movement_selector);
-	 
-	 end if; -- osv
+      --  if Loop_Counter = First_Wave_Limit then                             -- Vid vissa tidpunkter spawnas
+      --  	 Spawn_Wave(Num_To_Spawn, Game.Wave, Num_Lives, Shot_Difficulty, Movement_selector);      
+      --  	 -- nya fiendewaves som rör sig på olika
+      --  	 -- sätt och skjuter olika mycket och
+      --  elsif Loop_Counter = Second_Wave_Limit then                         -- är olika svåra att döda. / Tobias
+      --  	 Spawn_Wave(Num_To_Spawn, Game.Wave, Num_Lives, Shot_Difficulty, Movement_selector);
+      
+      --  end if; -- osv
       
       
-      for I in Enemies'Range loop
-	 -- för varje skepp i hela vågen
-	
-	if Active_Ship(Game.Wave(I)) then -- om det finns ett aktivt skepp på den här platsen
-					       -- i arrayen med fiendeskepp.
- 
-	  Update_Enemy_position(Loop_counter, Game.Wave(I)); --/ Tobias
-	  
-          Alien_Shot_Probability := Random(Chance_For_Alien_shot); --ska räkna ut sannolikheten
-								   -- för att en alien skjuter / Tobias
-	  
-	--  Enemy_Shots(Alien_Shot_Probability, Game.Wave(I)); -- uppdaterar skott /Tobias
-	  
-	end if;
+      --  for I in Enemies'Range loop
+      --  	 -- för varje skepp i hela vågen
+      
+      --  	 if Active_Ship(Game.Wave(I)) then -- om det finns ett aktivt skepp på den här platsen
+      --  					   -- i arrayen med fiendeskepp.
+      
+      --  	    Update_Enemy_position(Loop_counter, Game.Wave(I)); --/ Tobias
+      
+      --  	    Alien_Shot_Probability := Random(Chance_For_Alien_shot); --ska räkna ut sannolikheten
+      --  								     -- för att en alien skjuter / Tobias
+      
+      --  	    --  Enemy_Shots(Alien_Shot_Probability, Game.Wave(I)); -- uppdaterar skott /Tobias
+      
+      --  	 end if;
 
-	   
-      end loop;
+      
+      --  end loop;
 
-
+      -- Hitbox_Procedure/compare_coordinates_procedure i en for loop för alla skepp/skott    //Andreas
       
       -- Skickar information till klienterna. / Eric
+      
+      
       for I in 1..Num_Players loop
 	 Put_Game_Data(Sockets(I),Game);
       end loop;
+      
+      Get_Player_Input(Sockets, Num_Players, Game);
 
       
       Loop_Counter := Loop_Counter + 1;
-       
+      
    end loop;
    
-   --------------------------------------------------
-   --------------------------------------------------
+   ----------------------------------------------------------------------------------------------------
+   -----------------------------------------------------------------------------------GAME LOOP END----
+   ----------------------------------------------------------------------------------------------------
    
    --Efter spelets slut.
    
@@ -524,3 +574,5 @@ begin
    
 
 end Server;
+
+--gnatmake $(~TDDD11/TJa-lib/bin/tja_config)
