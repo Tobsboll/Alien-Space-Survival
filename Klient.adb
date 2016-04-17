@@ -35,7 +35,7 @@ procedure Klient is
    type Ship_spec is 
       record
   	 XY      : XY_Type; 
-  	 Lives   : Integer; 
+  	 Health   : Integer;  --Tidigare "Lives"
   	 S       : Shot_Type;
       end record;
    
@@ -78,7 +78,7 @@ procedure Klient is
    -- Tar emot datan som skickas från servern till klienten   
    --------------------------------------------------------------
    procedure Get_Game_Data(Socket : Socket_Type;
-		      Data : out Game_Data) is
+			   Data : out Game_Data) is
       
       
       -- Tar emot spelarens skeppdata    
@@ -89,7 +89,7 @@ procedure Klient is
 	 
 	 Get(Socket,Ship.XY(1));
 	 Get(Socket,Ship.XY(2));
-	 Get(Socket,Ship.Lives);
+	 Get(Socket,Ship.Health);
 	 
 	 for I in Shot_Type'Range loop
 	    Get(Socket,Ship.S(I)(1));
@@ -135,7 +135,7 @@ procedure Klient is
 	 elsif Player_Playing = 0 then
 	    Data.Players(I).Playing := False;
 	 end if;
-    
+	 
       end loop;	 
       
       -- Tar emot Fiende vågen.
@@ -179,8 +179,7 @@ procedure Klient is
       
    begin
       
-      Set_Buffer_Mode(Off);
-    --  Set_Echo_Mode(Off);
+
       
       Input := True;
       
@@ -192,8 +191,8 @@ procedure Klient is
 	   or Is_Down_Arrow(Keyboard_input) 
 	   or Is_Left_Arrow(Keyboard_input) 
 	   or Is_Right_Arrow(Keyboard_input) 
-	  or Is_Character(Keyboard_input)-- and
-      	 --  To_Character(Keyboard_input) = ' ') 
+	   or Is_Character(Keyboard_input)-- and
+					  --  To_Character(Keyboard_input) = ' ') 
 	   or Is_Esc(Keyboard_input)  then 
 	    exit;
 	 end if;
@@ -202,7 +201,7 @@ procedure Klient is
       
    exception
       when Ada.Strings.INDEX_ERROR => null;
-      
+	 
    end Get_Input;
    --------------------------------------------------
    procedure Send_Input(Keyboard_Input : in Key_Type;
@@ -222,11 +221,35 @@ procedure Klient is
    exception
       when Ada.Strings.INDEX_ERROR => null;
 	 
-      
+	 
    end Send_Input;
+   
    --------------------------------------------------
    
+   procedure Put_Player_Ships (Data : in  Game_Data;
+			       NumPlayers : in Integer
+			      ) is
+      
+   begin
+      for I in 1..NumPlayers loop
+	 if Data.Players(I).Playing then
+	    Goto_XY(Data.Players(I).Ship.XY(1), Data.Players(I).Ship.XY(2));
+	    Put("-/\-");                         -- Uppgraderas till en Put_Ship senare
+	 end if;
+	 
+      end loop;
+      
+      
+      
+   end Put_Player_Ships;
    
+   
+   
+   ----------------------------------------------------------------------------------------------------
+   --|
+   --| DECLARATIONS
+   --|
+   ----------------------------------------------------------------------------------------------------
    
    --Socket_type används för att kunna kommunicera med en server
    Socket : Socket_Type;
@@ -240,6 +263,10 @@ procedure Klient is
    Esc     : constant Key_Code_Type := 27;
    Data         : Game_Data;    -- Innehåller all spelinformation som tas emot från servern.
    Loop_Counter : Integer;      -- Innehåller Serverns loopar (Kanske kan kontrollera syncningen lite mer)
+   
+   ----------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------
    
 
 begin
@@ -257,7 +284,7 @@ begin
    Initiate(Socket);
    
    
-      
+   
 
    
    
@@ -288,47 +315,56 @@ begin
    
 
 
-    
-
-      
-   Get(Socket, NumPlayers);
- -- Skip_Line;
-  Skip_Line;
    
-   --------------------------------------------------
-   --Game loop.
-  --------------------------------------------------
-  
-  
+
+   
+   Get(Socket, NumPlayers);
+   -- Skip_Line;
+   Skip_Line;
+   -- Put("ptroo");
+   ----------------------------------------------------------------------------------------------------
+   --|
+   --| Game loop
+   --|
+   ----------------------------------------------------------------------------------------------------
+   Set_Buffer_Mode(Off);
+   Set_Echo_Mode(Off);
+   Cursor_Invisible;
    loop
-      Get(Socket,Loop_Counter);    -- tar emot serverns loop_counter
-      Clear_Window;
+      --Get(Socket,Loop_Counter);    -- tar emot serverns loop_counter
+      
+      
       -- Hämtar all data från servern
       Get_Game_Data(Socket,Data);
-      
+      Put("ptroo");
+      Clear_Window;
       Put_World(Data.Layout,1,1);  -- put world // Eric
-      -- put Ships // Andreas
+      Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
+						   -- Put_Enemies();
       
-    Get_Input(Keyboard_input);
-    
-    if Is_Esc(Keyboard_Input) then-- måste ändras
-       
-       Put("Exiting...");
-       Put_Line(Socket, 'e');
-       exit;
-    end if;
-    
---    Send_Input(Keyboard_Input, Socket);    -- Funkade inte o köra scriptet / Eric
-    
-    delay(0.01); -- senare bra om vi gör så att server och
-                 -- klient synkar exakt!
-    
+      Get_Input(Keyboard_input);
+      
+      if Is_Esc(Keyboard_Input) then-- måste ändras
+	 
+	 Put("Exiting...");
+	 Put_Line(Socket, 'e');
+	 exit;
+      end if;
+      
+      Send_Input(Keyboard_Input, Socket);    -- Funkade inte o köra scriptet / Eric
+      
+      --delay(0.01); -- senare bra om vi gör så att server och
+      -- klient synkar exakt!
+      
    end loop;
-   
+   Set_Echo_Mode(On);
+   Set_Buffer_Mode(On);
+
    
    --Innan programmet avslutar stängs socketen, detta genererar ett exception
    --hos servern, pss kommer denna klient få ett exception när servern avslutas
    Close(Socket);
+   Cursor_visible;
 
 
 
