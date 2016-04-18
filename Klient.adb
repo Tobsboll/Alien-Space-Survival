@@ -7,6 +7,8 @@ with TJa.Sockets;             use TJa.Sockets;
 with TJa.Keyboard;            use TJa.Keyboard;
 with TJa.Keyboard.Keys;       use TJa.Keyboard.Keys;
 with Ada.Strings;             use Ada.Strings;
+with Ada.Characters.Latin_1;  use Ada.Characters.Latin_1;    -- Används för att använda Escape till att inakvtivera 
+							     -- textensynligheten i terminalen
 with Space_Map;
 
 
@@ -25,10 +27,8 @@ procedure Klient is
    use Bana;
    
    --------------------------------------------------------------
-   
-   --  type X_Led is array(1 .. World_X_Length) of Character;
-   --  type World is array(1 .. World_Y_Length) of X_Led;
-   
+   -- | Game Datan
+   --------------------------------------------------------------
    type XY_Type is array(1 .. 2) of Integer;
    type Shot_Type is array (1 .. 5) of XY_Type;
    
@@ -239,8 +239,6 @@ procedure Klient is
 	 
       end loop;
       
-      
-      
    end Put_Player_Ships;
    
    
@@ -251,18 +249,17 @@ procedure Klient is
    --|
    ----------------------------------------------------------------------------------------------------
    
-   --Socket_type används för att kunna kommunicera med en server
-   Socket : Socket_Type;
-
-   Val      : Character; --Används för att ta emot text från användaren
-   NumPlayers : Integer;
-   Textlangd : Natural;        --Kommer innehålla längden på denna text
-   Resultat  : Natural;        --Resultatet från servern
-   Keyboard_Input : Key_Type;
-   -- Input          : Boolean;
-   Esc     : constant Key_Code_Type := 27;
-   Data         : Game_Data;    -- Innehåller all spelinformation som tas emot från servern.
-   Loop_Counter : Integer;      -- Innehåller Serverns loopar (Kanske kan kontrollera syncningen lite mer)
+   Socket         : Socket_Type;    -- Socket_type används för att kunna kommunicera med en server
+   Val            : Character;      -- Används för att ta emot text från användaren
+   NumPlayers     : Integer;        -- Antal Spelare
+   Textlangd      : Natural;        -- Kommer innehålla längden på denna text
+   Resultat       : Natural;        -- Resultatet från servern
+   Data           : Game_Data;      -- Innehåller all spelinformation som tas emot från servern.
+   Loop_Counter   : Integer;        -- Innehåller Serverns loopar (Kanske kan kontrollera syncningen lite mer)
+   Keyboard_Input : Key_Type;       -- Spelarens knapptryckning
+   Esc            : constant Key_Code_Type := 27;
+   Escape         : Character renames Ada.Characters.Latin_1.ESC;  -- Används för att använda Escape till att inakvtivera 
+							           -- textensynligheten i terminalen
    
    ----------------------------------------------------------------------------------------------------
    ----------------------------------------------------------------------------------------------------
@@ -319,9 +316,7 @@ begin
 
    
    Get(Socket, NumPlayers);
-   -- Skip_Line;
    Skip_Line;
-   -- Put("ptroo");
    ----------------------------------------------------------------------------------------------------
    --|
    --| Game loop
@@ -336,11 +331,13 @@ begin
       
       -- Hämtar all data från servern
       Get_Game_Data(Socket,Data);
-      Put("ptroo");
       Clear_Window;
+      Put (Escape & "[m");                         -- Aktiverar Textsynligheten i Terminalen.
       Put_World(Data.Layout,1,1);  -- put world // Eric
       Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
-						   -- Put_Enemies();
+      -- Put_Enemies();                            -- Tobias
+      
+      Put (Escape & "[8m");                        -- Inaktiverar Textsynligheten i Terminalen.
       
       Get_Input(Keyboard_input);
       
