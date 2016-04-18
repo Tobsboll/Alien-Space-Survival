@@ -463,18 +463,18 @@ procedure Server is
 	       --***
 	       --------------------------------------------------
 	       
-	       for N in 1..Num_Enemies loop
+	  --     for N in 1..Num_Enemies loop
 		  
-		  New_Line;
-		  Put("Ship no. ");
-		  Put(N, 0);
-		  Put(".      ");
-		  Put("X: ");
-		  Put(Ship(N).XY(1),0);
-		  Put("    Y:  ");
-		  Put(Ship(N).XY(2),0);
+	--	  New_Line;
+	--	  Put("Ship no. ");
+	--	  Put(N, 0);
+	--	  Put(".      ");
+	--	  Put("X: ");
+	--	  Put(Ship(N).XY(1),0);
+	--	  Put("    Y:  ");
+	--	  Put(Ship(N).XY(2),0);
 		  
-	       end loop;
+	     --  end loop;
 	    
       end if;
 
@@ -684,27 +684,27 @@ begin
       --update ship /andreas
       
       
-       if Loop_Counter = First_Wave_Limit then                             -- Vid vissa tidpunkter spawnas
-      Num_To_Spawn := 6;  	 
-      Spawn_Wave(Num_To_Spawn, Game.Wave, 3, 10, 4);      
+   --    if Loop_Counter = First_Wave_Limit then                             -- Vid vissa tidpunkter spawnas
+     -- Num_To_Spawn := 6;  	 
+     -- Spawn_Wave(Num_To_Spawn, Game.Wave, 3, 10, 4);      
       --  	 -- nya fiendewaves som rör sig på olika
       --  	 -- sätt och skjuter olika mycket och
       --  elsif Loop_Counter = Second_Wave_Limit then                         -- är olika svåra att döda. / Tobias
       --  	 Spawn_Wave(Num_To_Spawn, Game.Wave, Num_Lives, Shot_Difficulty, Movement_selector);
       
-      end if; -- osv
+    --  end if; -- osv
       
       
-      for I in Enemies'Range loop
+      --for I in Enemies'Range loop
 	 
-       	 if Game.Wave(I).Active = true  then -- bara om det finns levande skepp.
+       	-- if Game.Wave(I).Active = true  then -- bara om det finns levande skepp.
 	    
-	    Update_Enemy_position(Loop_counter, Game.Wave, 6, Direction); --/ Tobias 6:an har med 6:an ovan att göra.
+	  --  Update_Enemy_position(Loop_counter, Game.Wave, 6, Direction); --/ Tobias 6:an har med 6:an ovan att göra.
 	                                                          -- 1:an är riktning.
-	    exit;
-	 end if;
+	  --  exit;
+--	 end if;
 	 
-      end loop;
+  --    end loop;
 
       -- Hitbox_Procedure/compare_coordinates_procedure i en for loop för alla skepp/skott    //Andreas
       
