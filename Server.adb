@@ -250,19 +250,26 @@ procedure Server is
 			 Enemy_Ship_Array  : in out Enemies;
 			 Num_Lives         : in Integer;
 			 Shot_Difficulty   : in Integer;
-			 Movement_Selector : in Integer) is
+			 Movement_Selector : in Integer;
+			 Start_Position    : in Enemy_Spawn_Points) is
       
    begin
       
       for I in 1..Num_Spawning loop -- måste eventuellt senare lagra startsiffran så vi inte skriver över gamla fiender som fortfarande lever!!
 	 
-	 Enemy_Ship_Array(I).Active := True; -- aktiverar ett skepp på den här platsen i arrayen
-	 Enemy_Ship_Array(I).Lives  := Num_Lives; -- ger den ett antal liv
-	 Enemy_Ship_Array(I).Shot_Difficulty  := Shot_Difficulty; -- ger skeppet en gräns att passera för skott
+	 Enemy_Ship_Array(I).Active            := True; -- aktiverar ett skepp på den här platsen i arrayen
+	 Enemy_Ship_Array(I).Lives             := Num_Lives; -- ger den ett antal liv
+	 Enemy_Ship_Array(I).Shot_Difficulty   := Shot_Difficulty; -- ger skeppet en gräns att passera för skott
 	 Enemy_Ship_Array(I).Movement_Selector := Movement_Selector; -- ger ett rörelsemönster.
 	 
+	 Enemy_Ship_Array(I).XY                := Start_Position(I); -- detta kan nog göras bättre, 
+	                                                             -- ger en spawnpoint ur en array.
+	                                                             -- det ger oss ganska lite kontroll.
+	 Enemy_Ship_Array(I).Direction_Selector := 1; --Gör så att alla skepp börjar åt höger, vet
+	                                              -- inte hur vi ska lösa det snyggt // Tobias
+	 
       end loop;
-      
+     
    end Spawn_Wave;
    --------------------------------------------------
    
