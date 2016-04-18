@@ -53,20 +53,27 @@ procedure Server is
    --   type World is array(1 .. World_Y_Length) of X_Led;
    
    type XY_Type is array(1 .. 2) of Integer;
-   type Shot_Type is array (1 .. 5) of XY_Type;
+   
+      type Shot_Type is
+      record
+	 XY     : XY_Type;
+	 Active : Boolean;
+      end record;
+   
+   type Shot_array is array (1 .. 5) of Shot_Type;
    
    type Ship_spec is 
       record
   	 XY      : XY_Type; 
   	 Lives   : Integer; 
-  	 S       : Shot_Type; --??
+  	 S       : Shot_Array; --??
       end record;
    
    type Enemy_Ship_Spec is
       record
 	 XY                 : XY_Type;
 	 Lives              : Integer;
-	 Shot               : Shot_Type;
+	 Shot               : Shot_Array;
 	 Shot_Difficulty    : Integer;
 	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
 	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
