@@ -260,7 +260,7 @@ procedure Klient is
       
       Set_Colours(Text_Colour, Background);               -- Ställer in dom inmatade färgerna.
       
-      Set_Graphical_Mode(On);                             -- Startar grafiken.
+--      Set_Graphical_Mode(On);                             -- Startar grafiken.
       
       Goto_XY(X,Y);
       Put(Upper_Left_Corner);
@@ -394,8 +394,8 @@ begin
       -----------------------------------------------------------------
       -- Highscore fönster
       -----------------------------------------------------------------
-      Put_Box(Highscore_Ruta_X, Highscore_Ruta_Y, Highscore_Ruta_Width, 
-	      Highscore_Ruta_Height, Background_Colour_1, Text_Colour_1);  -- / Eric
+   --   Put_Box(Highscore_Ruta_X, Highscore_Ruta_Y, Highscore_Ruta_Width, 
+   --	      Highscore_Ruta_Height, Background_Colour_1, Text_Colour_1);  -- / Eric
       
       
       Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+1);
