@@ -189,16 +189,15 @@ procedure Klient is
 	 
 	 Get_Immediate(Keyboard_Input, Input);
 	 
-	 if Is_Up_Arrow(Keyboard_input) 
-	   or Is_Down_Arrow(Keyboard_input) 
-	   or Is_Left_Arrow(Keyboard_input) 
-	   or Is_Right_Arrow(Keyboard_input) 
-	   or Is_Character(Keyboard_input)-- and
-					  --  To_Character(Keyboard_input) = ' ') 
-	   or Is_Esc(Keyboard_input)  then 
-	    exit;
-	 end if;
-       	 
+	 if (Is_Character(Keyboard_Input) and then To_Character(Keyboard_Input)=' ')
+		   or Is_Up_Arrow(Keyboard_input) 
+		   or Is_Down_Arrow(Keyboard_input) 
+		   or Is_Left_Arrow(Keyboard_input) 
+		   or Is_Right_Arrow(Keyboard_input) 
+		   or Is_Esc(Keyboard_input)  then 
+		    exit;
+		 end if;
+		 
       end loop;
       
    exception
