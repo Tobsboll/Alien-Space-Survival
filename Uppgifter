@@ -1,0 +1,42 @@
+Utskrifter
+  -	Meny (Eric)
+  -	Spelare (Andreas)
+  -	Skott (Andreas)
+  -	Poängtavla(Eric)
+      o	Rankning
+      o	Nickname
+      o	Antal Liv
+      o	Poäng  
+  -	Fiender (Tobias)
+  -	Vägg	 (Eric)
+  -	Fönster (Eric)
+
+Inmatningar
+  -	Rörelse (Andreas)
+  -	Skjuter (Andreas) 
+  
+Överföring
+  -	Game_Data till klienterna (Eric)
+  -	Tecken till Servern (Klar)
+  
+Räknare
+  -	Spelare (Andreas)
+  -	Skott (Andreas)
+    o	Score (Andreas)
+    o	Health (Andreas)
+  -	Fiende (Tobias)
+  -	Skapa Vägg (Eric)
+
+Extra (i mån av tid)
+  -	Vägg genereras (Eric)
+  -	Astroider (Eric)
+  -	Powerups
+  -	Boss
+  -	Återuplivningstid
+  -	Chatt
+  -	Barriärer i början
+  -	Spel meddelanden
+  -	Fienders startanimation
+  -	Sparar Highscore 
+  -	Exit    -> Pausa alla andra klienter i Exit Meny
+  -	Singelplayer
