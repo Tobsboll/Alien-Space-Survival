@@ -125,9 +125,9 @@ procedure Server is
 	 Put_Line(Socket,Ship.XY(2));
 	 Put_Line(Socket,Ship.Lives);
 	 
-	 for I in Shot_Type'Range loop
-	    Put_Line(Socket,Ship.S(I)(1));
-	    Put_Line(Socket,Ship.S(I)(2));
+	 for I in Shot_Array'Range loop
+	    Put_Line(Socket,Ship.S(I).XY(1));
+	    Put_Line(Socket,Ship.S(I).XY(2));
 	 end loop;
 	 
       end Put_Ship_Data;
@@ -187,9 +187,9 @@ procedure Server is
 	    Put_Line(Socket,Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
 	    
 	    
-	    for J in Shot_Type'Range loop
-	       Put_Line(Socket,Data.Wave(I).Shot(J)(1));
-	       Put_Line(Socket,Data.Wave(I).Shot(J)(2));
+	    for J in Shot_Array'Range loop
+	       Put_Line(Socket,Data.Wave(I).Shot(J).XY(1));
+	       Put_Line(Socket,Data.Wave(I).Shot(J).XY(2));
 	    end loop;
 	    
 	    Put_Line(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
@@ -257,98 +257,189 @@ procedure Server is
 			 Enemy_Ship_Array  : in out Enemies;
 			 Num_Lives         : in Integer;
 			 Shot_Difficulty   : in Integer;
-			 Movement_Selector : in Integer;
-			 Start_Position    : in Enemy_Spawn_Points) is
+			 Movement_Selector : in Integer) is
+      
+      X_Position : Integer;
+      Spacing    : constant Integer := World_X_Length/(Num_Spawning+1);
       
    begin
       
+      X_Position := 0;
+      
       for I in 1..Num_Spawning loop -- måste eventuellt senare lagra startsiffran så vi inte skriver över gamla fiender som fortfarande lever!!
 	 
-	 Enemy_Ship_Array(I).Active            := True; -- aktiverar ett skepp på den här platsen i arrayen
+	 Enemy_Ship_Array(I).Active            := True;-- aktiverar ett skepp på den här platsen i arrayen
 	 Enemy_Ship_Array(I).Lives             := Num_Lives; -- ger den ett antal liv
 	 Enemy_Ship_Array(I).Shot_Difficulty   := Shot_Difficulty; -- ger skeppet en gräns att passera för skott
 	 Enemy_Ship_Array(I).Movement_Selector := Movement_Selector; -- ger ett rörelsemönster.
 	 
-	 Enemy_Ship_Array(I).XY                := Start_Position(I); -- detta kan nog göras bättre, 
-	                                                             -- ger en spawnpoint ur en array.
-	                                                             -- det ger oss ganska lite kontroll.
+	 
+	 Enemy_Ship_Array(I).XY(2)             := 1; -- sätter start y-värdet till 1.  
+	 Enemy_Ship_Array(I).XY(1)             := X_Position + Spacing;
+	 
 	 Enemy_Ship_Array(I).Direction_Selector := 1; --Gör så att alla skepp börjar åt höger, vet
-	                                              -- inte hur vi ska lösa det snyggt // Tobias
+						      -- inte hur vi ska lösa det snyggt // Tobias
+	 
+	 X_Position := X_Position + Spacing;
 	 
       end loop;
-     
+      
    end Spawn_Wave;
    --------------------------------------------------
    
    --------------------------------------------------
    procedure Update_Enemy_Position(Loop_Counter : in Integer;
-			           Ship         : in out Enemy_Ship_Spec) is
+			           Ship         : in out Enemies;
+				   Num_Enemies  : in Integer) is
       
       -- Movement_selector:
       -- 1) stand still
       -- 2) move from side to side
       -- 3) move forwards
-      -- 4) move zigzag forwards
+      -- 4) move zigzag, classic space invaders
       -- 5) move in circles
       -- 6) move down and spread out on line
       -- etc.
       
       Start_Position : constant XY_Type := (30,10);
+      Chance_For_Alien_shot  : Generator;
+      Alien_Shot_Probability : Integer;
       
    begin -- procedure som tar input och uppdaterar 
       
+   Reset(Chance_For_Alien_shot); -- resetar generatorn för finedeskeppens
       
-      if Loop_Counter = 0 then -- första gången spawnar skeppet på en angiven startposition.
-	                       -- Kan senare ersättas med en startanimation att de flyger ner från
-	                       -- toppen eller liknande.
+      
+      if Loop_Counter mod 2 = 0 then
+
 	 
-	 Ship.XY := Start_Position;
-	 
-      end if;
-      
-      
-      -- om movement_selector är 1 så står skeppet still, vilket innebär att koden här helt enkelt hoppas över.
-      
-      if Ship.XY(2) = World_Y_Length-1 then -- ta bort skeppet om det är på väg att lämna banan 
-	 Ship.Active := False;
-      end if;
-      
-      
-      if Ship.Movement_Selector = 2 then -- sida till sida
-	 
-	 if Ship.Direction_Selector = 1 then -- move right
+	 for I in 1..Num_Enemies loop -- loopar igenom alla skepp
 	    
-	    if Ship.XY(1) < (World_X_Length-1) then                  -- här måste sannolikt delay läggas
-               Ship.XY(1) := Ship.XY(1) + 1;                         -- in, typ if Loop_Counter mod 5 = 0
-	                                                             -- eller liknande
-	    elsif Ship.XY(1) = (World_X_Length-1) then
-	       Ship.Direction_Selector := 2;   
-	    end if;
-	    
-	 elsif Ship.Direction_Selector = 2 then -- move left
-	    
-	    if Ship.XY(1) > 1  then
-               Ship.XY(1) := Ship.XY(1) -1;
+	    if Ship(I).XY(2) < 30 then -- om skeppet har lågt y-värde (vid start) flyger det först ner till y=30
 	       
-	    elsif Ship.XY(1) = 1 then
-	       Ship.Direction_Selector := 1;   
+	       Ship(I).XY(2) := Ship(I).XY(2) + 1;
+	       
+	    elsif Ship(I).XY(2) = World_Y_Length-1 then -- ta bort skeppet om det är på väg att lämna banan 
+	       Ship(I).Active := False;
+
+	       
+	       
+	       -- om movement_selector är 1 så står skeppet still, vilket innebär att koden här helt enkelt hoppas över.
+	       
+	    elsif Ship(I).Movement_Selector = 2 and Ship(I).Direction_Selector = 1 then -- sida till sida
+	       
+	       -- move right
+	       
+	       if Ship(I).XY(1) < (World_X_Length-1) then          
+		  Ship(I).XY(1) := Ship(I).XY(1) + 1;                         
+        
+	       elsif Ship(I).XY(1) = (World_X_Length-1) then
+		  Ship(I).Direction_Selector := 2;   
+	       end if;
+
+	    elsif Ship(I).Direction_Selector = 2 and Ship(I).Direction_Selector = 2 then 
+	       
+	       -- move left
+	       
+	       if Ship(I).XY(1) > 2  then -- funktion för var vänsterväggen finns ska läggas in istälet för 2:an
+		  Ship(I).XY(1) := Ship(I).XY(1) -1;
+		  
+	       elsif Ship(I).XY(1) = 2 then
+		  Ship(I).Direction_Selector := 1;   
+	       end if;
+	       
+	       
+	       ----------------------------------
+	       -- MOVE DOWN UNIFORMLY
+	       ----------------------------------
+	       
+	    elsif Ship(I).Movement_Selector = 3 then 
+	       
+	       Ship(I).XY(2) := Ship(I).XY(2) + 1;
+	       
+	       -----------------------------------
+	       -- CLASSIC SPACE INVADERS MOVEMENT
+	       -----------------------------------
+	       
+	    elsif Ship(I).Movement_Selector = 4 and Ship(I).Direction_Selector = 1 then
+	       
+	       	       -- move towards right wall.
+	       
+	       if Ship(I).XY(1) < (World_X_Length-1) then          
+		  Ship(I).XY(1) := Ship(I).XY(1) + 1;                         
+		  
+	       elsif Ship(Num_Enemies).XY(1) = (World_X_Length-1) then 
+		  
+		  for J in 1..Num_Enemies loop
+		     
+		     Ship(J).XY(2) := Ship(J).XY(2) + 1; --flytta ner ett steg
+		     Ship(J).Direction_Selector := 2;    -- byt riktning till vänster.
+		     
+		  end loop;
+	       end if;
+	       
+
+	    elsif Ship(I).Movement_Selector = 4 and Ship(I).Direction_Selector = 2 then	     
+
+	       
+	       -- move towards left wall.
+	       
+	       if Ship(I).XY(1) < 2 then -- samma här, byt ut mot funktion för världens gräns          
+		  Ship(I).XY(1) := Ship(I).XY(1) - 1;                         
+		  
+	       elsif Ship(Num_Enemies).XY(1) = 2 then 
+		  
+		  for K in 1..Num_Enemies loop
+		     
+		     Ship(K).XY(2) := Ship(K).XY(2) + 1; --flytta ner ett steg
+		     Ship(K).Direction_Selector := 1;    -- byt riktning till höger
+		     
+		  end loop;
+	       end if;
+	       
+	       
+	       
 	    end if;
 	    
-	 end if;
+	    ------------------------------
+	    --***
+	    ------------------------------
+	    
+	    
+	    
+	    --------------------------------------------------
+	    -- SHOT GENERATOR!!!
+	    --------------------------------------------------
+	    -- En gång per runda får varje skepp chansen att skjuta, styrs av denna random process.
+	    
+	    Alien_Shot_Probability := Random(Chance_For_Alien_shot); -- 1-20
+	    if Alien_Shot_Probability >= Ship(I).Shot_Difficulty then
+	       
+	       for M in 1..5 loop
+		  
+		  if Ship(I).Shot(M).Active = false then
+	       
+		     Ship(I).Shot(M).Active := True; -- skottet aktiveras
+		     Ship(I).Shot(M).XY     := (Ship(I).XY(1), Ship(I).XY(2)+ 1); -- skottet får samma koordinat som skeppet, men y +1.
+		     exit;
+		  end if;
+	       end loop;
+	       
+		     
+	       
+	    
+	       
+	    end if;
+	    --------------------------------------------------
+	    --***
+	    --------------------------------------------------
+	    
+	    
+	    
+	 end loop;
+
       end if;
-      
-      
-      
-      if Ship.Movement_Selector = 3 then
-	 
-	 Ship.XY(2) := Ship.XY(2) + 1;
-	 
-      end if;
-      
-      
-      
-      
-      
+
       
    end Update_Enemy_position;
    --------------------------------------------------
@@ -432,7 +523,7 @@ procedure Server is
    
    Game                   : Game_Data;
    Loop_Counter           : Integer;
-   Chance_For_Alien_shot  : Generator;
+
    Alien_Shot_Probability : Integer;
    Num_To_Spawn           : Integer;
    Num_Lives              : Integer;
@@ -443,7 +534,7 @@ procedure Server is
    
 begin
    
-   Reset(Chance_For_Alien_shot); -- resetar generatorn för finedeskeppens
+
    
    -- "öppna dörren". För tillfället endast lokalt, ändra sedan.
    Initiate(Listener, Integer'Value(Argument(1)), Localhost => true);
