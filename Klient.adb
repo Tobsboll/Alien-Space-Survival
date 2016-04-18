@@ -2,6 +2,8 @@ with Ada.Command_Line;        use Ada.Command_Line;
 with Ada.Exceptions;          use Ada.Exceptions;
 with Ada.Text_IO;             use Ada.Text_IO;
 with Ada.Integer_Text_IO;     use Ada.Integer_Text_IO;
+with TJa.Window.Text;         use TJa.Window.Text;
+with TJa.Window.Graphic;      use TJa.Window.Graphic;
 with tja.window.Elementary;   use tja.window.Elementary;
 with TJa.Sockets;             use TJa.Sockets;
 with TJa.Keyboard;            use TJa.Keyboard;
@@ -241,7 +243,40 @@ procedure Klient is
       
    end Put_Player_Ships;
    
-   
+      procedure Put_Box(X           : in Integer;        -- X Koordinat där den ska börja boxen
+		     Y           : in Integer;        -- Y Koordinat där den ska börja boxen
+		     Width       : in Integer;        -- Hur bred boxen ska vara.
+		     Height      : in Integer;        -- Hur hög boxen ska vara.
+		     Background  : in Colour_Type;    -- Bakgrundfärgen
+		     Text_Colour : in Colour_Type) is -- Boxens färg
+      
+      Old_Background  : Colour_Type;
+      Old_Text_Colour : Colour_Type;
+      
+      
+   begin
+      Old_Text_Colour := Get_Foreground_Colour;           -- Sparar den tidigare textfärgen
+      Old_Background  := Get_Background_Colour;           -- Sparar den tidigare bakgrundsfärgen
+      
+      Set_Colours(Text_Colour, Background);               -- Ställer in dom inmatade färgerna.
+      
+      Set_Graphical_Mode(On);                             -- Startar grafiken.
+      
+      Goto_XY(X,Y);
+      Put(Upper_Left_Corner);
+      Put(Horisontal_Line,Width);
+      Put(Upper_Right_Corner);
+
+      Goto_XY(X,Y+Height);
+      Put(Lower_Left_Corner);
+      Put(Horisontal_Line,Width);
+      Put(Lower_Right_Corner);
+      
+      Set_Graphical_Mode(Off);                            -- Stänger av grafiken
+      
+      Set_Colours(Old_Text_Colour, Old_Background);       -- Ställer tillbaka till dom tidigare färgerna.
+      
+   end Put_Box;
    
    ----------------------------------------------------------------------------------------------------
    --|
@@ -260,6 +295,22 @@ procedure Klient is
    Esc            : constant Key_Code_Type := 27;
    Escape         : Character renames Ada.Characters.Latin_1.ESC;  -- Används för att använda Escape till att inakvtivera 
 							           -- textensynligheten i terminalen
+      Background_Colour_1 : Colour_Type := Black;    -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
+   Text_Colour_1       : Colour_Type := White;    -- Teckenfärg    till (Scoreboard, Hela Terminalen)
+   
+   
+   
+   ---------------------------------------------------
+   -- X,Y Koordinater för alla fönster
+   ---------------------------------------------------
+   SpelPlanen_X : Integer := 2; 
+   SpelPlanen_Y : Integer := 0;
+   
+   Highscore_Ruta_X      : Integer := SpelPlanen_X+World_X_Length+1;
+   Highscore_Ruta_Y      : Integer := SpelPlanen_Y;
+   Highscore_Ruta_Width  : Integer := 30;
+   Highscore_Ruta_Height : Integer := 6;
+   ---------------------------------------------------
    
    ----------------------------------------------------------------------------------------------------
    ----------------------------------------------------------------------------------------------------
@@ -280,7 +331,8 @@ begin
    -- servern.
    Initiate(Socket);
    
-   
+   Set_Colours(Text_Colour_1, Background_Colour_1);  -- Ändrar färgen på terminalen
+   Clear_Window;
    
 
    
@@ -333,12 +385,37 @@ begin
       Get_Game_Data(Socket,Data);
       Clear_Window;
       Put (Escape & "[m");                         -- Aktiverar Textsynligheten i Terminalen.
+      -- Skriv era puts efter denna rad -------
+      
       Put_World(Data.Layout,1,1);  -- put world // Eric
       Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
       -- Put_Enemies();                            -- Tobias
+
+      -----------------------------------------------------------------
+      -- Highscore fönster
+      -----------------------------------------------------------------
+      Put_Box(Highscore_Ruta_X, Highscore_Ruta_Y, Highscore_Ruta_Width, 
+	      Highscore_Ruta_Height, Background_Colour_1, Text_Colour_1);  -- / Eric
       
+      
+      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+1);
+      Put("  Nickname       Lives   Score");                               -- Kan vara i Put_Score senare / Eric
+      
+      -- Sort_Score(Data.Players, List);                                   -- Sorterar vem som leder / Eric
+      -- Put_Score(List,Highscore_Ruta_X+1,Highscore_Ruta_Y+2);            -- Skriver ut den sorterade scorelistan / Eric
+        
+      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+2);                      -- Ett exempel på hur jag tänkt ska se ut
+      Put("1.Andreas                  152");  
+      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+3);
+      Put("2.Tobias                    94");  
+      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+4);
+      Put("3.Eric                      26");  
+      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+5);
+      Put("4.Kalle          RIP         2");  
+      -----------------------------------------------------------------
+      
+      -- Inga mer puts efter denna rad -------
       Put (Escape & "[8m");                        -- Inaktiverar Textsynligheten i Terminalen.
-      
       Get_Input(Keyboard_input);
       
       if Is_Esc(Keyboard_Input) then-- måste ändras
