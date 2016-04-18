@@ -472,17 +472,18 @@ procedure Server is
 	    
 	    
 	    if Keyboard_Input = 'w' then 
-	       Data.Players(I).Ship.XY(2) := Data.Players(I).Ship.XY(2) - 1;
+	       Data.Players(I).Ship.XY(2) := Integer'Max(1 , Data.Players(I).Ship.XY(2) - 1);
 	    elsif Keyboard_Input = 's' then 
-	       Data.Players(I).Ship.XY(2) := Data.Players(I).Ship.XY(2) + 1;
+	       Data.Players(I).Ship.XY(2) := Integer'Min(World_Y_Length , Data.Players(I).Ship.XY(2) + 1);
 	    elsif Keyboard_Input = 'a' then
-	       Data.Players(I).Ship.XY(1) := Data.Players(I).Ship.XY(1) - 1;
+	       Data.Players(I).Ship.XY(1) := Integer'Max(1 ,  Data.Players(I).Ship.XY(1) - 1);
 	    elsif Keyboard_Input = 'd' then 
-	       Data.Players(I).Ship.XY(1) := Data.Players(I).Ship.XY(1) + 1;
-	       -- elsif Keyboard_input = ' ' then Put("Fire"); 	                          NOOO SHOTING MAN..
+	       Data.Players(I).Ship.XY(1) := Integer'Min(World_X_Length , Data.Players(I).Ship.XY(1) + 1);
+	    elsif Keyboard_input = ' ' then 
+	       Data.Players(I).Playing := False;
 	       
 	    elsif Keyboard_Input = 'e' then exit; -- betyder "ingen input" för servern.
-	    end if;
+	    end if;	
 	 end if;
 	 
       end loop;
