@@ -4,6 +4,7 @@ with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
 with TJa.Sockets;                  use TJa.Sockets;
+with TJa.Window.Text;              use TJa.Window.Text;
 with Ada.Numerics.Discrete_Random; 
 with Space_Map;
 
@@ -89,6 +90,7 @@ procedure Server is
   	 Name       : String(1..24);
   	 NameLength : Integer;
   	 Ship       : Ship_Spec;
+	 Colour     : Colour_Type;
   	 Score      : Integer;
       end record;
    
@@ -154,7 +156,7 @@ procedure Server is
 	    
 	    
 	    -- Skickar Spelarens namn
-	    Put_Line(Socket,Data.Players(I).Name(1..Data.Players(I).NameLength) );
+	    --Put_Line(Socket,Data.Players(I).Name(1..Data.Players(I).NameLength) ); -- Behöver bara skicka det en gång / Eric
 	    
 	    
 	    -- Skickar spelarens skeppdata
@@ -592,8 +594,14 @@ procedure Server is
    First_Wave_Limit       : constant Integer := 10;
    Second_Wave_Limit      : Integer;
    Direction              : Integer;
+   Background_Colour_1    : Colour_Type := Black;    -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
+   Text_Colour_1          : Colour_Type := White;    -- Teckenfärg    till (Scoreboard, Hela Terminalen)
+   Player_Colour          : String(1..15);           -- Inhämtning (innan GameLoopen) av spelarnas färger
+   Player_Colour_Length   : Integer;
 
 begin
+   
+   Set_Colours(Text_Colour_1, Background_Colour_1);  -- Ändrar färgen på terminalen
    
 
    
@@ -608,7 +616,9 @@ begin
    
    -- vänta på spelare 1
    Add_Player(Listener, Sockets(1), 1);
-   Get(Sockets(1), Num_Players); -- spelare 1 bestämmer hur många som ska spela.
+   Get(Sockets(1), Num_Players);             -- spelare 1 bestämmer hur många som ska spela.
+   Skip_Line(Sockets(1));                    -- Låg ett entertecken kvar i socketen
+   
    Put_line("Waiting for players...");
    
    -- lägg till wait_for_connections för så många spelare som angetts!
@@ -617,24 +627,48 @@ begin
    end loop;
    
    New_Line;
-   Put("All players have joined the game.");
+   Put_Line("All players have joined the game.");
    
    
-   -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
-   for J in 1..Num_Players loop
-      Put_Line(Sockets(J), Num_Players);
+   
+   
+   -------------------------------------Skickar
+   --------------------------------------------
+   for I in 1..Num_Players loop
+      Put_Line(Sockets(I), Num_Players);     -- Hur många spelare som spelar
+      Put_Line(Sockets(I), I);               -- Vad för klient nr man har.
    end loop;
+   --------------------------------------------
+   --------------------------------------------
+   
+   
+   
+   ------------------------------------Tar Emot
+   --------------------------------------------   
+   for I in 1..Num_Players loop
+      Get_Line(Sockets(I), Game.Players(I).Name,    -- Spelarens namn
+   	       Game.Players(I).NameLength);         -- Spelarens namn längd
+      Get_Line(Sockets(I), Player_Colour,           -- Spelarens färgnamn.
+   	       Player_Colour_Length);               -- Spelarens färgnamnlängd.
+      
+      
+      -------------------------------------Skickar
+      --------------------------------------------   
+      for J in 1..Num_Players loop
+	 Put_Line(Sockets(J), Game.Players(I).
+		    Name(1..Game.Players(I).NameLength));  -- Spelarnas namn
+	 Put_Line(Sockets(J), 
+		  Player_Colour(1..Player_Colour_Length)); -- Spelarnas Färger
+      end loop;
+      --------------------------------------------
+      --------------------------------------------
+   end loop;
+   --------------------------------------------
+   --------------------------------------------  
+
+
    
    Put("Spelet är igång!");
-   --------------------------------------------------
-   --------------------------------------------------
-   
-   
-   -- Skip_Line;
-   
-   
-   
-   
    ----------------------------------------------------------------------------------------------------
    --|
    --| Game loop
