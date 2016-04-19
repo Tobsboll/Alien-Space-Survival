@@ -37,8 +37,9 @@ package Space_Map is
    procedure Put_World(Map : in World;
 		       X   : in Integer;
 		       Y   : in Integer;
-		       Top_Border : Boolean := True);
-   
+		       Background : Colour_Type;
+		       Text       : Colour_Type;
+		       Boarder    : Boolean := True);
    
    --------------------------------------------------------------------
    -- Genererar en ny rad längst upp.
@@ -67,6 +68,20 @@ package Space_Map is
 			  X   : out Integer;
 			  Y   : in Integer);
    
+      
+   --------------------------------------------------------
+   -- Räknar ut och skickar tillbaka vart vänster vägg är
+   --------------------------------------------------------
+   function Border_Left(Map : in World;
+			Y   : in Integer) return Integer;
+
+   
+   --------------------------------------------------------
+   -- Räknar ut och skickar tillbaka vart höger vägg är
+   --------------------------------------------------------
+   function Border_Right(Map : in World;
+			 Y   : in Integer) return Integer;
+      
    
    -------------------------------------------------------------------
    -- Genererar astroider
