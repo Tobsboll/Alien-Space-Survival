@@ -65,7 +65,7 @@ procedure Server is
    type Ship_spec is 
       record
   	 XY      : XY_Type; 
-  	 Lives   : Integer; 
+  	 Health  : Integer; 
   	 S       : Shot_Array; --??
       end record;
    
@@ -123,7 +123,7 @@ procedure Server is
 	 
 	 Put_Line(Socket,Ship.XY(1));
 	 Put_Line(Socket,Ship.XY(2));
-	 Put_Line(Socket,Ship.Lives);
+	 Put_Line(Socket,Ship.Health);
 	 
 	 for I in Shot_Array'Range loop
 	    Put_Line(Socket,Ship.S(I).XY(1));
@@ -494,9 +494,9 @@ procedure Server is
    --------------------------------------------------
    
    --------------------------------------------------
-   procedure Get_Player_Input(Sockets : in Socket_Array;
+   procedure Get_Player_Input(Sockets     : in Socket_Array;
 			      Num_Players : in Integer; --Num_Players ej längre global
-			      Data : in out Game_Data
+			      Data        : in out Game_Data
 			     ) is
       
    begin
@@ -512,11 +512,11 @@ procedure Server is
 	    if Keyboard_Input = 'w' then 
 	       Data.Players(I).Ship.XY(2) := Integer'Max(1 , Data.Players(I).Ship.XY(2) - 1);
 	    elsif Keyboard_Input = 's' then 
-	       Data.Players(I).Ship.XY(2) := Integer'Min(World_Y_Length , Data.Players(I).Ship.XY(2) + 1);
-	    elsif Keyboard_Input = 'a' then
-	       Data.Players(I).Ship.XY(1) := Integer'Max(1 ,  Data.Players(I).Ship.XY(1) - 1);
-	    elsif Keyboard_Input = 'd' then 
-	       Data.Players(I).Ship.XY(1) := Integer'Min(World_X_Length , Data.Players(I).Ship.XY(1) + 1);
+	       Data.Players(I).Ship.XY(2) := Integer'Min(World_Y_Length - 1 , Data.Players(I).Ship.XY(2) + 1);
+	    elsif Keyboard_Input = 'a' then             --| Border_Left är väggen till vänster funkar med & utan Genererin
+	       Data.Players(I).Ship.XY(1) := Integer'Max(Border_Left(Data.Layout , Data.Players(I).Ship.XY(2)) ,  Data.Players(I).Ship.XY(1) - 1);
+	    elsif Keyboard_Input = 'd' then              --| Border_Right är väggen till höger funkar med & utan Generering
+	       Data.Players(I).Ship.XY(1) := Integer'Min(Border_Right(Data.Layout , Data.Players(I).Ship.XY(2)) - 5 , Data.Players(I).Ship.XY(1) + 1);
 	    elsif Keyboard_input = ' ' then 
 	       Data.Players(I).Playing := False;
 	       
@@ -549,7 +549,7 @@ procedure Server is
       for K in 1..Num_Players loop
 	 Game.Players(K).Ship.XY(2) := World_Y_Length - 1;  -- + border_Length
 	 Game.Players(K).Ship.XY(1) := Xpos + Interval; -- + border_Length;
-	 Game.Players(K).Playing := True; 
+	 Game.Players(K).Playing    := True; 
 	 Xpos := Xpos + Interval;
       end loop;
       
