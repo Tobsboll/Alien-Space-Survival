@@ -60,6 +60,7 @@ procedure Klient is
   	 Name       : String(1..24);
   	 NameLength : Integer;
   	 Ship       : Ship_Spec;
+	 Colour     : Colour_Type;
   	 Score      : Integer;
       end record;
    
@@ -122,7 +123,7 @@ procedure Klient is
 	    
 	    
 	    -- Tar emot spelarens namn och namnlängd.
-	    Get_line(Socket,Data.Players(I).Name, Data.Players(I).NameLength );
+	    --Get_line(Socket,Data.Players(I).Name, Data.Players(I).NameLength ); -- Behöver bara skicka en gång (Ingen uppdatering)
 	    
 	    
 	    -- Tar emot spelarens skeppdata
@@ -232,15 +233,24 @@ procedure Klient is
 			       X          : in Integer;    -- La till X koordinaterna för att ha samma variabel som till put_World och alla andra fönster
 			       Y          : in Integer     -- samma anledning som ovan
 			      ) is
+     
+      Old_Background  : Colour_Type;
+      Old_Text_Colour : Colour_Type; 
       
    begin
+      Old_Text_Colour := Get_Foreground_Colour;           -- Sparar den tidigare textfärgen
+      Old_Background  := Get_Background_Colour;           -- Sparar den tidigare bakgrundsfärgen
+      
       for I in 1..NumPlayers loop
 	 if Data.Players(I).Playing then
+	    Set_Colours(Data.Players(I).Colour, Old_Background);               -- Ställer in spelarens färg.
 	    Goto_XY(Data.Players(I).Ship.XY(1)+X, Data.Players(I).Ship.XY(2)+Y);
 	    Put("-/\-");                         -- Uppgraderas till en Put_Ship senare
 	 end if;
 	 
       end loop;
+      
+      Set_Colours(Old_Text_Colour, Old_Background);       -- Ställer tillbaka till dom tidigare färgerna.
       
    end Put_Player_Ships;
    
@@ -303,8 +313,11 @@ procedure Klient is
    Esc            : constant Key_Code_Type := 27;
    Escape         : Character renames Ada.Characters.Latin_1.ESC;  -- Används för att använda Escape till att inakvtivera 
 							           -- textensynligheten i terminalen
-   Background_Colour_1 : Colour_Type := Black;    -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
-   Text_Colour_1       : Colour_Type := White;    -- Teckenfärg    till (Scoreboard, Hela Terminalen)
+   Background_Colour_1  : Colour_Type := Black;  -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
+   Text_Colour_1        : Colour_Type := White;  -- Teckenfärg    till (Scoreboard, Hela Terminalen)
+   Klient_Number        : Integer;               -- Servern skickar klientnumret
+   Player_Colour        : String(1..15);         -- Används i början till att överföra spelarnas färger
+   Player_Colour_Length : Integer;               -- Används för att hålla koll hur lång färgnamnet är
    
    
    
@@ -368,8 +381,59 @@ begin
    end loop;
    
 
-   Get(Socket, NumPlayers);
-   Skip_Line;
+   --------------------------------------
+   ------------------------------Tar Emot
+   Get(Socket, NumPlayers);                -- Antal spelare som spelar
+   Get(Socket, Klient_Number);             -- Spelarens Klient nummer
+   --------------------------------------
+   --------------------------------------
+   
+   Skip_Line(Socket);                      -- Ligger ett entertecken kvar i socketen.
+   
+   --------------------------------------
+   -------------------------------Skickar
+   if Klient_Number = 1 then
+      Put_Line(Socket,"Andreas");     -- Namn
+      Put_Line(Socket,"Blue");        -- Spelarens Färg
+   elsif Klient_Number = 2 then
+      Put_Line(Socket,"Tobias");      -- and so on..  
+      Put_Line(Socket,"Green");
+   elsif Klient_Number = 3 then
+      Put_Line(Socket,"Eric");
+      Put_Line(Socket,"Yellow");
+   elsif Klient_Number = 4 then
+      Put_Line(Socket,"Kalle");
+      Put_Line(Socket,"Red");
+   end if;
+   --------------------------------------
+   --------------------------------------   
+   
+   
+   --------------------------------------
+   ------------------------------Tar Emot   
+   for I in 1 .. NumPlayers loop
+      Get_Line(Socket, Data.Players(I).Name,                  -- Spelarnas Namn 
+	       Data.Players(I).NameLength);                   -- Spelarnas Namn Längder
+      Get_Line(Socket, Player_Colour,                         -- Spelarnas Färger
+	       Player_Colour_Length);                         -- Spelarnas Färg Längder
+      
+      
+      --| Översätter sträng till Colour_Type (Lite fult tyvärr...)        
+      if Player_Colour(1 .. Player_Colour_Length) = "Blue" then
+	 Data.Players(I).Colour := Blue;
+      elsif Player_Colour(1 .. Player_Colour_Length) = "Green" then
+	 Data.Players(I).Colour := Green;
+      elsif Player_Colour(1 .. Player_Colour_Length) = "Yellow" then
+	 Data.Players(I).Colour := Yellow;
+      elsif Player_Colour(1 .. Player_Colour_Length) = "Red" then
+	 Data.Players(I).Colour := Red;
+      end if;
+   end loop;
+   --------------------------------------
+   -------------------------------------- 
+   
+   
+   
    ----------------------------------------------------------------------------------------------------
    --|
    --| Game loop
@@ -412,9 +476,9 @@ begin
       -- Put_Score(List,Highscore_Ruta_X+1,Highscore_Ruta_Y+2);               -- Skriver ut den sorterade scorelistan / Eric
         
       Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+2);                         -- Ett exempel på hur jag tänkt ska se ut
-      Put("1.Andreas        ♡♡♡      152");  
+      Put("1.Andreas        ♡♡♡       152");  
       Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+3);
-      Put("2.Tobias         ♡♡        94");  
+      Put("2.Tobias         ♡♡         94");  
       Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+4);
       Put("3.Eric           ♡          26");  
       Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+5);
