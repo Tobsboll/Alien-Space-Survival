@@ -389,7 +389,7 @@ begin
       --------------------------------
       --| Skriver ut banan
       --------------------------------
-      Put_World(Data.Layout, Spelplanen_X+1, Spelplanen_Y, false);              -- put world // Eric
+      Put_World(Data.Layout, Spelplanen_X+1, Spelplanen_Y, Background_Colour_1, Text_Colour_1, false);              -- put world // Eric
       Put_Box(Spelplanen_X, SpelPlanen_Y, World_X_Length-2, 
 	      World_Y_Length, Background_Colour_1, Text_Colour_1);            -- En låda runt spelplanen / Eric
       --------------------------------
