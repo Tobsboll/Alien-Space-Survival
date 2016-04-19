@@ -1,3 +1,5 @@
+with TJa.Window.Text;         use TJa.Window.Text;
+
 generic
    
    X_Width     : Integer;
