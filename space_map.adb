@@ -52,19 +52,33 @@ package body Space_Map is
    ----------------------------------------------------------
    -- Skriver ut banan
    -----------------------------------------------------------
-   procedure Put_World(Map : World;
-		       X   : Integer;
-		       Y   : Integer;
-		       Top_Border : Boolean := True) is
+   procedure Put_World(Map        : World;
+		       X          : Integer;
+		       Y          : Integer;
+		       Background : Colour_Type;
+		       Text       : Colour_Type;
+		       Boarder    : Boolean := True) is
+      
+      Old_Background  : Colour_Type;
+      Old_Text_Colour : Colour_Type;
+      
       
    begin
+      Old_Text_Colour := Get_Foreground_Colour;           -- Sparar den tidigare textfärgen
+      Old_Background  := Get_Background_Colour;           -- Sparar den tidigare bakgrundsfärgen
+      
+      Set_Colours(Text, Background);                      -- Ställer in dom inmatade färgerna.
       
       -- Skriver ut banan vid X,Y -Koordinater
       -------------------------------------------
       Goto_XY(X,Y);
       for I in World'Range loop
 	 for J in X_Led'First .. X_Led'last loop
-	    Put(Map(I)(J));
+	    if Boarder then
+	       Put(Map(I)(J));
+	    elsif J > X_Led'First and J < X_Led'Last then
+	       Put(Map(I)(J));
+	    end if;
 	 end loop;
 	 New_Line;
 	 Goto_XY(X,Y+I);
@@ -72,7 +86,7 @@ package body Space_Map is
       
       -- Skriver ut ett tak som följer bredden mellan höger och vänster vägg.
       -----------------------------------------------------------------------
-      if Top_Border then
+      if Boarder then
 	 Goto_XY(X,Y);
 	 if Left_Border /= 1 then
 	    for I in 1 .. Left_Border-1 loop
@@ -87,7 +101,8 @@ package body Space_Map is
 	    Put(' ');
 	 end loop;
 	 Goto_XY(X,World'Last+1);
-      end if;      
+      end if;           
+      Set_Colours(Old_Text_Colour, Old_Background);       -- Ställer tillbaka till dom tidigare färgerna. 
    end Put_World;
    
    
@@ -309,6 +324,38 @@ package body Space_Map is
       for J in reverse X_Led'Range loop
 	 if Map(Y)(J) /= ' ' then
 	    X := J;        
+	    exit;
+	 end if;
+      end loop;
+   end Border_Right;
+   
+   --------------------------------------------------------
+   -- Räknar ut och skickar tillbaka vart vänster vägg är
+   --------------------------------------------------------
+   function Border_Left(Map : in World;
+			Y   : in Integer) return Integer is
+      
+   begin
+      for J in X_Led'Range loop	    
+	 if Map(Y)(J) /= ' ' then
+	    return J;
+	    exit;
+	 end if;
+      end loop;
+   end Border_Left;
+   
+   
+   
+   --------------------------------------------------------
+   -- Räknar ut och skickar tillbaka vart höger vägg är
+   --------------------------------------------------------
+   function Border_Right(Map : in World;
+			 Y   : in Integer) return Integer is
+      
+   begin
+      for J in reverse X_Led'Range loop
+	 if Map(Y)(J) /= ' ' then
+	    return J;        
 	    exit;
 	 end if;
       end loop;
