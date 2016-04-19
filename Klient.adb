@@ -266,6 +266,13 @@ procedure Klient is
       Put(Horisontal_Line,Width);
       Put(Upper_Right_Corner);
 
+      for I in 1 .. Height loop
+	 Goto_XY(X,Y+I);
+	 Put("│");
+	 Goto_XY(X+Width+1,Y+I);
+	 Put("│");
+      end loop;
+      
       Goto_XY(X,Y+Height);
       Put(Lower_Left_Corner);
       Put(Horisontal_Line,Width);
@@ -294,7 +301,7 @@ procedure Klient is
    Esc            : constant Key_Code_Type := 27;
    Escape         : Character renames Ada.Characters.Latin_1.ESC;  -- Används för att använda Escape till att inakvtivera 
 							           -- textensynligheten i terminalen
-      Background_Colour_1 : Colour_Type := Black;    -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
+   Background_Colour_1 : Colour_Type := Black;    -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
    Text_Colour_1       : Colour_Type := White;    -- Teckenfärg    till (Scoreboard, Hela Terminalen)
    
    
@@ -303,7 +310,7 @@ procedure Klient is
    -- X,Y Koordinater för alla fönster
    ---------------------------------------------------
    SpelPlanen_X : Integer := 2; 
-   SpelPlanen_Y : Integer := 0;
+   SpelPlanen_Y : Integer := 1;
    
    Highscore_Ruta_X      : Integer := SpelPlanen_X+World_X_Length+1;
    Highscore_Ruta_Y      : Integer := SpelPlanen_Y;
@@ -333,9 +340,6 @@ begin
    Set_Colours(Text_Colour_1, Background_Colour_1);  -- Ändrar färgen på terminalen
    Clear_Window;
    
-
-   
-   
    Put("Join eller Create, J eller C: ");
 
    
@@ -362,10 +366,6 @@ begin
    end loop;
    
 
-
-   
-
-   
    Get(Socket, NumPlayers);
    Skip_Line;
    ----------------------------------------------------------------------------------------------------
@@ -383,38 +383,54 @@ begin
       -- Hämtar all data från servern
       Get_Game_Data(Socket,Data);
       Clear_Window;
-      Put (Escape & "[m");                         -- Aktiverar Textsynligheten i Terminalen.
+--      Put (Escape & "[m");                         -- Aktiverar Textsynligheten i Terminalen.
       -- Skriv era puts efter denna rad -------
       
-      Put_World(Data.Layout,1,1);  -- put world // Eric
-      Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
-      -- Put_Enemies();                            -- Tobias
-
-      -----------------------------------------------------------------
+      --------------------------------
+      --| Skriver ut banan
+      --------------------------------
+      Put_World(Data.Layout, Spelplanen_X+1, Spelplanen_Y, false);              -- put world // Eric
+      Put_Box(Spelplanen_X, SpelPlanen_Y, World_X_Length-2, 
+	      World_Y_Length, Background_Colour_1, Text_Colour_1);            -- En låda runt spelplanen / Eric
+      --------------------------------
+      
+      Put_Player_Ships(Data, NumPlayers);                                     -- put Ships // Andreas
+      -- Put_Enemies();                                                       -- Tobias
+      
+      --------------------------------
       -- Highscore fönster
-      -----------------------------------------------------------------
-   --   Put_Box(Highscore_Ruta_X, Highscore_Ruta_Y, Highscore_Ruta_Width, 
-   --	      Highscore_Ruta_Height, Background_Colour_1, Text_Colour_1);  -- / Eric
-      
-      
+      --------------------------------
+      Put_Box(Highscore_Ruta_X, Highscore_Ruta_Y, Highscore_Ruta_Width, 
+   	      Highscore_Ruta_Height, Background_Colour_1, Text_Colour_1);     -- / Eric
+            
       Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+1);
-      Put("  Nickname       Lives   Score");                               -- Kan vara i Put_Score senare / Eric
+      Put("  Nickname       Lives   Score");                                  -- Kan vara i Put_Score senare / Eric
       
-      -- Sort_Score(Data.Players, List);                                   -- Sorterar vem som leder / Eric
-      -- Put_Score(List,Highscore_Ruta_X+1,Highscore_Ruta_Y+2);            -- Skriver ut den sorterade scorelistan / Eric
+      -- Sort_Score(Data.Players, List);                                      -- Sorterar vem som leder / Eric
+      -- Put_Score(List,Highscore_Ruta_X+1,Highscore_Ruta_Y+2);               -- Skriver ut den sorterade scorelistan / Eric
         
-      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+2);                      -- Ett exempel på hur jag tänkt ska se ut
-      Put("1.Andreas                  152");  
+      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+2);                         -- Ett exempel på hur jag tänkt ska se ut
+      Put("1.Andreas        ♡♡♡      152");  
       Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+3);
-      Put("2.Tobias                    94");  
+      Put("2.Tobias         ♡♡        94");  
       Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+4);
-      Put("3.Eric                      26");  
+      Put("3.Eric           ♡          26");  
       Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+5);
       Put("4.Kalle          RIP         2");  
-      -----------------------------------------------------------------
+      --------------------------------
+      
+      --------------------------------
+      -- Där man skriver för att chatta
+      --------------------------------
+      Put_Box(SpelPlanen_X, SpelPlanen_Y+World_Y_Length+1,                    -- Ett litet fönster för att skriva i. / Eric 
+	      World_X_Length-2, 2, Background_Colour_1, Text_Colour_1); 
+      Goto_XY(SpelPlanen_X+1,SpelPlanen_Y+World_Y_Length+2);
+      Put("Här skriver man.");
+      --------------------------------
+      
       
       -- Inga mer puts efter denna rad -------
-      Put (Escape & "[8m");                        -- Inaktiverar Textsynligheten i Terminalen.
+--      Put (Escape & "[8m");                        -- Inaktiverar Textsynligheten i Terminalen.
       Get_Input(Keyboard_input);
       
       if Is_Esc(Keyboard_Input) then-- måste ändras
