@@ -228,13 +228,15 @@ procedure Klient is
    --------------------------------------------------
    
    procedure Put_Player_Ships (Data : in  Game_Data;
-			       NumPlayers : in Integer
+			       NumPlayers : in Integer;
+			       X          : in Integer;    -- La till X koordinaterna för att ha samma variabel som till put_World och alla andra fönster
+			       Y          : in Integer     -- samma anledning som ovan
 			      ) is
       
    begin
       for I in 1..NumPlayers loop
 	 if Data.Players(I).Playing then
-	    Goto_XY(Data.Players(I).Ship.XY(1), Data.Players(I).Ship.XY(2));
+	    Goto_XY(Data.Players(I).Ship.XY(1)+X, Data.Players(I).Ship.XY(2)+Y);
 	    Put("-/\-");                         -- Uppgraderas till en Put_Ship senare
 	 end if;
 	 
@@ -242,7 +244,7 @@ procedure Klient is
       
    end Put_Player_Ships;
    
-      procedure Put_Box(X           : in Integer;        -- X Koordinat där den ska börja boxen
+   procedure Put_Box(X           : in Integer;        -- X Koordinat där den ska börja boxen
 		     Y           : in Integer;        -- Y Koordinat där den ska börja boxen
 		     Width       : in Integer;        -- Hur bred boxen ska vara.
 		     Height      : in Integer;        -- Hur hög boxen ska vara.
@@ -394,7 +396,7 @@ begin
 	      World_Y_Length, Background_Colour_1, Text_Colour_1);            -- En låda runt spelplanen / Eric
       --------------------------------
       
-      Put_Player_Ships(Data, NumPlayers);                                     -- put Ships // Andreas
+      Put_Player_Ships(Data, NumPlayers, Spelplanen_X, Spelplanen_Y);         -- put Ships // Andreas
       -- Put_Enemies();                                                       -- Tobias
       
       --------------------------------
