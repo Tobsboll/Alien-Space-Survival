@@ -32,28 +32,37 @@ procedure Klient is
    -- | Game Datan
    --------------------------------------------------------------
    type XY_Type is array(1 .. 2) of Integer;
-   type Shot_Type is array (1 .. 5) of XY_Type;
+   type Ranking_List is array (1 .. 4) of Integer;
    
+   ------------------------------------------------
+   --| Nya skott typen
+   ------------------------------------------------
+   type Shot_Type is
+      record
+	 XY     : XY_Type;
+	 Active : Boolean;
+      end record;
+   
+   type Shot_array is array (1 .. 5) of Shot_Type;
+   ------------------------------------------------
+   
+   
+   ------------------------------------------------
+   --| Skepp Specifikationerna
+   ------------------------------------------------
    type Ship_spec is 
       record
   	 XY      : XY_Type; 
-  	 Health   : Integer;  --Tidigare "Lives"
-  	 S       : Shot_Type;
+  	 Health  : Integer; 
+  	 Shot    : Shot_Array;
       end record;
-   
-   type Enemy_Ship_Spec is
-      record
-	 XY                 : XY_Type;
-	 Lives              : Integer;
-	 Shot               : Shot_Type;
-	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
-	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
-	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
-	                               -- åt höger eller vänster.
-	 Active             : Boolean;
-      end record;
+   ------------------------------------------------
    
    
+   
+   ------------------------------------------------
+   --| Spelarnas Specifikationerna
+   ------------------------------------------------
    type Player_Type is
       record
   	 Playing    : Boolean;
@@ -65,15 +74,66 @@ procedure Klient is
       end record;
    
    type Player_Array is array (1..4) of Player_Type;
+   ------------------------------------------------
+   
+   
+   
+   ------------------------------------------------
+   -- | Gamla enemies information.
+   ------------------------------------------------
+   type Enemy_Ship_Spec is
+      record
+   	 XY                 : XY_Type;
+   	 Lives              : Integer;
+   	 Shot               : Shot_Array;
+   	 Shot_Difficulty    : Integer;
+   	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
+   	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
+   	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
+   	                               -- åt höger eller vänster.
+   	 Active             : Boolean;  
+      end record;
    
    type Enemies is array (1 .. 50) of Enemy_Ship_Spec;
+   ------------------------------------------------
+   
+   
+   
+   
+   
+   ------------------------------------------------
+   -- | Nya enemies information.
+   ------------------------------------------------
+   --  type Enemy_Ship_Spec is
+   --     record
+   --  	 Active             : Boolean;
+   --  	 XY                 : XY_Type;
+   --  	 Health             : Integer;
+   --  	 Shot               : Shot_Array;
+   --     end record;
+   
+   --  type Enemies_Array is array (1 .. 50) of Enemy_Ship_Spec;   
+   
+   --  type Wave_Type is
+   --     record
+   --  	 Active             : Boolean;
+   --  	 Enemies            : Enemies_Array;
+   --  	 Difficult          : Integer;
+   --  	 Movement_Selector  : Integer;     --  så att jag kan hålla koll på vad varje skepp har för rörelsemönster
+   --  					   -- , då kan vi ha olika typer av fiender på skärmen samtidigt.
+   --  	 Direction_Selector : Integer;      -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
+   --     end record;
+   ------------------------------------------------
+      
    
    type Game_Data is
       record
   	 Layout   : Bana.World;        -- Banan är i packetet så att både klienten och servern 
 	                               -- hanterar samma datatyp / Eric
-  	 Players   : Player_Array;     -- Underlättade informationsöverföringen mellan klient och server.
+  	 Players  : Player_Array;      -- Underlättade informationsöverföringen mellan klient och server.
   	 Wave     : Enemies;
+	 --Wave     : Wave_Type;         -- Nya Fiende våg.
+	 Ranking  : Ranking_List;   -- Vem som har mest poäng
       end record; 
    -------------------------------------------------------------
    
@@ -88,22 +148,37 @@ procedure Klient is
       -------------------------------------------------
       procedure Get_Ship_Data(Socket : in Socket_Type;
 			      Ship   : out Ship_Spec) is
+	 
+	 Shot_Active : Integer;	 
+	 
       begin
 	 
 	 Get(Socket,Ship.XY(1));
 	 Get(Socket,Ship.XY(2));
 	 Get(Socket,Ship.Health);
 	 
-	 for I in Shot_Type'Range loop
-	    Get(Socket,Ship.S(I)(1));
-	    Get(Socket,Ship.S(I)(2));
+	 for I in Shot_Array'Range loop
+	    Get(Socket, Shot_Active);
+	    
+	    if Shot_Active = 1 then
+	       
+	       Ship.Shot(I).Active := True;
+	       
+	       Get(Socket,Ship.Shot(I).XY(1));
+	       Get(Socket,Ship.Shot(I).XY(2));
+	    elsif Shot_Active = 0 Then
+	       Ship.Shot(I).Active := False;
+	    end if;
 	 end loop;
 	 
       end Get_Ship_Data;
       -------------------------------------------------
       
-      Player_Playing : Integer;
-      Enemies_Active : Integer;
+      Player_Playing    : Integer;
+      Enemies_Active    : Integer;
+      Wave_Active       : Integer;    -- För nya vågendatan
+      Enemy_Active      : Integer;    -- För nya vågendatan
+      Enemy_Shot_Active : Integer;    -- För nya vågendatan
       
    begin
       -- Tar emot Banan.
@@ -118,7 +193,7 @@ procedure Klient is
       for I in Player_Array'Range loop
 	 -- Tar emot om spelaren spelar.
 	 Get(Socket,Player_Playing);
-	 if Player_Playing = 1 then
+	 if Player_Playing = 1 then         -- Spelaren spelar och måste uppdateras
 	    Data.Players(I).Playing := True;
 	    
 	    
@@ -141,35 +216,85 @@ procedure Klient is
 	 
       end loop;	 
       
-      -- Tar emot Fiende vågen.
+      ----------------------------------------------------------
+      -- Tar emot Fiende vågen                             GAMLA
+      ----------------------------------------------------------
       for I in Enemies'Range loop
-	 Get(Socket,Enemies_Active);
-	 if Enemies_Active = 1 then
+      	 Get(Socket, Enemies_Active);
+      	 if Enemies_Active = 1 then
 	    
-	    Data.Wave(I).Active := True;
+      	    Data.Wave(I).Active := True;
 	    
-	    Get(Socket,Data.Wave(I).XY(1));
-	    Get(Socket,Data.Wave(I).XY(2));
+      	    Get(Socket, Data.Wave(I).XY(1));
+      	    Get(Socket, Data.Wave(I).XY(2));
 	    
-	    Get(Socket,Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
-	    
-	    
-	    for J in Shot_Type'Range loop
-	       Get(Socket,Data.Wave(I).Shot(J)(1));
-	       Get(Socket,Data.Wave(I).Shot(J)(2));
-	    end loop;
-	    
-	    Get(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
-	    Get(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
+      	    Get(Socket, Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
 	    
 	    
-	    -- Tar inte emot mer data om Fienden inte är aktiv.
-	 elsif Enemies_Active = 0 then
-	    Data.Wave(I).Active := False;
-	 end if;
+      	    for J in Shot_Array'Range loop
+      	       Get(Socket, Data.Wave(I).Shot(J).XY(1));
+      	       Get(Socket, Data.Wave(I).Shot(J).XY(2));
+      	    end loop;
+	    
+      	    Get(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
+      	    Get(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
+	    
+	    
+      	    -- Tar inte emot mer data om Fienden inte är aktiv.
+      	 elsif Enemies_Active = 0 then
+      	    Data.Wave(I).Active := False;
+      	 end if;
       end loop;
-
       
+      
+      ----------------------------------------------------------
+      -- Tar emot Fiende vågen                               NYA
+      ----------------------------------------------------------
+      --  Get(Socket, Wave_Active);
+      --  if Wave_Active = 1 then	                    -- Fiendevågen är aktiv och måste uppdateras
+
+      --  	 Data.Wave.Active := True;
+	 
+      --  	 ---------------------------
+      --  	 -- Hämtar Fienderna
+      --  	 ----------------------------
+      --  	 for I in Enemies_Array'Range loop
+      --  	    Get(Socket, Enemy_Active);
+      --  	    if Enemy_Active = 1 then	                       -- Fienden är aktiv i vågen.
+      --  	       Data.Wave.Enemies(I).Active := True;
+	       
+      --  	       Get(Socket,Data.Wave.Enemies(I).XY(1));         -- Fiendens X-Koordinat
+      --  	       Get(Socket,Data.Wave.Enemies(I).XY(2));         -- Fiendens Y-Koordinat
+	       
+      --  	       for J in Shot_Array'Range loop                  -- Fiendens skott
+		  
+      --  		  Get(Socket, Enemy_Shot_Active);
+		  
+      --  		  if Enemy_Shot_Active = 1 then                -- Skottet är aktiv
+		     
+      --  		     Data.Wave.Enemies(I).Shot(J).Active := True;
+		     
+      --  		     Get(Socket, Data.Wave.Enemies(I).Shot(J).XY(1));
+      --  		     Get(Socket, Data.Wave.Enemies(I).Shot(J).XY(2));
+		     
+      --  		  elsif Enemy_Shot_Active = 0 then             -- Skottet är inaktiv
+      --  		     Data.Wave.Enemies(I).Shot(J).Active := False;
+      --  		  end if;
+		     
+      --  	       end loop; 
+	       
+      --  	    elsif Enemy_Active = 0 then
+	       
+      --  	       Data.Wave.Enemies(I).Active := False;	       -- Fienden är inaktiv
+      --  	    end if;
+      --  	 end loop;
+      --  elsif Wave_Active = 0 then
+      --  	 Data.Wave.Active := False;	                       -- Vågen är inaktiv.
+      --  end if;
+      
+      for I in Ranking_List'Range loop
+	 Get(Socket, Data.Ranking(I));
+      end loop;
       
    end Get_Game_Data;
    ---------------------------------------------------------------
