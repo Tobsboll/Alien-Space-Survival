@@ -1,4 +1,3 @@
-
 with TJa.Keyboard;                 use TJa.Keyboard;
 with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
@@ -24,10 +23,8 @@ procedure Server is
    
    
    --------------------------------------------------
-   -- Slut
+   -- Slut på Tobias randomgenerator för fiendeskepp
    --------------------------------------------------
-   
-   
    
    type Socket_Array is
      array (1..4) of Socket_Type;
@@ -50,40 +47,42 @@ procedure Server is
 		    Y_Height => World_Y_Length);
    use Bana;
    
-   --   type X_Led is array(1 .. World_X_Length) of Character;
-   --   type World is array(1 .. World_Y_Length) of X_Led;
+   --------------------------------------------------------------
+   -- | Game Datan
+   --------------------------------------------------------------
+   type XY_Type      is array (1 .. 2) of Integer;
+   type Ranking_List is array (1 .. 4) of Integer;
    
-   type XY_Type is array(1 .. 2) of Integer;
-   
-      type Shot_Type is
+   ------------------------------------------------
+   --| Nya skott typen
+   ------------------------------------------------
+   type Shot_Type is
       record
 	 XY     : XY_Type;
 	 Active : Boolean;
       end record;
    
    type Shot_array is array (1 .. 5) of Shot_Type;
+   ------------------------------------------------
    
+   
+   
+   ------------------------------------------------
+   --| Skepp Specifikationerna
+   ------------------------------------------------
    type Ship_spec is 
       record
   	 XY      : XY_Type; 
   	 Health  : Integer; 
-  	 S       : Shot_Array; --??
+  	 Shot    : Shot_Array;
       end record;
-   
-   type Enemy_Ship_Spec is
-      record
-	 XY                 : XY_Type;
-	 Lives              : Integer;
-	 Shot               : Shot_Array;
-	 Shot_Difficulty    : Integer;
-	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
-	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
-	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
-	                               -- åt höger eller vänster.
-	 Active             : Boolean;  
-      end record;
+   ------------------------------------------------
    
    
+   
+   ------------------------------------------------
+   --| Spelarnas Specifikationerna
+   ------------------------------------------------
    type Player_Type is
       record
   	 Playing    : Boolean;
@@ -94,16 +93,64 @@ procedure Server is
   	 Score      : Integer;
       end record;
    
-   type Player_Array is array (1..4) of Player_Type;   
+   type Player_Array is array (1..4) of Player_Type;
+   ------------------------------------------------
+   
+   
+   
+   ------------------------------------------------
+   -- | Gamla enemies information.
+   ------------------------------------------------
+   type Enemy_Ship_Spec is
+      record
+   	 XY                 : XY_Type;
+   	 Lives              : Integer;
+   	 Shot               : Shot_Array;
+   	 Shot_Difficulty    : Integer;
+   	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
+   	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
+   	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
+   	                               -- åt höger eller vänster.
+   	 Active             : Boolean;  
+      end record;
    
    type Enemies is array (1 .. 50) of Enemy_Ship_Spec;
+   ------------------------------------------------
+   
+   
+   ------------------------------------------------
+   -- | Nya enemies information.
+   ------------------------------------------------
+   --  type Enemy_Ship_Spec is
+   --     record
+   --  	 Active             : Boolean;
+   --  	 XY                 : XY_Type;
+   --  	 Health             : Integer;
+   --  	 Shot               : Shot_Array;
+   --     end record;
+   
+   --  type Enemies_Array is array (1 .. 50) of Enemy_Ship_Spec;   
+   
+   --  type Wave_Type is
+   --     record
+   --  	 Active             : Boolean;
+   --  	 Enemies            : Enemies_Array;
+   --  	 Difficult          : Integer;
+   --  	 Movement_Selector  : Integer;     --  så att jag kan hålla koll på vad varje skepp har för rörelsemönster
+   --  					   -- , då kan vi ha olika typer av fiender på skärmen samtidigt.
+   --  	 Direction_Selector : Integer;      -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
+   --     end record;
+   ------------------------------------------------
+   
    
    type Game_Data is
       record
-  	 Layout   : World;          -- Banan är i packetet så att både klienten och servern 
-	                            -- hanterar samma datatyp / Eric
-  	 Players  : Player_Array;   -- Underlättade informationsöverföringen mellan klient och server. / Eric
-  	 Wave     : Enemies;
+	 Layout   : World;          -- Banan är i packetet så att både klienten och servern 
+				    -- hanterar samma datatyp / Eric
+	 Players  : Player_Array;   -- Underlättade informationsöverföringen mellan klient och server. / Eric
+	 Wave     : Enemies;
+	 --Wave     : Wave_Type;      -- Nya Fiende våg.
+	 Ranking  : Ranking_List;   -- Vem som har mest poäng
       end record; 
    --------------------------------------------------
    
@@ -128,8 +175,14 @@ procedure Server is
 	 Put_Line(Socket,Ship.Health);
 	 
 	 for I in Shot_Array'Range loop
-	    Put_Line(Socket,Ship.S(I).XY(1));
-	    Put_Line(Socket,Ship.S(I).XY(2));
+	    if Ship.Shot(I).Active then
+	       Put_Line(Socket, 1);
+	       
+	       Put_Line(Socket,Ship.Shot(I).XY(1));
+	       Put_Line(Socket,Ship.Shot(I).XY(2));
+	    else
+	       Put_Line(Socket, 0);
+	    end if;
 	 end loop;
 	 
       end Put_Ship_Data;
@@ -154,18 +207,11 @@ procedure Server is
 	    
 	    Put_Line(Socket,1);
 	    
-	    
-	    -- Skickar Spelarens namn
-	    --Put_Line(Socket,Data.Players(I).Name(1..Data.Players(I).NameLength) ); -- Behöver bara skicka det en gång / Eric
-	    
-	    
 	    -- Skickar spelarens skeppdata
 	    Put_Ship_Data(Socket,Data.Players(I).Ship);
 	    
-	    
 	    -- Skickar spelarens poäng
 	    Put_Line(Socket,Data.Players(I).Score);
-	    
 	    
 	    -- Skickar inget mer om spelaren inte spelar.
 	 elsif Data.Players(I).Playing = False then
@@ -175,35 +221,79 @@ procedure Server is
       end loop;
       
       
-      ---------------------------------------------------------
-      -- Skickar Fiende vågen
+      ----------------------------------------------------------
+      -- Skickar Fiende vågen                              GAMLA
       ----------------------------------------------------------
       for I in Enemies'Range loop
-	 if Data.Wave(I).Active = True then
+      	 if Data.Wave(I).Active = True then
 	    
-	    Put_Line(Socket, 1);
+      	    Put_Line(Socket, 1);
 	    
-	    Put_Line(Socket,Data.Wave(I).XY(1));
-	    Put_Line(Socket,Data.Wave(I).XY(2));
+      	    Put_Line(Socket, Data.Wave(I).XY(1));
+      	    Put_Line(Socket, Data.Wave(I).XY(2));
 	    
-	    Put_Line(Socket,Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
+      	    Put_Line(Socket, Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
 	    
 	    
-	    for J in Shot_Array'Range loop
-	       Put_Line(Socket,Data.Wave(I).Shot(J).XY(1));
-	       Put_Line(Socket,Data.Wave(I).Shot(J).XY(2));
-	    end loop;
+      	    for J in Shot_Array'Range loop
+      	       Put_Line(Socket, Data.Wave(I).Shot(J).XY(1));
+      	       Put_Line(Socket, Data.Wave(I).Shot(J).XY(2));
+      	    end loop;
 	    
-	    Put_Line(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
-	    Put_Line(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
+      	    Put_Line(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
+      	    Put_Line(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
 	    
-	 elsif Data.Wave(I).Active = False then
+      	 elsif Data.Wave(I).Active = False then
 	    
-	    Put_Line(Socket, 0);
+      	    Put_Line(Socket, 0);
 	    
-	 end if;
+      	 end if;
       end loop;
       
+      
+      ----------------------------------------------------------
+      -- Skickar fiendevågen.                                NYA
+      ----------------------------------------------------------
+      --  if Data.Wave.Active then	                    -- Fiendevågen är aktiv och måste skicka
+      --  	 Put_Line(Socket, 1);
+	 
+	 
+      --  	 ---------------------------
+      --  	 -- Skickar Fienderna
+      --  	 ----------------------------
+      --  	 for I in Enemies_Array'Range loop
+      --  	    if Data.Wave.Enemies(I).Active then
+      --  	       Put_Line(Socket, 1);
+	       
+      --  	       Put_Line(Socket, Data.Wave.Enemies(I).XY(1));        -- Fiendens X-Koordinat
+      --  	       Put_Line(Socket, Data.Wave.Enemies(I).XY(2));        -- Fiendens Y-Koordinat
+	       
+	       
+      --  	       for J in Shot_Array'Range loop                       -- Fiendens skott
+      --  		  if Data.Wave.Enemies(I).Shot(J).Active then
+		     
+      --  		     Put_Line(Socket, 1);                           -- Skottet är aktiv
+		     
+      --  		     Put_Line(Socket, Data.Wave.Enemies(I).Shot(J).XY(1));
+      --  		     Put_Line(Socket, Data.Wave.Enemies(I).Shot(J).XY(2));
+		     
+      --  		  else
+      --  		     Put_Line(Socket, 0);                           -- Skottet är inaktiv
+      --  		  end if;
+		     
+      --  	       end loop;  
+	       
+      --  	    else
+      --  	       Put_Line(Socket, 0);	                            -- Fienden är inaktiv
+      --  	    end if;
+      --  	 end loop;
+      --  else
+      --  	 Put_Line(Socket, 0);	                            -- Vågen är inaktiv.
+      --  end if;
+      
+      for I in Ranking_List'Range loop
+	 Put_Line(Socket, Data.Ranking(I));
+      end loop;
       
    end Put_Game_Data;
    --------------------------------------------------
