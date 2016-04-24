@@ -42,11 +42,18 @@ package Enemy_Ship_Handling is
    function Next_To_Wall(Enemies : in Enemy_List) return Boolean;
    procedure Move_To_Side(Enemies : in out Enemy_List);
    procedure Change_Direction(Enemies : in out Enemy_List);
+   procedure Destroy_Ship(Enemies   : in out Enemy_List;
+			  Hit_Coord : in XY_Type);
+   procedure Put_Enemy_Ships(Enemies : in Enemy_List;
+			     Socket  : in Socket_Type);
+   procedure Get_Enemy_Ships(Enemies : in out Enemy_List;
+			     Socket  : in Socket_Type);
+   
    
    procedure Free is
       new Ada.Unchecked_Deallocation(Enemy_Ship_Type, Enemy_List);
    
-      
+   
       
 	
    
