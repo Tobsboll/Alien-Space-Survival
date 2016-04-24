@@ -98,9 +98,13 @@ package body Enemy_Ship_Handling is
       
       if Enemies /= null then
 	 
-	 Enemies.XY(2) := Enemies.XY(2) + 1;
-      
-	 Move_One_Down(Enemies.Next); -- rekursion
+	 if (Enemies.XY(2) + 1) < 60 then -- sätter en nedre gräns
+	 
+	    Enemies.XY(2) := Enemies.XY(2) + 1;
+	 
+	    Move_One_Down(Enemies.Next); -- rekursion
+	    
+	 end if;
 	 
       end if;
       
@@ -266,18 +270,24 @@ package body Enemy_Ship_Handling is
       
       if Enemies /= null then
 	 
-	 Put_Line(Socket, Enemies.Enemy_Type); -- skickar fiendens typ
+	 Put_line(Socket, Enemies.Enemy_Type); -- skickar fiendens typ
+	 Put_line(Socket, Enemies.XY(1)); --skickar fiendens koordinater.
+	 Put_line(Socket, Enemies.XY(2));	 
+	 Put_line(Socket, Enemies.Num_Lives); -- skickar över antal liv för ev print eller 
+					      -- olika print beroende på skada	 
+	 ------------------------------ TEST
+--	 New_Line;
+--	 Put("Ship Cordinates: ");
+--	 Put(Enemies.XY(1), 0);
+--	 Put(",      ");
+--	 Put(Enemies.XY(2), 0);
+	 ------------------------------
 	 
-	 Put_Line(Socket, Enemies.XY(1)); --skickar fiendens koordinater.
-	 Put_Line(Socket, Enemies.XY(2));
-	 
-	 Put_Line(Socket, Enemies.Num_Lives); -- skickar över antal liv för ev print eller 
-	                                      -- olika print beroende på skada.
-	 
+	 Put_Enemy_Ships(Enemies.Next, Socket); --rekursion
 	 
       else
 	 
-	 Put_Line(Socket, 0);
+	 Put_line(Socket, 0);
 	 
       end if;  
       
@@ -291,22 +301,31 @@ package body Enemy_Ship_Handling is
    -- GET_ENEMY_SHIPS
    --------------------------------------------------
    
-   procedure Get_Enemy_Ships(Enemies : out Enemy_List;
+   procedure Get_Enemy_Ships(Enemies : in out Enemy_List;
 			     Socket  : in Socket_Type) is
       
       Input : Integer;
+      Enemy_Type : Integer;
+      X : Integer;
+      Y: Integer;
+      Num_Lives : Integer;
       
    begin
       
       Get(Socket, Input);
-      
-      if Input /= 0 then
-	 Enemies.Enemy_Type := Input;
+    
+      if Input /= 0 then -- listan inte null.
+
+	 Enemy_Type := Input;
+	 Get(Socket, X);
+	 Get(Socket, Y);
+	 Get(Socket, Num_Lives);
 	 
-	 Get(Socket, Enemies.XY(1));
-	 Get(Socket, Enemies.XY(2));
+	 Spawn_Ship(Enemy_Type, X, Y, 10, Num_Lives, 1, 1, Enemies);
 	 
-	 Get(Socket, Enemies.Num_Lives);
+	 Get_Enemy_Ships(Enemies.Next, Socket); --rekursion
+	 
+
 	 
       end if;
      
