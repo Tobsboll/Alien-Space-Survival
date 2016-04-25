@@ -1,10 +1,10 @@
-
 with TJa.Keyboard;                 use TJa.Keyboard;
 with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
 with TJa.Sockets;                  use TJa.Sockets;
 with TJa.Window.Text;              use TJa.Window.Text;
+with Window_Handling;              use Window_Handling;
 with Ada.Numerics.Discrete_Random; 
 with Space_Map;
 
@@ -51,7 +51,9 @@ procedure Server is
    use Bana;
    
    type Shot_Type is array (1 .. 5) of XY_Type;
-   
+
+   type Ranking_List is array (1 .. 4) of Integer;
+      
    type Ship_spec is 
       record
   	 XY      : XY_Type; 
@@ -149,11 +151,6 @@ procedure Server is
 	 if Data.Players(I).Playing = True then
 	    
 	    Put_Line(Socket,1);
-	    
-	    
-	    -- Skickar Spelarens namn
-	    Put_Line(Socket,Data.Players(I).Name(1..Data.Players(I).NameLength) );
-	    
 	    
 	    -- Skickar spelarens skeppdata
 	    Put_Ship_Data(Socket,Data.Players(I).Ship);
@@ -336,10 +333,10 @@ procedure Server is
 	       --------------------------------------------------
 	       if L.Object_Type in 1..10 then
 		  if L.Object_Type = ShotType(1) then
-		     Player_Ship.Health := 0;
+		     Player_Ship.Health := Player_Ship.Health-1;
 		     
 		  elsif L.Object_Type = ShotType(2) then
-		     Player_Ship.Health := 0;
+		     Player_Ship.Health := Player_Ship.Health-1;
 		  end if;
 		  Remove(L);
 		  
@@ -475,10 +472,20 @@ procedure Server is
 	 Xpos := Xpos + Interval;
 	 
 	 --Equipment
-	 Game.Players(K).Ship.Health := 100;
+	 Game.Players(K).Ship.Health := 3;
 	 Game.Players(K).Ship.Laser_Type := 1;
 	 Game.Players(K).Ship.Missile_Ammo := 5;
       end loop;
+      
+      -------------------------------------------------
+      --| Banan
+      -------------------------------------------------
+      Generate_World(Game.Layout);  -- Genererar en helt ny bana med raka väggar. / Eric
+      Game.Settings.Generate_Map := False; -- Sätter i början att banan inte ska genereras.   
+      
+      --------------------------------------------------
+      
+      
       
    end Set_Default_Values;
    
@@ -551,6 +558,8 @@ begin
    -- vänta på spelare 1
    Add_Player(Listener, Sockets(1), 1);
    Get(Sockets(1), Num_Players); -- spelare 1 bestämmer hur många som ska spela.
+   Skip_Line(Sockets(1));                    -- Låg ett entertecken kvar i socketen
+
    Put_line("Waiting for players...");
    
    -- lägg till wait_for_connections för så många spelare som angetts!
@@ -607,18 +616,13 @@ begin
    Game.Players(3).Score :=  26;
    Game.Players(4).Score :=   2;
    
-   Game.Players(1).Ship.Health := 3;
-   Game.Players(2).Ship.Health := 2;
-   Game.Players(3).Ship.Health := 1;
-   Game.Players(4).Ship.Health := 0;
-   
    for I in 1..Num_Players loop
       Game.Ranking(I) := I;
    end loop;
    ---------------------------------------------------------------
 
    
-   Put("Spelet är igång!");
+   Put_line("Spelet är igång!");
    --------------------------------------------------
    --------------------------------------------------
    
@@ -632,13 +636,19 @@ begin
    --| Game loop
    --|
    ----------------------------------------------------------------------------------------------------
-   
    Set_Default_Values(Num_Players, Game);
-   
    
    Loop_Counter := 1;
    
-   Generate_World(Game.Layout);  -- Genererar en helt ny bana med raka väggar. / Eric
+   
+   -- Skickar startbanan till alla klienter 
+   for I in 1..Num_Players loop
+      for J in World'Range loop
+	 for K in X_Led'Range loop
+	    Put_line(Sockets(I), Game.Layout(J)(K)); -- Skickar Banan till klienterna
+	 end loop;
+      end loop;
+   end loop;   
    
    
    --Testar att skapa olika typer av väggar
@@ -653,9 +663,6 @@ begin
    loop 
       
 
-			 
-      
-      
       delay(0.01);      -- En delay så att servern inte fyller socket bufferten till klienterna. / Eric
       
       
@@ -727,7 +734,6 @@ exception
       DeleteList(Powerup_List);
       New_Line;
       Put("Someone disconnected!");
-      
       
 
 end Server;
