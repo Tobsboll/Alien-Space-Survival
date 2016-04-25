@@ -9,7 +9,7 @@ with Window_Handling;         use Window_Handling;
 with TJa.Window.Text;         use TJa.Window.Text;
 with Box_Hantering;           use Box_Hantering;
 with Ada.Strings;             use Ada.Strings;
-with Space_Map;
+with Space_Map;               
 
 with Object_Handling;         use Object_Handling;
 with Graphics;                use Graphics;
@@ -21,7 +21,6 @@ procedure Klient is
    
    -------------------------------------------------------------
 
-   
    -- Packet som hanterar banan.
    package Bana is
       new Space_map(X_Width => World_X_Length,
@@ -29,51 +28,18 @@ procedure Klient is
    use Bana;
    
    --------------------------------------------------------------
-   
-   type Ranking_List is array (1 .. 4) of Integer;
-
-   type Shot_Type is array (1 .. 5) of XY_Type;
-   
-   type Ship_spec is 
-      record
-  	 XY      : XY_Type; 
-  	 Health   : Integer;  --Tidigare "Lives"
-  	 S       : Shot_Type;
-      end record;
-   
-   ------------------------------------------------
-   --| Spelarnas Specifikationerna
-   ------------------------------------------------
-   type Player_Type is
-      record
-  	 Playing    : Boolean;
-  	 Name       : String(1..24);
-  	 NameLength : Integer;
-  	 Ship       : Ship_Spec;
-	 Colour     : Colour_Type;
-  	 Score      : Integer;
-      end record;
-   
-   type Player_Array is array (1..4) of Player_Type;
-   ------------------------------------------------
-   
-   
-   
-   ------------------------------------------------
-   type Setting_Type is
-      record
-	 Generate_Map   : Boolean;     -- Generering av banan Activ/Inaktiv
-	 Astroid_Active : Boolean;     -- Generering av astroider Activ/Inaktiv
-      end record;
-   
+   --------------------------------------------------------------
+   --| Början på Game Datan
+   --------------------------------------------------------------
+   --------------------------------------------------------------
    type Game_Data is
       record
-  	 Layout   : Bana.World;        -- Banan är i packetet så att både klienten och servern 
-	                               -- hanterar samma datatyp / Eric
-  	 Players  : Player_Array;      -- Underlättade informationsöverföringen mellan klient och server.
+   	 Layout   : Bana.World;        -- Banan är i packetet så att både klienten och servern 
+   	                               -- hanterar samma datatyp / Eric
+   	 Players  : Player_Array;      -- Underlättade informationsöverföringen mellan klient och server.
 	 
-	 Ranking  : Ranking_List;      -- Vem som har mest poäng
-	 Settings : Setting_Type;      -- Inställningar.
+   	 Ranking  : Ranking_List;      -- Vem som har mest poäng
+   	 Settings : Setting_Type;      -- Inställningar.
       end record; 
    -------------------------------------------------------------
    -------------------------------------------------------------
@@ -230,17 +196,20 @@ procedure Klient is
    end Put_Player_Ships;
    
    --------------------------------------------------
-   procedure Put_Score(Data       : in Game_Data; 
-		       NumPlayers : in Integer;
-		       X          : in Integer;
-		       Y          : in Integer) is
+   procedure Put_Score(Data        : in Game_Data; 
+		       NumPlayers  : in Integer;
+		       X           : in Integer;
+		       Y           : in Integer;
+		       Back_Colour : in Colour_Type;
+		       Text_Colour : in Colour_Type) is
       
-      Old_Text_Colour  : Colour_Type;
-     
+      Old_Background  : Colour_Type;
+      Old_Text_Colour : Colour_Type;
+      
    begin
       Old_Text_Colour := Get_Foreground_Colour;           -- Sparar den tidigare textfärgen
-     
-      
+      Old_Background  := Get_Background_Colour;           -- Sparar den tidigare bakgrundsfärgen
+      Set_Background_Colour(Back_Colour);
       Goto_XY(X+2,Y);	 
       Set_Text_Modes(On,Off,Off);  -- Understreck på utskriften
       Put("Nickname");
@@ -252,9 +221,9 @@ procedure Klient is
       
       for I in 1 .. NumPlayers loop
 	 Goto_XY(X,Y+I);
-	 Put(Data.Ranking(I), Width => 0);       -- Skriver ut placeringen
+	 Put(I, Width => 0);       -- Skriver ut placeringen
 	 Put('.');
-	 Set_Foreground_Colour(Data.Players( Data.Ranking(I) ).Colour);                       -- Ställer in Spelarens färg.
+         Set_Foreground_Colour(Data.Players( Data.Ranking(I) ).Colour);                       -- Ställer in Spelarens färg.
 	 Set_Text_Modes(Off,Off,On);  -- Fet stil på utskriften
 	 Put(Data.Players( Data.Ranking(I) ).Name( 1..Data.Players( Data.Ranking(I) ).NameLength)); -- Skriver ut spelarens namn.
 	 
@@ -280,8 +249,9 @@ procedure Klient is
 	    end loop;
 	 end if;
 	 Set_Text_Modes(Off,Off,Off);
-	 Set_Foreground_Colour(Old_Text_Colour);                 -- Ställer tillbaka till dom tidigare färgerna.
-	 Put(Data.Players( Data.Ranking(I) ).Score, Width => 9);       -- skriver ut spelarens poäng
+	 Set_Foreground_Colour(Old_Text_Colour);                    -- Ställer tillbaka till text färgen.
+	 Put(Data.Players( Data.Ranking(I) ).Score, Width => 9);    -- skriver ut spelarens poäng
+	 Set_BackGround_Colour(Old_Background);                     -- Ställer tillbaka till bakgrunds färgen.
       end loop;
    end Put_Score;
    --------------------------------------------------
@@ -297,43 +267,26 @@ procedure Klient is
    --|
    ----------------------------------------------------------------------------------------------------
    
-   --Socket_type används för att kunna kommunicera med en server
-   Socket : Socket_Type;
+   Socket : Socket_Type; --Socket_type används för att kunna kommunicera med en server
 
-   Val      : Character; --Används för att ta emot text från användaren
-   NumPlayers : Integer;
-   Textlangd : Natural;        --Kommer innehålla längden på denna text
-   Resultat  : Natural;        --Resultatet från servern
+   Val            : Character; --Används för att ta emot text från användaren
+   NumPlayers     : Integer;
    Keyboard_Input : Key_Type;
    -- Input          : Boolean;
-   Esc     : constant Key_Code_Type := 27;
-   Data         : Game_Data;    -- Innehåller all spelinformation som tas emot från servern.
-   Loop_Counter : Integer;      -- Innehåller Serverns loopar (Kanske kan kontrollera syncningen lite mer)
+   Esc            : constant Key_Code_Type := 27;
+   Data           : Game_Data;    -- Spelinformation som tas emot från servern.
    
-   Shot_List : Object_List;
-   Obstacle_List: Object_List;
-   Powerup_List : Object_List;
+   Shot_List      : Object_List;
+   Obstacle_List  : Object_List;
+   Powerup_List   : Object_List;
    
-   
-   Background_Colour_1  : Colour_Type := Black;  -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
-   Text_Colour_1        : Colour_Type := White;  -- Teckenfärg    till (Scoreboard, Hela Terminalen)
    Klient_Number        : Integer;               -- Servern skickar klientnumret
    Player_Colour        : String(1..15);         -- Används i början till att överföra spelarnas färger
    Player_Colour_Length : Integer;               -- Används för att hålla koll hur lång färgnamnet är
    
    
    
-   ---------------------------------------------------
-   -- X,Y Koordinater för alla fönster
-   ---------------------------------------------------
-   SpelPlanen_X : Integer := 1; 
-   SpelPlanen_Y : Integer := 1;
-   
-   Highscore_Ruta_X      : Integer := SpelPlanen_X+World_X_Length+1;
-   Highscore_Ruta_Y      : Integer := SpelPlanen_Y;
-   Highscore_Ruta_Width  : Integer := 30;
-   Highscore_Ruta_Height : Integer := 2;
-   ---------------------------------------------------
+
    
    
    ----------------------------------------------------------------------------------------------------
@@ -462,7 +415,6 @@ begin
    ----------------------------------------------------------------------------------------------------
    Set_Echo(Off);
    Cursor_Invisible;
-   Loop_Counter := 1;
    loop
       -- Get(Socket,Loop_Counter);    -- tar emot serverns loop_counter
       
@@ -509,10 +461,11 @@ begin
       --| Highscore fönster
       --------------------------------
       Put_Box(Highscore_Ruta_X, Highscore_Ruta_Y, Highscore_Ruta_Width, 
-   	      Highscore_Ruta_Height+NumPlayers, Background_Colour_1, Text_Colour_1);     -- En låda runt scorelistan Eric
+   	      Highscore_Ruta_Height+NumPlayers, Background_Colour_2, Text_Colour_2);     -- En låda runt scorelistan Eric
       
-      Put_Score(Data, NumPlayers, Highscore_Ruta_X+1, Highscore_Ruta_Y+1);    -- Skriver ut den sorterade scorelistan / Eric
- --------------------------------
+      Put_Score(Data, NumPlayers, Highscore_X, Highscore_Y, 
+		Background_Colour_2, Text_Colour_2);    -- Skriver ut den sorterade scorelistan / Eric
+      --------------------------------
       
       --------------------------------
       --| Där man skriver för att chatta
