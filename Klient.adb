@@ -2,25 +2,23 @@ with Ada.Command_Line;        use Ada.Command_Line;
 with Ada.Exceptions;          use Ada.Exceptions;
 with Ada.Text_IO;             use Ada.Text_IO;
 with Ada.Integer_Text_IO;     use Ada.Integer_Text_IO;
-with TJa.Window.Text;         use TJa.Window.Text;
-with TJa.Window.Graphic;      use TJa.Window.Graphic;
 with tja.window.Elementary;   use tja.window.Elementary;
 with TJa.Sockets;             use TJa.Sockets;
 with TJa.Keyboard;            use TJa.Keyboard;
 with TJa.Keyboard.Keys;       use TJa.Keyboard.Keys;
 with Ada.Strings;             use Ada.Strings;
-with Ada.Characters.Latin_1;  use Ada.Characters.Latin_1;    -- Används för att använda Escape till att inakvtivera 
-							     -- textensynligheten i terminalen
 with Space_Map;
 
+with Object_Handling;         use Object_Handling;
+with Graphics;                use Graphics;
+with Definitions;             use Definitions;
+with Gnat.Sockets;
 
 procedure Klient is
-   
+
    
    -------------------------------------------------------------
-   
-   World_X_Length : constant Integer := 62;
-   World_Y_Length : constant Integer := 30;
+
    
    -- Packet som hanterar banan.
    package Bana is
@@ -29,111 +27,52 @@ procedure Klient is
    use Bana;
    
    --------------------------------------------------------------
-   -- | Game Datan
-   --------------------------------------------------------------
-   type XY_Type is array(1 .. 2) of Integer;
-   type Ranking_List is array (1 .. 4) of Integer;
    
-   ------------------------------------------------
-   --| Nya skott typen
-   ------------------------------------------------
-   type Shot_Type is
-      record
-	 XY     : XY_Type;
-	 Active : Boolean;
-      end record;
+   --  type X_Led is array(1 .. World_X_Length) of Character;
+   --  type World is array(1 .. World_Y_Length) of X_Led;
    
-   type Shot_array is array (1 .. 5) of Shot_Type;
-   ------------------------------------------------
+
+   type Shot_Type is array (1 .. 5) of XY_Type;
    
-   
-   ------------------------------------------------
-   --| Skepp Specifikationerna
-   ------------------------------------------------
    type Ship_spec is 
       record
   	 XY      : XY_Type; 
-  	 Health  : Integer; 
-  	 Shot    : Shot_Array;
+  	 Health   : Integer;  --Tidigare "Lives"
+  	 S       : Shot_Type;
       end record;
-   ------------------------------------------------
+   
+   type Enemy_Ship_Spec is
+      record
+	 XY                 : XY_Type;
+	 Lives              : Integer;
+	 Shot               : Shot_Type;
+	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
+	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
+	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
+	                               -- åt höger eller vänster.
+	 Active             : Boolean;
+      end record;
    
    
-   
-   ------------------------------------------------
-   --| Spelarnas Specifikationerna
-   ------------------------------------------------
    type Player_Type is
       record
   	 Playing    : Boolean;
   	 Name       : String(1..24);
   	 NameLength : Integer;
   	 Ship       : Ship_Spec;
-	 Colour     : Colour_Type;
   	 Score      : Integer;
       end record;
    
    type Player_Array is array (1..4) of Player_Type;
-   ------------------------------------------------
-   
-   
-   
-   ------------------------------------------------
-   -- | Gamla enemies information.
-   ------------------------------------------------
-   type Enemy_Ship_Spec is
-      record
-   	 XY                 : XY_Type;
-   	 Lives              : Integer;
-   	 Shot               : Shot_Array;
-   	 Shot_Difficulty    : Integer;
-   	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
-   	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
-   	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
-   	                               -- åt höger eller vänster.
-   	 Active             : Boolean;  
-      end record;
    
    type Enemies is array (1 .. 50) of Enemy_Ship_Spec;
-   ------------------------------------------------
-   
-   
-   
-   
-   
-   ------------------------------------------------
-   -- | Nya enemies information.
-   ------------------------------------------------
-   --  type Enemy_Ship_Spec is
-   --     record
-   --  	 Active             : Boolean;
-   --  	 XY                 : XY_Type;
-   --  	 Health             : Integer;
-   --  	 Shot               : Shot_Array;
-   --     end record;
-   
-   --  type Enemies_Array is array (1 .. 50) of Enemy_Ship_Spec;   
-   
-   --  type Wave_Type is
-   --     record
-   --  	 Active             : Boolean;
-   --  	 Enemies            : Enemies_Array;
-   --  	 Difficult          : Integer;
-   --  	 Movement_Selector  : Integer;     --  så att jag kan hålla koll på vad varje skepp har för rörelsemönster
-   --  					   -- , då kan vi ha olika typer av fiender på skärmen samtidigt.
-   --  	 Direction_Selector : Integer;      -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
-   --     end record;
-   ------------------------------------------------
-      
    
    type Game_Data is
       record
   	 Layout   : Bana.World;        -- Banan är i packetet så att både klienten och servern 
 	                               -- hanterar samma datatyp / Eric
-  	 Players  : Player_Array;      -- Underlättade informationsöverföringen mellan klient och server.
+  	 Players   : Player_Array;     -- Underlättade informationsöverföringen mellan klient och server.
   	 Wave     : Enemies;
-	 --Wave     : Wave_Type;         -- Nya Fiende våg.
-	 Ranking  : Ranking_List;   -- Vem som har mest poäng
       end record; 
    -------------------------------------------------------------
    
@@ -148,37 +87,19 @@ procedure Klient is
       -------------------------------------------------
       procedure Get_Ship_Data(Socket : in Socket_Type;
 			      Ship   : out Ship_Spec) is
-	 
-	 Shot_Active : Integer;	 
-	 
       begin
 	 
 	 Get(Socket,Ship.XY(1));
 	 Get(Socket,Ship.XY(2));
 	 Get(Socket,Ship.Health);
 	 
-	 for I in Shot_Array'Range loop
-	    Get(Socket, Shot_Active);
-	    
-	    if Shot_Active = 1 then
-	       
-	       Ship.Shot(I).Active := True;
-	       
-	       Get(Socket,Ship.Shot(I).XY(1));
-	       Get(Socket,Ship.Shot(I).XY(2));
-	    elsif Shot_Active = 0 Then
-	       Ship.Shot(I).Active := False;
-	    end if;
-	 end loop;
+
 	 
       end Get_Ship_Data;
       -------------------------------------------------
       
-      Player_Playing    : Integer;
-      Enemies_Active    : Integer;
-      Wave_Active       : Integer;    -- För nya vågendatan
-      Enemy_Active      : Integer;    -- För nya vågendatan
-      Enemy_Shot_Active : Integer;    -- För nya vågendatan
+      Player_Playing : Integer;
+      Enemies_Active : Integer;
       
    begin
       -- Tar emot Banan.
@@ -193,12 +114,12 @@ procedure Klient is
       for I in Player_Array'Range loop
 	 -- Tar emot om spelaren spelar.
 	 Get(Socket,Player_Playing);
-	 if Player_Playing = 1 then         -- Spelaren spelar och måste uppdateras
+	 if Player_Playing = 1 then
 	    Data.Players(I).Playing := True;
 	    
 	    
 	    -- Tar emot spelarens namn och namnlängd.
-	    --Get_line(Socket,Data.Players(I).Name, Data.Players(I).NameLength ); -- Behöver bara skicka en gång (Ingen uppdatering)
+	    Get_line(Socket,Data.Players(I).Name, Data.Players(I).NameLength );
 	    
 	    
 	    -- Tar emot spelarens skeppdata
@@ -216,85 +137,35 @@ procedure Klient is
 	 
       end loop;	 
       
-      ----------------------------------------------------------
-      -- Tar emot Fiende vågen                             GAMLA
-      ----------------------------------------------------------
+      -- Tar emot Fiende vågen.
       for I in Enemies'Range loop
-      	 Get(Socket, Enemies_Active);
-      	 if Enemies_Active = 1 then
+	 Get(Socket,Enemies_Active);
+	 if Enemies_Active = 1 then
 	    
-      	    Data.Wave(I).Active := True;
+	    Data.Wave(I).Active := True;
 	    
-      	    Get(Socket, Data.Wave(I).XY(1));
-      	    Get(Socket, Data.Wave(I).XY(2));
+	    Get(Socket,Data.Wave(I).XY(1));
+	    Get(Socket,Data.Wave(I).XY(2));
 	    
-      	    Get(Socket, Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
-	    
-	    
-      	    for J in Shot_Array'Range loop
-      	       Get(Socket, Data.Wave(I).Shot(J).XY(1));
-      	       Get(Socket, Data.Wave(I).Shot(J).XY(2));
-      	    end loop;
-	    
-      	    Get(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
-      	    Get(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
+	    Get(Socket,Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
 	    
 	    
-      	    -- Tar inte emot mer data om Fienden inte är aktiv.
-      	 elsif Enemies_Active = 0 then
-      	    Data.Wave(I).Active := False;
-      	 end if;
+	    for J in Shot_Type'Range loop
+	       Get(Socket,Data.Wave(I).Shot(J)(1));
+	       Get(Socket,Data.Wave(I).Shot(J)(2));
+	    end loop;
+	    
+	    Get(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
+	    Get(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
+	    
+	    
+	    -- Tar inte emot mer data om Fienden inte är aktiv.
+	 elsif Enemies_Active = 0 then
+	    Data.Wave(I).Active := False;
+	 end if;
       end loop;
-      
-      
-      ----------------------------------------------------------
-      -- Tar emot Fiende vågen                               NYA
-      ----------------------------------------------------------
-      --  Get(Socket, Wave_Active);
-      --  if Wave_Active = 1 then	                    -- Fiendevågen är aktiv och måste uppdateras
 
-      --  	 Data.Wave.Active := True;
-	 
-      --  	 ---------------------------
-      --  	 -- Hämtar Fienderna
-      --  	 ----------------------------
-      --  	 for I in Enemies_Array'Range loop
-      --  	    Get(Socket, Enemy_Active);
-      --  	    if Enemy_Active = 1 then	                       -- Fienden är aktiv i vågen.
-      --  	       Data.Wave.Enemies(I).Active := True;
-	       
-      --  	       Get(Socket,Data.Wave.Enemies(I).XY(1));         -- Fiendens X-Koordinat
-      --  	       Get(Socket,Data.Wave.Enemies(I).XY(2));         -- Fiendens Y-Koordinat
-	       
-      --  	       for J in Shot_Array'Range loop                  -- Fiendens skott
-		  
-      --  		  Get(Socket, Enemy_Shot_Active);
-		  
-      --  		  if Enemy_Shot_Active = 1 then                -- Skottet är aktiv
-		     
-      --  		     Data.Wave.Enemies(I).Shot(J).Active := True;
-		     
-      --  		     Get(Socket, Data.Wave.Enemies(I).Shot(J).XY(1));
-      --  		     Get(Socket, Data.Wave.Enemies(I).Shot(J).XY(2));
-		     
-      --  		  elsif Enemy_Shot_Active = 0 then             -- Skottet är inaktiv
-      --  		     Data.Wave.Enemies(I).Shot(J).Active := False;
-      --  		  end if;
-		     
-      --  	       end loop; 
-	       
-      --  	    elsif Enemy_Active = 0 then
-	       
-      --  	       Data.Wave.Enemies(I).Active := False;	       -- Fienden är inaktiv
-      --  	    end if;
-      --  	 end loop;
-      --  elsif Wave_Active = 0 then
-      --  	 Data.Wave.Active := False;	                       -- Vågen är inaktiv.
-      --  end if;
       
-      for I in Ranking_List'Range loop
-	 Get(Socket, Data.Ranking(I));
-      end loop;
       
    end Get_Game_Data;
    ---------------------------------------------------------------
@@ -316,14 +187,15 @@ procedure Klient is
 	 Get_Immediate(Keyboard_Input, Input);
 	 
 	 if (Is_Character(Keyboard_Input) and then To_Character(Keyboard_Input)=' ')
-		   or Is_Up_Arrow(Keyboard_input) 
-		   or Is_Down_Arrow(Keyboard_input) 
-		   or Is_Left_Arrow(Keyboard_input) 
-		   or Is_Right_Arrow(Keyboard_input) 
-		   or Is_Esc(Keyboard_input)  then 
-		    exit;
-		 end if;
-		 
+	   or (Is_Character(Keyboard_Input) and then To_Character(Keyboard_Input)='m')
+	   or Is_Up_Arrow(Keyboard_input) 
+	   or Is_Down_Arrow(Keyboard_input) 
+	   or Is_Left_Arrow(Keyboard_input) 
+	   or Is_Right_Arrow(Keyboard_input) 
+	   or Is_Esc(Keyboard_input)  then 
+	    exit;
+	 end if;
+       	 
       end loop;
       
    exception
@@ -340,7 +212,10 @@ procedure Klient is
       elsif Is_Down_Arrow(Keyboard_input) then Put_Line(Socket, 's');
       elsif Is_Left_Arrow(Keyboard_input) then Put_Line(Socket, 'a');
       elsif Is_Right_Arrow(Keyboard_input) then Put_Line(Socket, 'd');
-      elsif Is_Character(Keyboard_input) then Put_Line(Socket, ' '); 
+      elsif (Is_Character(Keyboard_Input) and then To_Character(Keyboard_Input)='m') then 
+	 Put_Line(Socket, 'm');
+      elsif (Is_Character(Keyboard_Input) and then To_Character(Keyboard_Input)=' ') then 
+	 Put_Line(Socket, ' '); 
       
       else Put_Line(Socket, 'o'); -- betyder "ingen input" för servern.
       end if;
@@ -354,72 +229,27 @@ procedure Klient is
    --------------------------------------------------
    
    procedure Put_Player_Ships (Data : in  Game_Data;
-			       NumPlayers : in Integer;
-			       X          : in Integer;    -- La till X koordinaterna för att ha samma variabel som till put_World och alla andra fönster
-			       Y          : in Integer     -- samma anledning som ovan
+			       NumPlayers : in Integer
 			      ) is
-     
-      Old_Background  : Colour_Type;
-      Old_Text_Colour : Colour_Type; 
       
    begin
-      Old_Text_Colour := Get_Foreground_Colour;           -- Sparar den tidigare textfärgen
-      Old_Background  := Get_Background_Colour;           -- Sparar den tidigare bakgrundsfärgen
-      
       for I in 1..NumPlayers loop
 	 if Data.Players(I).Playing then
-	    Set_Colours(Data.Players(I).Colour, Old_Background);               -- Ställer in spelarens färg.
-	    Goto_XY(Data.Players(I).Ship.XY(1)+X, Data.Players(I).Ship.XY(2)+Y);
-	    Put("-/\-");                         -- Uppgraderas till en Put_Ship senare
+	    --Goto_XY(Data.Players(I).Ship.XY(1), Data.Players(I).Ship.XY(2));
+	    Put_Player(Data.Players(I).Ship.XY(1), Data.Players(I).Ship.XY(2));                         -- Uppgraderas till en Put_Ship senare
 	 end if;
 	 
       end loop;
       
-      Set_Colours(Old_Text_Colour, Old_Background);       -- Ställer tillbaka till dom tidigare färgerna.
+      
       
    end Put_Player_Ships;
    
-   procedure Put_Box(X           : in Integer;        -- X Koordinat där den ska börja boxen
-		     Y           : in Integer;        -- Y Koordinat där den ska börja boxen
-		     Width       : in Integer;        -- Hur bred boxen ska vara.
-		     Height      : in Integer;        -- Hur hög boxen ska vara.
-		     Background  : in Colour_Type;    -- Bakgrundfärgen
-		     Text_Colour : in Colour_Type) is -- Boxens färg
-      
-      Old_Background  : Colour_Type;
-      Old_Text_Colour : Colour_Type;
-      
-      
-   begin
-      Old_Text_Colour := Get_Foreground_Colour;           -- Sparar den tidigare textfärgen
-      Old_Background  := Get_Background_Colour;           -- Sparar den tidigare bakgrundsfärgen
-      
-      Set_Colours(Text_Colour, Background);               -- Ställer in dom inmatade färgerna.
-      
---      Set_Graphical_Mode(On);                             -- Startar grafiken.
-      
-      Goto_XY(X,Y);
-      Put(Upper_Left_Corner);
-      Put(Horisontal_Line,Width);
-      Put(Upper_Right_Corner);
+   --------------------------------------------------
+   
 
-      for I in 1 .. Height loop
-	 Goto_XY(X,Y+I);
-	 Put("│");
-	 Goto_XY(X+Width+1,Y+I);
-	 Put("│");
-      end loop;
-      
-      Goto_XY(X,Y+Height);
-      Put(Lower_Left_Corner);
-      Put(Horisontal_Line,Width);
-      Put(Lower_Right_Corner);
-      
-      Set_Graphical_Mode(Off);                            -- Stänger av grafiken
-      
-      Set_Colours(Old_Text_Colour, Old_Background);       -- Ställer tillbaka till dom tidigare färgerna.
-      
-   end Put_Box;
+   
+   
    
    ----------------------------------------------------------------------------------------------------
    --|
@@ -427,36 +257,22 @@ procedure Klient is
    --|
    ----------------------------------------------------------------------------------------------------
    
-   Socket         : Socket_Type;    -- Socket_type används för att kunna kommunicera med en server
-   Val            : Character;      -- Används för att ta emot text från användaren
-   NumPlayers     : Integer;        -- Antal Spelare
-   Textlangd      : Natural;        -- Kommer innehålla längden på denna text
-   Resultat       : Natural;        -- Resultatet från servern
-   Data           : Game_Data;      -- Innehåller all spelinformation som tas emot från servern.
-   Loop_Counter   : Integer;        -- Innehåller Serverns loopar (Kanske kan kontrollera syncningen lite mer)
-   Keyboard_Input : Key_Type;       -- Spelarens knapptryckning
-   Esc            : constant Key_Code_Type := 27;
-   Escape         : Character renames Ada.Characters.Latin_1.ESC;  -- Används för att använda Escape till att inakvtivera 
-							           -- textensynligheten i terminalen
-   Background_Colour_1  : Colour_Type := Black;  -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
-   Text_Colour_1        : Colour_Type := White;  -- Teckenfärg    till (Scoreboard, Hela Terminalen)
-   Klient_Number        : Integer;               -- Servern skickar klientnumret
-   Player_Colour        : String(1..15);         -- Används i början till att överföra spelarnas färger
-   Player_Colour_Length : Integer;               -- Används för att hålla koll hur lång färgnamnet är
+   --Socket_type används för att kunna kommunicera med en server
+   Socket : Socket_Type;
+
+   Val      : Character; --Används för att ta emot text från användaren
+   NumPlayers : Integer;
+   Textlangd : Natural;        --Kommer innehålla längden på denna text
+   Resultat  : Natural;        --Resultatet från servern
+   Keyboard_Input : Key_Type;
+   -- Input          : Boolean;
+   Esc     : constant Key_Code_Type := 27;
+   Data         : Game_Data;    -- Innehåller all spelinformation som tas emot från servern.
+   Loop_Counter : Integer;      -- Innehåller Serverns loopar (Kanske kan kontrollera syncningen lite mer)
    
-   
-   
-   ---------------------------------------------------
-   -- X,Y Koordinater för alla fönster
-   ---------------------------------------------------
-   SpelPlanen_X : Integer := 2; 
-   SpelPlanen_Y : Integer := 1;
-   
-   Highscore_Ruta_X      : Integer := SpelPlanen_X+World_X_Length+1;
-   Highscore_Ruta_Y      : Integer := SpelPlanen_Y;
-   Highscore_Ruta_Width  : Integer := 30;
-   Highscore_Ruta_Height : Integer := 6;
-   ---------------------------------------------------
+   Shot_List : Object_List;
+   Obstacle_List: Object_List;
+   Powerup_List : Object_List;
    
    ----------------------------------------------------------------------------------------------------
    ----------------------------------------------------------------------------------------------------
@@ -477,8 +293,10 @@ begin
    -- servern.
    Initiate(Socket);
    
-   Set_Colours(Text_Colour_1, Background_Colour_1);  -- Ändrar färgen på terminalen
-   Clear_Window;
+   
+   
+
+   
    
    Put("Join eller Create, J eller C: ");
 
@@ -506,59 +324,14 @@ begin
    end loop;
    
 
-   --------------------------------------
-   ------------------------------Tar Emot
-   Get(Socket, NumPlayers);                -- Antal spelare som spelar
-   Get(Socket, Klient_Number);             -- Spelarens Klient nummer
-   --------------------------------------
-   --------------------------------------
+
    
-   Skip_Line(Socket);                      -- Ligger ett entertecken kvar i socketen.
+
    
-   --------------------------------------
-   -------------------------------Skickar
-   if Klient_Number = 1 then
-      Put_Line(Socket,"Andreas");     -- Namn
-      Put_Line(Socket,"Blue");        -- Spelarens Färg
-   elsif Klient_Number = 2 then
-      Put_Line(Socket,"Tobias");      -- and so on..  
-      Put_Line(Socket,"Green");
-   elsif Klient_Number = 3 then
-      Put_Line(Socket,"Eric");
-      Put_Line(Socket,"Yellow");
-   elsif Klient_Number = 4 then
-      Put_Line(Socket,"Kalle");
-      Put_Line(Socket,"Red");
-   end if;
-   --------------------------------------
-   --------------------------------------   
-   
-   
-   --------------------------------------
-   ------------------------------Tar Emot   
-   for I in 1 .. NumPlayers loop
-      Get_Line(Socket, Data.Players(I).Name,                  -- Spelarnas Namn 
-	       Data.Players(I).NameLength);                   -- Spelarnas Namn Längder
-      Get_Line(Socket, Player_Colour,                         -- Spelarnas Färger
-	       Player_Colour_Length);                         -- Spelarnas Färg Längder
-      
-      
-      --| Översätter sträng till Colour_Type (Lite fult tyvärr...)        
-      if Player_Colour(1 .. Player_Colour_Length) = "Blue" then
-	 Data.Players(I).Colour := Blue;
-      elsif Player_Colour(1 .. Player_Colour_Length) = "Green" then
-	 Data.Players(I).Colour := Green;
-      elsif Player_Colour(1 .. Player_Colour_Length) = "Yellow" then
-	 Data.Players(I).Colour := Yellow;
-      elsif Player_Colour(1 .. Player_Colour_Length) = "Red" then
-	 Data.Players(I).Colour := Red;
-      end if;
-   end loop;
-   --------------------------------------
-   -------------------------------------- 
-   
-   
-   
+   Get(Socket, NumPlayers);
+   -- Skip_Line;
+   Skip_Line;
+   -- Put("ptroo");
    ----------------------------------------------------------------------------------------------------
    --|
    --| Game loop
@@ -567,85 +340,78 @@ begin
    Set_Buffer_Mode(Off);
    Set_Echo_Mode(Off);
    Cursor_Invisible;
+   Loop_Counter := 1;
    loop
-      --Get(Socket,Loop_Counter);    -- tar emot serverns loop_counter
+      -- Get(Socket,Loop_Counter);    -- tar emot serverns loop_counter
       
+      --Här får vi info om alla skottens koordinater
+      DeleteList(Shot_List);
+      Get(Socket, Shot_List);
+      DeleteList(Obstacle_List);
+      Get(Socket, Obstacle_List);
+      DeleteList(Powerup_List);
+      Get(Socket, Powerup_List);
       
+      --if Loop_Counter mod 2 = 1 then
       -- Hämtar all data från servern
-      Get_Game_Data(Socket,Data);
+	 Get_Game_Data(Socket,Data);
+      --end if;
+      
+      
       Clear_Window;
---      Put (Escape & "[m");                         -- Aktiverar Textsynligheten i Terminalen.
-      -- Skriv era puts efter denna rad -------
+      Put_World(Data.Layout,1,1);  -- put world // Eric
+      Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
+        					   -- Put_Enemies();
+      Put_Objects(Shot_List);
+      Put_Objects(Obstacle_List);
+      Put_Objects(Powerup_List);
+      Goto_XY(World_X_Length , World_Y_Length);
       
-      --------------------------------
-      --| Skriver ut banan
-      --------------------------------
-      Put_World(Data.Layout, Spelplanen_X+1, Spelplanen_Y, Background_Colour_1, Text_Colour_1, false);              -- put world // Eric
-      Put_Box(Spelplanen_X, SpelPlanen_Y, World_X_Length-2, 
-	      World_Y_Length, Background_Colour_1, Text_Colour_1);            -- En låda runt spelplanen / Eric
-      --------------------------------
+      --Put X Y koordinater för alla skott [TEST] [OK]
+      --Put(Shot_List);
       
-      Put_Player_Ships(Data, NumPlayers, Spelplanen_X, Spelplanen_Y);         -- put Ships // Andreas
-      -- Put_Enemies();                                                       -- Tobias
+      Get_Input(Keyboard_Input);
       
-      --------------------------------
-      -- Highscore fönster
-      --------------------------------
-      Put_Box(Highscore_Ruta_X, Highscore_Ruta_Y, Highscore_Ruta_Width, 
-   	      Highscore_Ruta_Height, Background_Colour_1, Text_Colour_1);     -- / Eric
-            
-      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+1);
-      Put("  Nickname       Lives   Score");                                  -- Kan vara i Put_Score senare / Eric
-      
-      -- Sort_Score(Data.Players, List);                                      -- Sorterar vem som leder / Eric
-      -- Put_Score(List,Highscore_Ruta_X+1,Highscore_Ruta_Y+2);               -- Skriver ut den sorterade scorelistan / Eric
-        
-      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+2);                         -- Ett exempel på hur jag tänkt ska se ut
-      Put("1.Andreas        ♡♡♡       152");  
-      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+3);
-      Put("2.Tobias         ♡♡         94");  
-      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+4);
-      Put("3.Eric           ♡          26");  
-      Goto_XY(Highscore_Ruta_X+1,Highscore_Ruta_Y+5);
-      Put("4.Kalle          RIP         2");  
-      --------------------------------
-      
-      --------------------------------
-      -- Där man skriver för att chatta
-      --------------------------------
-      Put_Box(SpelPlanen_X, SpelPlanen_Y+World_Y_Length+1,                    -- Ett litet fönster för att skriva i. / Eric 
-	      World_X_Length-2, 2, Background_Colour_1, Text_Colour_1); 
-      Goto_XY(SpelPlanen_X+1,SpelPlanen_Y+World_Y_Length+2);
-      Put("Här skriver man.");
-      --------------------------------
-      
-      
-      -- Inga mer puts efter denna rad -------
---      Put (Escape & "[8m");                        -- Inaktiverar Textsynligheten i Terminalen.
-      Get_Input(Keyboard_input);
-      
+      --------------------------------------------------
       if Is_Esc(Keyboard_Input) then-- måste ändras
-	 
 	 Put("Exiting...");
 	 Put_Line(Socket, 'e');
 	 exit;
       end if;
+      --------------------------------------------------
       
-      Send_Input(Keyboard_Input, Socket);    -- Funkade inte o köra scriptet / Eric
+      --Sänder ut användarens input från tangentbordet
+      Send_Input(Keyboard_Input, Socket);
       
-      --delay(0.01); -- senare bra om vi gör så att server och
+      --delay(0.005); -- senare bra om vi gör så att server och
       -- klient synkar exakt!
-      
+       -- Loop_Counter := Loop_Counter + 1;
    end loop;
-   Set_Echo_Mode(On);
+   
+   
+   --Set_Echo_Mode(On); Funkar EJ
    Set_Buffer_Mode(On);
-
+   
+   --Fria allokerat minne
+   DeleteList(Shot_List);
+   DeleteList(Obstacle_List);
+   DeleteList(Powerup_List);
    
    --Innan programmet avslutar stängs socketen, detta genererar ett exception
    --hos servern, pss kommer denna klient få ett exception när servern avslutas
    Close(Socket);
    Cursor_visible;
-
+   
+exception
+   when GNAT.SOCKETS.SOCKET_ERROR =>
+      
+      DeleteList(Shot_List);
+      DeleteList(Obstacle_List);
+      DeleteList(Powerup_List);
+     -- Close(Socket);
+      Cursor_visible;
+      New_Line;
+      Put("Someone disconnected!");
 
 
 end Klient;
