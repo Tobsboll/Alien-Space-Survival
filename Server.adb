@@ -4,10 +4,11 @@ with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
 with TJa.Sockets;                  use TJa.Sockets;
+with TJa.Window.Text;              use TJa.Window.Text;
 with Ada.Numerics.Discrete_Random; 
 with Space_Map;
 
-with Object_Handling;                use Object_Handling;
+with Object_Handling;              use Object_Handling;
 with Graphics;                     use Graphics;
 with Definitions;                  use Definitions;
 with Gnat.Sockets;
@@ -49,10 +50,6 @@ procedure Server is
 		    Y_Height => World_Y_Length);
    use Bana;
    
-   --   type X_Led is array(1 .. World_X_Length) of Character;
-   --   type World is array(1 .. World_Y_Length) of X_Led;
-   
-
    type Shot_Type is array (1 .. 5) of XY_Type;
    
    type Ship_spec is 
@@ -63,41 +60,43 @@ procedure Server is
 	 Missile_Ammo : Integer;
       end record;
    
-   type Enemy_Ship_Spec is
-      record
-	 XY                 : XY_Type;
-	 Lives              : Integer;
-	 Shot               : Shot_Type;
-	 Shot_Difficulty    : Integer;
-	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
-	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
-	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
-	                               -- åt höger eller vänster.
-	 Active             : Boolean;  
-      end record;
-   
-   
+   ------------------------------------------------
+   --| Spelarnas Specifikationerna
+   ------------------------------------------------
    type Player_Type is
       record
   	 Playing    : Boolean;
   	 Name       : String(1..24);
   	 NameLength : Integer;
   	 Ship       : Ship_Spec;
+	 Colour     : Colour_Type;
   	 Score      : Integer;
       end record;
    
    type Player_Array is array (1..4) of Player_Type;   
+   ------------------------------------------------
    
-   type Enemies is array (1 .. 50) of Enemy_Ship_Spec;
    
+   ------------------------------------------------
+   type Setting_Type is
+      record
+	 Generate_Map   : Boolean;     -- Generering av banan Activ/Inaktiv
+	 Astroid_Active : Boolean;     -- Generering av astroider Activ/Inaktiv
+      end record;
+   ------------------------------------------------
    type Game_Data is
       record
-  	 Layout   : World;          -- Banan är i packetet så att både klienten och servern 
-	                            -- hanterar samma datatyp / Eric
-  	 Players  : Player_Array;   -- Underlättade informationsöverföringen mellan klient och server. / Eric
-  	 Wave     : Enemies;
+	 Layout   : Bana.World;     -- Banan är i packetet så att både klienten och servern 
+				    -- hanterar samma datatyp / Eric
+	 Players  : Player_Array;   -- Underlättade informationsöverföringen mellan klient och server. / Eric
+	 
+	 Ranking  : Ranking_List;   -- Vem som har mest poäng
+	 Settings : Setting_Type;   -- Inställningar.
       end record; 
-   --------------------------------------------------
+   ------------------------------------------------
+   --------------------------------------------------------------
+   --| Slut på Game Datan
+   --------------------------------------------------------------
    
    
    
@@ -125,12 +124,19 @@ procedure Server is
       
       
    begin
-      -- Skickar Banan till klienterna
-      for I in World'Range loop
-	 for J in X_Led'Range loop
-	    Put_line(Socket, Data.Layout(I)(J));
+      if Data.Settings.Generate_Map then            -- Skickar banan om den generarar väggar
+	 
+	 Put_Line(Socket, 1);
+	 
+	 for I in World'Range loop
+	    for J in X_Led'Range loop
+	       Put_line(Socket, Data.Layout(I)(J)); -- Skickar Banan till klienterna
+	    end loop;
 	 end loop;
-      end loop;
+	 
+      elsif Data.Settings.Generate_Map = False then -- Genererar inte ny vägg ( Ingen uppdatering )
+	 Put(Socket, 0);
+      end if;
       
       
       --------------------------------------------------------
@@ -164,34 +170,8 @@ procedure Server is
 
       end loop;
       
-      
-      ---------------------------------------------------------
-      -- Skickar Fiende vågen
-      ----------------------------------------------------------
-      for I in Enemies'Range loop
-	 if Data.Wave(I).Active = True then
-	    
-	    Put_Line(Socket, 1);
-	    
-	    Put_Line(Socket,Data.Wave(I).XY(1));
-	    Put_Line(Socket,Data.Wave(I).XY(2));
-	    
-	    Put_Line(Socket,Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
-	    
-	    
-	    for J in Shot_Type'Range loop
-	       Put_Line(Socket,Data.Wave(I).Shot(J)(1));
-	       Put_Line(Socket,Data.Wave(I).Shot(J)(2));
-	    end loop;
-	    
-	    Put_Line(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
-	    Put_Line(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
-	    
-	 elsif Data.Wave(I).Active = False then
-	    
-	    Put_Line(Socket, 0);
-	    
-	 end if;
+      for I in Ranking_List'Range loop
+	 Put_Line(Socket, Data.Ranking(I));
       end loop;
       
       
@@ -545,7 +525,17 @@ procedure Server is
    Obstacle_List          : Object_List;
    Powerup_List           : Object_List;
    
+   Player_Colour          : String(1..15);           -- Inhämtning (innan GameLoopen) av spelarnas färger
+   Player_Colour_Length   : Integer;
+   Background_Colour_1    : Colour_Type := Black;    -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
+   Text_Colour_1          : Colour_Type := White;    -- Teckenfärg    till (Scoreboard, Hela Terminalen)
+
+   
 begin
+   Set_Window_Title("Server");
+   
+   Set_Colours(Text_Colour_1, Background_Colour_1);  -- Ändrar färgen på terminalen
+   
    
    Reset(Chance_For_Alien_shot); -- resetar generatorn för finedeskeppens
    
@@ -571,19 +561,69 @@ begin
    New_Line;
    Put("All players have joined the game.");
    
-   
-   -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
-   for J in 1..Num_Players loop
-      Put_Line(Sockets(J), Num_Players);
+      
+   -------------------------------------Skickar
+   --------------------------------------------
+   for I in 1..Num_Players loop
+      Put_Line(Sockets(I), Num_Players);     -- Hur många spelare som spelar
+      Put_Line(Sockets(I), I);               -- Vad för klient nr man har.
    end loop;
+   --------------------------------------------
+   --------------------------------------------
+   
+   
+   
+   ------------------------------------Tar Emot
+   --------------------------------------------   
+   for I in 1..Num_Players loop
+      Get_Line(Sockets(I), Game.Players(I).Name,    -- Spelarens namn
+   	       Game.Players(I).NameLength);         -- Spelarens namn längd
+      Get_Line(Sockets(I), Player_Colour,           -- Spelarens färgnamn.
+   	       Player_Colour_Length);               -- Spelarens färgnamnlängd.
+      
+      
+      -------------------------------------Skickar
+      --------------------------------------------   
+      for J in 1..Num_Players loop
+	 Put_Line(Sockets(J), Game.Players(I).
+		    Name(1..Game.Players(I).NameLength));  -- Spelarnas namn
+	 Put_Line(Sockets(J), 
+		  Player_Colour(1..Player_Colour_Length)); -- Spelarnas Färger
+      end loop;
+      --------------------------------------------
+      --------------------------------------------
+   end loop;
+   --------------------------------------------
+   --------------------------------------------  
+   
+   
+   
+   ---------------------------------------------------------------
+   --| Används endast för att testa utskrift av poängtavlan + liv
+   --| Tas bort senare när vi har en räknare för detta
+   ---------------------------------------------------------------
+   Game.Players(1).Score := 152;
+   Game.Players(2).Score :=  94;
+   Game.Players(3).Score :=  26;
+   Game.Players(4).Score :=   2;
+   
+   Game.Players(1).Ship.Health := 3;
+   Game.Players(2).Ship.Health := 2;
+   Game.Players(3).Ship.Health := 1;
+   Game.Players(4).Ship.Health := 0;
+   
+   for I in 1..Num_Players loop
+      Game.Ranking(I) := I;
+   end loop;
+   ---------------------------------------------------------------
+
    
    Put("Spelet är igång!");
    --------------------------------------------------
    --------------------------------------------------
    
    
-   -- Skip_Line;
-   
+
    
    
    
@@ -600,8 +640,6 @@ begin
    
    Generate_World(Game.Layout);  -- Genererar en helt ny bana med raka väggar. / Eric
    
-   Set_Buffer_Mode(Off);
-   Set_Echo_Mode(Off);
    
    --Testar att skapa olika typer av väggar
    Create_Object(ObstacleType(1), 2, 20, Light, Obstacle_List);
@@ -613,13 +651,6 @@ begin
    Create_Object(PowerUpType(3), 50, 20, 0, Powerup_List);
    
    loop 
- 
-      
-      --  for I in 1..Num_Players loop
-      --  	 Put_Line(Sockets(I),Loop_Counter);  -- Skickar Serverns loop_Count till klienterna / Eric
-      --  end loop;
-      
-
       
 
 			 
@@ -632,10 +663,12 @@ begin
       --| SCROLLING MAP 
       --| "Level 2" => därför ej nödvändig än
       --------------------------------------------------
-      --  if Loop_Counter mod 4 = 0 then
-      --  	 New_Top_Row(Game.Layout);          -- Genererar två nya väggar längst upp på banan på var sida.
-      --  	 Move_Rows_Down(Game.Layout);       -- Flyttar ner hela banan ett steg.
-      --  end if;
+       if Game.Settings.Generate_Map then       -- Bestämmer under spelet om banan ska börja genereras eller inte.
+	 if Loop_Counter mod 4 = 0 then
+	    New_Top_Row(Game.Layout);          -- Genererar två nya väggar längst upp på banan på var sida.
+	    Move_Rows_Down(Game.Layout);       -- Flyttar ner hela banan ett steg.
+	 end if;
+      end if;    
 
       
 
