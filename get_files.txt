@@ -1,0 +1,20 @@
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/definitions.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/enemy_ship_handling.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/enemy_ship_handling.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/klient.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/server.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/graphics.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/graphics.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/object_handling.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/object_handling.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/space_map.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/space_map.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/window_handling.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/window_handling.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/box_hantering.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/box_hantering.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/key_codes
+
+gnatmake $(~TDDD11/TJa-lib/bin/tja_config) server.adb
+gnatmake $(~TDDD11/TJa-lib/bin/tja_config) klient.adb
+
