@@ -15,18 +15,7 @@ with Gnat.Sockets;
 
 procedure Server is
    
-   
-   --------------------------------------------------
-   --Tobias randomgenerator för fiendeskepp
-   --------------------------------------------------
-   subtype One_To_Twenty is Integer range 1..20;
-   
-   
-   package One_To_Twenty_Random is
-      new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_Twenty);
-   use One_To_Twenty_Random;
-   
-   
+  
    --------------------------------------------------
    -- Slut
    --------------------------------------------------
