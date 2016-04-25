@@ -41,7 +41,7 @@ procedure Server is
    Listener                           : Listener_Type;
    Keyboard_Input                     : Character;
    
-   --------------------------------------------------
+   --------------------------------------------------------------
 
    
    -- Paket som hanterar banan.
@@ -50,52 +50,20 @@ procedure Server is
 		    Y_Height => World_Y_Length);
    use Bana;
    
-   type Shot_Type is array (1 .. 5) of XY_Type;
-
-   type Ranking_List is array (1 .. 4) of Integer;
-      
-   type Ship_spec is 
-      record
-  	 XY      : XY_Type; 
-  	 Health   : Integer; 
-  	 Laser_Type : Integer;
-	 Missile_Ammo : Integer;
-      end record;
-   
-   ------------------------------------------------
-   --| Spelarnas Specifikationerna
-   ------------------------------------------------
-   type Player_Type is
-      record
-  	 Playing    : Boolean;
-  	 Name       : String(1..24);
-  	 NameLength : Integer;
-  	 Ship       : Ship_Spec;
-	 Colour     : Colour_Type;
-  	 Score      : Integer;
-      end record;
-   
-   type Player_Array is array (1..4) of Player_Type;   
-   ------------------------------------------------
-   
-   
-   ------------------------------------------------
-   type Setting_Type is
-      record
-	 Generate_Map   : Boolean;     -- Generering av banan Activ/Inaktiv
-	 Astroid_Active : Boolean;     -- Generering av astroider Activ/Inaktiv
-      end record;
-   ------------------------------------------------
+   --------------------------------------------------------------
+   --| Början på Game Datan
+   --------------------------------------------------------------
+   --------------------------------------------------------------
    type Game_Data is
       record
-	 Layout   : Bana.World;     -- Banan är i packetet så att både klienten och servern 
-				    -- hanterar samma datatyp / Eric
-	 Players  : Player_Array;   -- Underlättade informationsöverföringen mellan klient och server. / Eric
+	 Layout   : Bana.World;     -- Måste klura lite till med detta.. / Eric
+	 Players  : Player_Array;
 	 
 	 Ranking  : Ranking_List;   -- Vem som har mest poäng
 	 Settings : Setting_Type;   -- Inställningar.
       end record; 
-   ------------------------------------------------
+   
+   --------------------------------------------------------------
    --------------------------------------------------------------
    --| Slut på Game Datan
    --------------------------------------------------------------
