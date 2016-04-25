@@ -482,8 +482,6 @@ procedure Server is
    
    Game                   : Game_Data;
    Loop_Counter           : Integer;
-   Chance_For_Alien_shot  : Generator;
-   --Alien_Shot_Probability : Integer;
    
    Shot_List              : Object_List; --shot_handling.ads
    Obstacle_List          : Object_List;
@@ -499,9 +497,6 @@ begin
    Set_Window_Title("Server");
    
    Set_Colours(Text_Colour_1, Background_Colour_1);  -- Ändrar färgen på terminalen
-   
-   
-   Reset(Chance_For_Alien_shot); -- resetar generatorn för finedeskeppens
    
    -- "öppna dörren". För tillfället endast lokalt, ändra sedan.
    Initiate(Listener, Integer'Value(Argument(1)), Localhost => true);
