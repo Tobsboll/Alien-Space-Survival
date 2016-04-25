@@ -1,12 +1,16 @@
+
 with TJa.Keyboard;                 use TJa.Keyboard;
 with Ada.Text_IO;                  use Ada.Text_IO;
 with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
 with TJa.Sockets;                  use TJa.Sockets;
-with TJa.Window.Text;              use TJa.Window.Text;
 with Ada.Numerics.Discrete_Random; 
 with Space_Map;
 
+with Object_Handling;                use Object_Handling;
+with Graphics;                     use Graphics;
+with Definitions;                  use Definitions;
+with Gnat.Sockets;
 
 procedure Server is
    
@@ -23,8 +27,10 @@ procedure Server is
    
    
    --------------------------------------------------
-   -- Slut på Tobias randomgenerator för fiendeskepp
+   -- Slut
    --------------------------------------------------
+   
+   
    
    type Socket_Array is
      array (1..4) of Socket_Type;
@@ -32,14 +38,10 @@ procedure Server is
    Socket1, Socket2, Socket3, Socket4 : Socket_Type;
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
    Listener                           : Listener_Type;
-   --   Num_Players                        : Integer;
    Keyboard_Input                     : Character;
    
-   --Flyttade variablerna till declarations längre ner        OBS!
-   
    --------------------------------------------------
-   World_X_Length : constant Integer := 62;
-   World_Y_Length : constant Integer := 30;
+
    
    -- Paket som hanterar banan.
    package Bana is
@@ -47,110 +49,53 @@ procedure Server is
 		    Y_Height => World_Y_Length);
    use Bana;
    
-   --------------------------------------------------------------
-   -- | Game Datan
-   --------------------------------------------------------------
-   type XY_Type      is array (1 .. 2) of Integer;
-   type Ranking_List is array (1 .. 4) of Integer;
+   --   type X_Led is array(1 .. World_X_Length) of Character;
+   --   type World is array(1 .. World_Y_Length) of X_Led;
    
-   ------------------------------------------------
-   --| Nya skott typen
-   ------------------------------------------------
-   type Shot_Type is
-      record
-	 XY     : XY_Type;
-	 Active : Boolean;
-      end record;
+
+   type Shot_Type is array (1 .. 5) of XY_Type;
    
-   type Shot_array is array (1 .. 5) of Shot_Type;
-   ------------------------------------------------
-   
-   
-   
-   ------------------------------------------------
-   --| Skepp Specifikationerna
-   ------------------------------------------------
    type Ship_spec is 
       record
   	 XY      : XY_Type; 
-  	 Health  : Integer; 
-  	 Shot    : Shot_Array;
+  	 Health   : Integer; 
+  	 Laser_Type : Integer;
+	 Missile_Ammo : Integer;
       end record;
-   ------------------------------------------------
+   
+   type Enemy_Ship_Spec is
+      record
+	 XY                 : XY_Type;
+	 Lives              : Integer;
+	 Shot               : Shot_Type;
+	 Shot_Difficulty    : Integer;
+	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
+	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
+	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
+	                               -- åt höger eller vänster.
+	 Active             : Boolean;  
+      end record;
    
    
-   
-   ------------------------------------------------
-   --| Spelarnas Specifikationerna
-   ------------------------------------------------
    type Player_Type is
       record
   	 Playing    : Boolean;
   	 Name       : String(1..24);
   	 NameLength : Integer;
   	 Ship       : Ship_Spec;
-	 Colour     : Colour_Type;
   	 Score      : Integer;
       end record;
    
-   type Player_Array is array (1..4) of Player_Type;
-   ------------------------------------------------
-   
-   
-   
-   ------------------------------------------------
-   -- | Gamla enemies information.
-   ------------------------------------------------
-   type Enemy_Ship_Spec is
-      record
-   	 XY                 : XY_Type;
-   	 Lives              : Integer;
-   	 Shot               : Shot_Array;
-   	 Shot_Difficulty    : Integer;
-   	 Movement_Selector  : Integer; -- så att jag kan hålla koll på vad varje skepp har för rörelsemönster
-   	                               --, då kan vi ha olika typer av fiender på skärmen samtidigt.
-   	 Direction_Selector : Integer; -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
-   	                               -- åt höger eller vänster.
-   	 Active             : Boolean;  
-      end record;
+   type Player_Array is array (1..4) of Player_Type;   
    
    type Enemies is array (1 .. 50) of Enemy_Ship_Spec;
-   ------------------------------------------------
-   
-   
-   ------------------------------------------------
-   -- | Nya enemies information.
-   ------------------------------------------------
-   --  type Enemy_Ship_Spec is
-   --     record
-   --  	 Active             : Boolean;
-   --  	 XY                 : XY_Type;
-   --  	 Health             : Integer;
-   --  	 Shot               : Shot_Array;
-   --     end record;
-   
-   --  type Enemies_Array is array (1 .. 50) of Enemy_Ship_Spec;   
-   
-   --  type Wave_Type is
-   --     record
-   --  	 Active             : Boolean;
-   --  	 Enemies            : Enemies_Array;
-   --  	 Difficult          : Integer;
-   --  	 Movement_Selector  : Integer;     --  så att jag kan hålla koll på vad varje skepp har för rörelsemönster
-   --  					   -- , då kan vi ha olika typer av fiender på skärmen samtidigt.
-   --  	 Direction_Selector : Integer;      -- kanske inte behövs, men håller i nuläget koll på om skeppet är på väg
-   --     end record;
-   ------------------------------------------------
-   
    
    type Game_Data is
       record
-	 Layout   : World;          -- Banan är i packetet så att både klienten och servern 
-				    -- hanterar samma datatyp / Eric
-	 Players  : Player_Array;   -- Underlättade informationsöverföringen mellan klient och server. / Eric
-	 Wave     : Enemies;
-	 --Wave     : Wave_Type;      -- Nya Fiende våg.
-	 Ranking  : Ranking_List;   -- Vem som har mest poäng
+  	 Layout   : World;          -- Banan är i packetet så att både klienten och servern 
+	                            -- hanterar samma datatyp / Eric
+  	 Players  : Player_Array;   -- Underlättade informationsöverföringen mellan klient och server. / Eric
+  	 Wave     : Enemies;
       end record; 
    --------------------------------------------------
    
@@ -174,16 +119,6 @@ procedure Server is
 	 Put_Line(Socket,Ship.XY(2));
 	 Put_Line(Socket,Ship.Health);
 	 
-	 for I in Shot_Array'Range loop
-	    if Ship.Shot(I).Active then
-	       Put_Line(Socket, 1);
-	       
-	       Put_Line(Socket,Ship.Shot(I).XY(1));
-	       Put_Line(Socket,Ship.Shot(I).XY(2));
-	    else
-	       Put_Line(Socket, 0);
-	    end if;
-	 end loop;
 	 
       end Put_Ship_Data;
       -------------------------------------------------
@@ -203,15 +138,24 @@ procedure Server is
       --------------------------------------------------------
       for I in Player_Array'Range loop
 	 -- Skickar om spelaren spelar eller inte.
+
+	 
 	 if Data.Players(I).Playing = True then
 	    
 	    Put_Line(Socket,1);
 	    
+	    
+	    -- Skickar Spelarens namn
+	    Put_Line(Socket,Data.Players(I).Name(1..Data.Players(I).NameLength) );
+	    
+	    
 	    -- Skickar spelarens skeppdata
 	    Put_Ship_Data(Socket,Data.Players(I).Ship);
 	    
+	    
 	    -- Skickar spelarens poäng
 	    Put_Line(Socket,Data.Players(I).Score);
+	    
 	    
 	    -- Skickar inget mer om spelaren inte spelar.
 	 elsif Data.Players(I).Playing = False then
@@ -221,79 +165,35 @@ procedure Server is
       end loop;
       
       
-      ----------------------------------------------------------
-      -- Skickar Fiende vågen                              GAMLA
+      ---------------------------------------------------------
+      -- Skickar Fiende vågen
       ----------------------------------------------------------
       for I in Enemies'Range loop
-      	 if Data.Wave(I).Active = True then
+	 if Data.Wave(I).Active = True then
 	    
-      	    Put_Line(Socket, 1);
+	    Put_Line(Socket, 1);
 	    
-      	    Put_Line(Socket, Data.Wave(I).XY(1));
-      	    Put_Line(Socket, Data.Wave(I).XY(2));
+	    Put_Line(Socket,Data.Wave(I).XY(1));
+	    Put_Line(Socket,Data.Wave(I).XY(2));
 	    
-      	    Put_Line(Socket, Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
+	    Put_Line(Socket,Data.Wave(I).Lives);    -- Kanske inte behövs skicka/ta emot
 	    
 	    
-      	    for J in Shot_Array'Range loop
-      	       Put_Line(Socket, Data.Wave(I).Shot(J).XY(1));
-      	       Put_Line(Socket, Data.Wave(I).Shot(J).XY(2));
-      	    end loop;
+	    for J in Shot_Type'Range loop
+	       Put_Line(Socket,Data.Wave(I).Shot(J)(1));
+	       Put_Line(Socket,Data.Wave(I).Shot(J)(2));
+	    end loop;
 	    
-      	    Put_Line(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
-      	    Put_Line(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
+	    Put_Line(Socket, Data.Wave(I).Movement_Selector);    -- Kanske inte behövs skicka/ta emot
+	    Put_Line(Socket, Data.Wave(I).Direction_Selector);    -- Kanske inte behövs skicka/ta emot
 	    
-      	 elsif Data.Wave(I).Active = False then
+	 elsif Data.Wave(I).Active = False then
 	    
-      	    Put_Line(Socket, 0);
+	    Put_Line(Socket, 0);
 	    
-      	 end if;
+	 end if;
       end loop;
       
-      
-      ----------------------------------------------------------
-      -- Skickar fiendevågen.                                NYA
-      ----------------------------------------------------------
-      --  if Data.Wave.Active then	                    -- Fiendevågen är aktiv och måste skicka
-      --  	 Put_Line(Socket, 1);
-	 
-	 
-      --  	 ---------------------------
-      --  	 -- Skickar Fienderna
-      --  	 ----------------------------
-      --  	 for I in Enemies_Array'Range loop
-      --  	    if Data.Wave.Enemies(I).Active then
-      --  	       Put_Line(Socket, 1);
-	       
-      --  	       Put_Line(Socket, Data.Wave.Enemies(I).XY(1));        -- Fiendens X-Koordinat
-      --  	       Put_Line(Socket, Data.Wave.Enemies(I).XY(2));        -- Fiendens Y-Koordinat
-	       
-	       
-      --  	       for J in Shot_Array'Range loop                       -- Fiendens skott
-      --  		  if Data.Wave.Enemies(I).Shot(J).Active then
-		     
-      --  		     Put_Line(Socket, 1);                           -- Skottet är aktiv
-		     
-      --  		     Put_Line(Socket, Data.Wave.Enemies(I).Shot(J).XY(1));
-      --  		     Put_Line(Socket, Data.Wave.Enemies(I).Shot(J).XY(2));
-		     
-      --  		  else
-      --  		     Put_Line(Socket, 0);                           -- Skottet är inaktiv
-      --  		  end if;
-		     
-      --  	       end loop;  
-	       
-      --  	    else
-      --  	       Put_Line(Socket, 0);	                            -- Fienden är inaktiv
-      --  	    end if;
-      --  	 end loop;
-      --  else
-      --  	 Put_Line(Socket, 0);	                            -- Vågen är inaktiv.
-      --  end if;
-      
-      for I in Ranking_List'Range loop
-	 Put_Line(Socket, Data.Ranking(I));
-      end loop;
       
    end Put_Game_Data;
    --------------------------------------------------
@@ -335,285 +235,235 @@ procedure Server is
    --------------------------------------------------
    
    --------------------------------------------------
-   function Active_Ship(Enemy_Ship : Enemy_Ship_spec) return Boolean is
-      
-   begin
-      
-      return Enemy_Ship.Active;
-      
-   end Active_Ship;
+
+   --------------------------------------------------
+
    --------------------------------------------------
    
    --------------------------------------------------
-   procedure  Spawn_Wave(Num_Spawning      : in Integer;
-			 Enemy_Ship_Array  : in out Enemies;
-			 Num_Lives         : in Integer;
-			 Shot_Difficulty   : in Integer;
-			 Movement_Selector : in Integer) is
-      
-      X_Position : Integer;
-      Spacing    : constant Integer := World_X_Length/(Num_Spawning+1);
-      
-   begin
-      
-      X_Position := 0;
-      
-      for I in 1..Num_Spawning loop -- måste eventuellt senare lagra startsiffran så vi inte skriver över gamla fiender som fortfarande lever!!
-	 
-	 Enemy_Ship_Array(I).Active            := True;-- aktiverar ett skepp på den här platsen i arrayen
-	 Enemy_Ship_Array(I).Lives             := Num_Lives; -- ger den ett antal liv
-	 Enemy_Ship_Array(I).Shot_Difficulty   := Shot_Difficulty; -- ger skeppet en gräns att passera för skott
-	 Enemy_Ship_Array(I).Movement_Selector := Movement_Selector; -- ger ett rörelsemönster.
-	 
-	 
-	 Enemy_Ship_Array(I).XY(2)             := 1; -- sätter start y-värdet till 1.  
-	 Enemy_Ship_Array(I).XY(1)             := X_Position + Spacing;
-	 
-	 Enemy_Ship_Array(I).Direction_Selector := 1; --Gör så att alla skepp börjar åt höger, vet
-						      -- inte hur vi ska lösa det snyggt // Tobias
-	 
-	 X_Position := X_Position + Spacing;
-	 
-      end loop;
-      
-   end Spawn_Wave;
+ 
    --------------------------------------------------
-   
-   --------------------------------------------------
-   procedure Update_Enemy_Position(Loop_Counter : in Integer;
-			           Ship         : in out Enemies;
-				   Num_Enemies  : in Integer;
-				   Direction    : in out Integer) is
-      
-      -- Movement_selector:
-      -- 1) stand still
-      -- 2) move from side to side
-      -- 3) move forwards
-      -- 4) move zigzag, classic space invaders
-      -- 5) move in circles
-      -- 6) move down and spread out on line
-      -- etc.
-      
-      Chance_For_Alien_shot  : Generator;
-      Alien_Shot_Probability : Integer;
-      
-      
-   begin -- procedure som tar input och uppdaterar 
-      
-      if Loop_Counter mod 5 = 0 then -- FRÅGA MAGNUS!!
-	 
-      	 Reset(Chance_For_Alien_shot); -- resetar generatorn för finedeskeppens skott
-	 
-      end if;
-      
-      
-      
-      if Loop_Counter mod 2 = 0 then
-	 
-
-	 
-	 --  for I in 1..Num_Enemies loop -- loopar igenom alla skepp
-	    
-	 --     if Ship(I).XY(2) < 30 then -- om skeppet har lågt y-värde (vid start) flyger det först ner till y=30
+      function Player_Collide (X,Y : in Integer;
+			    L   : in Object_List
+			    ) return Boolean is
+      Object_X : Integer; 
+      Object_Y : Integer;
+      begin
+	 if not Empty(L) then
+	    Object_X := L.XY_Pos(1);
+	    Object_Y := L.XY_Pos(2);
+	    --------------------------------------------------
+	    --Med hinder:
+	    --------------------------------------------------
+	    if L.Object_Type in 11..20 then
 	       
-	 --        Ship(I).XY(2) := Ship(I).XY(2) + 1;
+	       --Jämför Hindrets koord. med hela ship top:
+	       --------------------------------------------------
+	       for A in 1..2 loop      --Obstacle height
+		  for I in 1..3 loop      --Ship top
+		     for K in 1..3 loop   --Obstacle width
+			
+			if X+I = Object_X+K-1 and Y = Object_Y+A-1 then
+			   return True;
+			end if;
+		     end loop;
+		  end loop;
+	       end loop;
 	       
-	 --     elsif Ship(I).XY(2) = World_Y_Length-1 then -- ta bort skeppet om det är på väg att lämna banan 
-	 --        Ship(I).Active := False;
-
-	 --     end if;
-	    
+	       --Jämför Hindrets koord. med hela ship bottom:
+	       --------------------------------------------------
+	       for A in 1..2 loop      --Obstacle height
+		  for I in 1..5 loop      --Ship bottom
+		     for K in 1..3 loop   --Obstacle width
+			
+			if X+I-1 = Object_X+K-1 and Y+1 = Object_Y+A-1 then
+			   return True;
+			end if;
+		     end loop;
+		  end loop;
+	       end loop;
 	       
-	 --        -- om movement_selector är 1 så står skeppet still, vilket innebär att koden här helt enkelt hoppas över.
 	       
-	 --     elsif Ship(I).Movement_Selector = 2 and Ship(I).Direction_Selector = 1 then -- sida till sida
+	       return Player_Collide(X,Y,L.Next);
+	       --------------------------------------------------
+	       --Med PowerUps:
+	       --------------------------------------------------
+	    elsif L.Object_Type in 21..30 then
 	       
-	 --        -- move right
+	       for I in 1..3 loop      --Ship top
+		  for K in 1..3 loop   --Object width
+		     
+		     if X+I = Object_X+K-2 and Y = Object_Y then
+			return True;
+		     end if;
+		  end loop;
+	       end loop;
 	       
-	 --        if Ship(I).XY(1) < (World_X_Length-1) then          
-	 --  	  Ship(I).XY(1) := Ship(I).XY(1) + 1;                         
-        
-	 --        elsif Ship(I).XY(1) = (World_X_Length-1) then
-	 --  	  Ship(I).Direction_Selector := 2;   
-	 --        end if;
-
-	 --     elsif Ship(I).Direction_Selector = 2 and Ship(I).Direction_Selector = 2 then 
+	       for I in 1..5 loop      --Ship bottom
+		  for K in 1..3 loop   --Object width
+		     
+		     if X+I-1 = Object_X+K-2 and Y+1 = Object_Y then
+			return True;
+		     end if;
+		  end loop;
+	       end loop;
 	       
-	 --        -- move left
+	       --return Player_Collide(X,Y,L.Next);
 	       
-	 --        if Ship(I).XY(1) > 2  then -- funktion för var vänsterväggen finns ska läggas in istälet för 2:an
-	 --  	  Ship(I).XY(1) := Ship(I).XY(1) -1;
+	       --------------------------------------------------
+	       --Med Skott:
+	       --------------------------------------------------
+	    elsif L.Object_Type in 1..10 then
+	       for I in 1..3 loop      --Ship top
 		  
-	 --        elsif Ship(I).XY(1) = 2 then
-	 --  	  Ship(I).Direction_Selector := 1;   
-	 --        end if;
-	       
-	       
-	       ----------------------------------
-	       -- MOVE DOWN UNIFORMLY
-	       ----------------------------------
-	       
-	    --  elsif Ship(I).Movement_Selector = 3 then 
-	       
-	    --     Ship(I).XY(2) := Ship(I).XY(2) + 1;
-	       
-	       -----------------------------------
-	       -- CLASSIC SPACE INVADERS MOVEMENT
-	       -----------------------------------
-	       
-	   -- elsif Ship(I).Movement_Selector = 4 and Ship(I).Direction_Selector = 1 then
-	 
-	 
-	 if Direction = 1 then
-	    
-	    -- move towards right wall.
-	    
-	    if Ship(Num_Enemies).XY(1) < (World_X_Length-1) then    -- skeppet längst till höger triggar      
-	       
-	       for J in 1..Num_Enemies loop -- för alla skepp
-		  Ship(J).XY(1) := Ship(J).XY(1) + 1;                         
+		     if X+I = Object_X and Y = Object_Y then
+			return True;
+		     end if;
 	       end loop;
 	       
 	       
-	    elsif Ship(Num_Enemies).XY(1) = (World_X_Length-1) then 
-	       
-	       for K in 1..Num_Enemies loop -- för alla skepp
+	       for I in 1..5 loop      --Ship bottom
 		  
-		  Ship(K).XY(2) := Ship(K).XY(2) + 1; --flytta ner ett steg
-						      -- Ship(K).Direction_Selector := 2;    -- byt riktning till vänster.
-		  Direction := 2;
-		  
+		     
+		     if X+I-1 = Object_X and Y+1 = Object_Y then
+			return True;
+		     end if;
+	        
 	       end loop;
-	       
-	    end if;
-	    
-
-	    -- elsif Ship(I).Movement_Selector = 4 and Ship(I).Direction_Selector = 2 then	     
-
-	 elsif Direction = 2 then
-	    
-	    -- move towards left wall.
-	    
-	    if Ship(1).XY(1) > 2 then -- samma här, byt ut mot funktion för världens gräns, vänster skepp bestämmer          
-	       
-	       for L in 1..Num_Enemies loop
-		  Ship(L).XY(1) := Ship(L).XY(1) - 1;                         
-	       end loop;
-	       
-	    elsif Ship(1).XY(1) = 2 then 
-	       
-	       for M in 1..Num_Enemies loop
-		  Ship(M).XY(2) := Ship(M).XY(2) + 1; --flytta ner ett steg
-						      -- Ship(M).Direction_Selector := 1;    -- byt riktning till höger
-		  Direction := 1;
-	       end loop;
+	       --return Player_Collide(X,Y,L.Next);
 	       
 	    end if;
 	    
 	 end if;
 	 
-	    ------------------------------
-	    --***
-	    ------------------------------
+      --Vid listans slut: 
+      return False;
+      
+      end Player_Collide;
+      --------------------------------------------------
+      procedure Player_Collide_In_Object ( X,Y         : in Integer;
+					   --Data        : out Integer;
+					   Player_Ship : in out Ship_Spec;
+					   L           : in out Object_List) is
+	 
+      begin
+	 if not Empty(L) then
 	    
-	    
-	    
-	    --------------------------------------------------
-	    -- SHOT GENERATOR!!!
-	    --------------------------------------------------
-	    -- En gång per runda får varje skepp chansen att skjuta, styrs av denna random process.
-	    
-	    
-	    Alien_Shot_Probability := Random(Chance_For_Alien_shot); -- 1-20
-	    
-	    --  New_Line(2);
-	    --  Put(Alien_Shot_Probability, 0);
-	    --  New_Line(2);
-	    
-	    for I in 1..Num_Enemies loop
+	    if Player_Collide (X, Y, L) then
 	       
-	       if Alien_Shot_Probability >= Ship(I).Shot_Difficulty then
-		  
-		  for M in 1..5 loop
+	       --------------------------------------------------
+	       --Beskjuten?
+	       --------------------------------------------------
+	       if L.Object_Type in 1..10 then
+		  if L.Object_Type = ShotType(1) then
+		     Player_Ship.Health := 0;
 		     
-		     if Ship(I).Shot(M).Active = false then
-			
-			--  New_Line(2);
-			--  Put("FIRE!");
-			
-			-- Ship(I).Shot(M).Active := True; -- skottet aktiveras -- kommenteras ut tills vi får en mekanism för att sätta dem till inaktiva.
-			-- Ship(I).Shot(M).XY     := (Ship(I).XY(1), Ship(I).XY(2)+ 1); -- skottet får samma koordinat som skeppet, men y +1.
-			exit;
-		     end if;
-		  end loop;
+		  elsif L.Object_Type = ShotType(2) then
+		     Player_Ship.Health := 0;
+		  end if;
+		  Remove(L);
 		  
+	       --------------------------------------------------
+	       --PowerUp?
+	       --------------------------------------------------
+	       elsif L.Object_Type in 21..30 then
+		  
+		  if L.Object_Type = PowerUpType(1) then
+		     null; --Öka Ship.Health
+		  elsif L.Object_Type = PowerUpType(2) then
+		     
+		     Player_Ship.Missile_Ammo := Player_Ship.Missile_Ammo + 10;
+		      
+		  elsif L.Object_Type = PowerUpType(3) then
+		     Player_Ship.Laser_Type := ShotType(2);
+		     
+		  --else
+		     --Rekursion:
+		    -- Player_Collide_In_Object(X,Y,Player_Ship,L.Next);
+		  end if;
+		  Remove(L);
+	      
 		  
 	       end if;
-	    end loop;
-	    
-	       --------------------------------------------------
-	       --***
-	       --------------------------------------------------
-	       
-	  --     for N in 1..Num_Enemies loop
-		  
-	--	  New_Line;
-	--	  Put("Ship no. ");
-	--	  Put(N, 0);
-	--	  Put(".      ");
-	--	  Put("X: ");
-	--	  Put(Ship(N).XY(1),0);
-	--	  Put("    Y:  ");
-	--	  Put(Ship(N).XY(2),0);
-		  
-	     --  end loop;
-	    
-      end if;
-
-      
-   end Update_Enemy_position;
-   --------------------------------------------------
+	    else
+	        Player_Collide_In_Object(X,Y,Player_Ship, L.Next);
+	    end if;
+	 end if;
+	 
+	 
+	 end Player_Collide_In_Object;
    
    --------------------------------------------------
-   procedure Enemy_Shots(Shot_Probability : in One_To_Twenty;
-			 Enemy_Ship  : in out Enemy_Ship_spec) is
-      
-   begin -- ska sköta uppdateringen av skeppens koordinater.
-      
-      null;
-      
-   end Enemy_Shots;
-   --------------------------------------------------
+  -- procedure Handle_PowerUp (
    
    --------------------------------------------------
-   procedure Get_Player_Input(Sockets     : in Socket_Array;
+   --| PLAYER INPUT                              |--===========|===|
+   --------------------------------------------------
+   procedure Get_Player_Input(Sockets : in Socket_Array;
 			      Num_Players : in Integer; --Num_Players ej längre global
-			      Data        : in out Game_Data
+			      Data : in out Game_Data;
+			      Shot_List : in out Object_List;
+			      Obstacle_List : in Object_List;
+			      Powerup_List  : in out Object_List
 			     ) is
-      
+      X          : Integer;
+      Y          : Integer;
+      Laser_Type : Integer;
+      Ammo       : Integer;
+      --Player_Ship: Ship_Spec;
    begin
       
       for I in 1..Num_Players loop
+	 X          := Data.Players(I).Ship.XY(1);
+	 Y          := Data.Players(I).Ship.XY(2);
+	 Laser_Type := Data.Players(I).Ship.Laser_Type;
+	 Ammo       := Data.Players(I).Ship.Missile_Ammo;
+	 --Player_Ship:= Data.Players(I).Ship;
 	 
 	 Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
 	 Skip_Line(Sockets(I)); -- DETTA kan bli problem om server går långsammare än klienterna!! /Andreas
-	 
+				--------------------------------------------------
+				--| Movement tjafs 
+				--|
+				--| #Bruteforce
+				--------------------------------------------------
+	 	 
 	 if Keyboard_Input /= 'o' then -- = om det fanns nollskild, giltig input.        
 	    
 	    
-	    if Keyboard_Input = 'w' then 
-	       Data.Players(I).Ship.XY(2) := Integer'Max(1 , Data.Players(I).Ship.XY(2) - 1);
-	    elsif Keyboard_Input = 's' then 
-	       Data.Players(I).Ship.XY(2) := Integer'Min(World_Y_Length - 1 , Data.Players(I).Ship.XY(2) + 1);
-	    elsif Keyboard_Input = 'a' then             --| Border_Left är väggen till vänster funkar med & utan Genererin
-	       Data.Players(I).Ship.XY(1) := Integer'Max(Border_Left(Data.Layout , Data.Players(I).Ship.XY(2)) ,  Data.Players(I).Ship.XY(1) - 1);
-	    elsif Keyboard_Input = 'd' then              --| Border_Right är väggen till höger funkar med & utan Generering
-	       Data.Players(I).Ship.XY(1) := Integer'Min(Border_Right(Data.Layout , Data.Players(I).Ship.XY(2)) - 5 , Data.Players(I).Ship.XY(1) + 1);
+	    if Keyboard_Input = 'w' and then not Player_Collide(X,Y-1, Obstacle_List) then 
+	       Data.Players(I).Ship.XY(2) := Integer'Max(2 , Y-1);
+	       
+	    elsif Keyboard_Input = 's' and then not Player_Collide(X,Y+1, Obstacle_List) then 
+	       Data.Players(I).Ship.XY(2) := Integer'Min(World_Y_Length-1 , Y+1);
+	       
+	    elsif Keyboard_Input = 'a' and then not Player_Collide(X-Move_Horisontal,Y, Obstacle_List) then
+	      Data.Players(I).Ship.XY(1) := Integer'Max(2 , X - Move_Horisontal);
+	      
+	    elsif Keyboard_Input = 'd' and then not Player_Collide(X+Move_Horisontal, Y , Obstacle_List) then
+	       Data.Players(I).Ship.XY(1) := Integer'Min(World_X_Length - Player_Width ,X + Move_Horisontal);
 	    elsif Keyboard_input = ' ' then 
-	       Data.Players(I).Playing := False;
+	       --Data.Players(I).Playing := False;  --Suicide
+	       
+	       Create_Object(ShotType(Laser_Type),
+			     X+2,
+			     Y,
+			     Up,
+			     Shot_List                );
+	    elsif Keyboard_input = 'm' and then Ammo > 0 then
+      
+	       Create_Object(ShotType(4), -- 4 = Missile
+			     X+2,
+			     Y,
+			     Up,
+			     Shot_List                );
+	       Data.Players(I).Ship.Missile_Ammo := Ammo - 1;
 	       
 	    elsif Keyboard_Input = 'e' then exit; -- betyder "ingen input" för servern.
-	    end if;	
+	    end if;
+	    
+	    Player_Collide_In_Object(X,Y, Data.Players(I).Ship, Powerup_List); -- Returnerar hur mycket extra ammo man får
+	    --  Data.Players(I).Ship.Missile_Ammo := Data.Players(I).Ship.Missile_Ammo + Ammo;
 	 end if;
 	 
       end loop;
@@ -623,6 +473,7 @@ procedure Server is
    
    --------------------------------------------------
    --|  DEFAULT VALUES
+   --|  Här 
    --------------------------------------------------
    procedure Set_Default_Values (Num_Players : in Integer;
 				 Game        : in out Game_Data
@@ -630,8 +481,6 @@ procedure Server is
 				) is
       Xpos : Integer;
       Interval : constant Integer := World_X_Length/(1+Num_Players);
-      Chance_For_Alien_Shot : Generator; -- /Tobias
-      
    begin
       --------------------------------------------------
       --| Ships
@@ -639,32 +488,46 @@ procedure Server is
       Xpos := 0;
       
       for K in 1..Num_Players loop
+	 --Spawning
 	 Game.Players(K).Ship.XY(2) := World_Y_Length - 1;  -- + border_Length
 	 Game.Players(K).Ship.XY(1) := Xpos + Interval; -- + border_Length;
-	 Game.Players(K).Playing    := True; 
+	 Game.Players(K).Playing := True; 
 	 Xpos := Xpos + Interval;
+	 
+	 --Equipment
+	 Game.Players(K).Ship.Health := 100;
+	 Game.Players(K).Ship.Laser_Type := 1;
+	 Game.Players(K).Ship.Missile_Ammo := 5;
       end loop;
-      
-      --------------------------------------------------
-      -- Enemies
-      --------------------------------------------------
-      
-      for L in Enemies'Range loop --settar alla fienders status till inaktiv i början.
-      
-	 Game.Wave(L).Active         := False;
-	 
-	 for M in 1..5 loop
-	 Game.Wave(L).Shot(M).Active := False; -- sätter skotten till inaktiva.
-	 end loop;
-	 
-	 
-      end loop;
-      
-      Reset(Chance_For_Alien_shot); -- resetar generatorn för finedeskeppens skott
-      
- 
       
    end Set_Default_Values;
+   
+   --------------------------------------------------
+   --|  SHOT MOVEMENT
+   --|  
+   --------------------------------------------------
+   
+   procedure Shot_Movement ( L : in out Object_List ) is
+      Direction : Integer; -- := L.Attribute;
+      Ydiff     : constant Integer := 1;
+   begin
+      
+      if not Empty(L) then
+	 Direction := L.Attribute;
+	 L.XY_Pos(2) := L.XY_Pos(2) + Ydiff*Direction;
+	 if L.XY_Pos(2) = 0 or L.XY_Pos(2) = World_Y_Length+1 then
+	    Remove(L);
+	    Shot_Movement(L);
+	 else
+	    Shot_Movement(L.Next);
+	 end if;
+      end if;
+      
+   end Shot_Movement; 
+   
+
+   
+   
 
    ----------------------------------------------------------------------------------------------------
    --|
@@ -675,25 +538,16 @@ procedure Server is
    
    Game                   : Game_Data;
    Loop_Counter           : Integer;
-
-   Alien_Shot_Probability : Integer;
-   Num_To_Spawn           : Integer;
-   Num_Lives              : Integer;
-   Shot_Difficulty        : Integer;
-   Movement_Selector      : Integer;
-   First_Wave_Limit       : constant Integer := 10;
-   Second_Wave_Limit      : Integer;
-   Direction              : Integer;
-   Background_Colour_1    : Colour_Type := Black;    -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
-   Text_Colour_1          : Colour_Type := White;    -- Teckenfärg    till (Scoreboard, Hela Terminalen)
-   Player_Colour          : String(1..15);           -- Inhämtning (innan GameLoopen) av spelarnas färger
-   Player_Colour_Length   : Integer;
-
+   Chance_For_Alien_shot  : Generator;
+   --Alien_Shot_Probability : Integer;
+   
+   Shot_List              : Object_List; --shot_handling.ads
+   Obstacle_List          : Object_List;
+   Powerup_List           : Object_List;
+   
 begin
    
-   Set_Colours(Text_Colour_1, Background_Colour_1);  -- Ändrar färgen på terminalen
-   
-
+   Reset(Chance_For_Alien_shot); -- resetar generatorn för finedeskeppens
    
    -- "öppna dörren". För tillfället endast lokalt, ändra sedan.
    Initiate(Listener, Integer'Value(Argument(1)), Localhost => true);
@@ -706,9 +560,7 @@ begin
    
    -- vänta på spelare 1
    Add_Player(Listener, Sockets(1), 1);
-   Get(Sockets(1), Num_Players);             -- spelare 1 bestämmer hur många som ska spela.
-   Skip_Line(Sockets(1));                    -- Låg ett entertecken kvar i socketen
-   
+   Get(Sockets(1), Num_Players); -- spelare 1 bestämmer hur många som ska spela.
    Put_line("Waiting for players...");
    
    -- lägg till wait_for_connections för så många spelare som angetts!
@@ -717,48 +569,24 @@ begin
    end loop;
    
    New_Line;
-   Put_Line("All players have joined the game.");
+   Put("All players have joined the game.");
    
    
-   
-   
-   -------------------------------------Skickar
-   --------------------------------------------
-   for I in 1..Num_Players loop
-      Put_Line(Sockets(I), Num_Players);     -- Hur många spelare som spelar
-      Put_Line(Sockets(I), I);               -- Vad för klient nr man har.
+   -- Skicka ut ett tecken till alla klienterna, så att de slutar vänta och börjar sin loop.
+   for J in 1..Num_Players loop
+      Put_Line(Sockets(J), Num_Players);
    end loop;
-   --------------------------------------------
-   --------------------------------------------
-   
-   
-   
-   ------------------------------------Tar Emot
-   --------------------------------------------   
-   for I in 1..Num_Players loop
-      Get_Line(Sockets(I), Game.Players(I).Name,    -- Spelarens namn
-   	       Game.Players(I).NameLength);         -- Spelarens namn längd
-      Get_Line(Sockets(I), Player_Colour,           -- Spelarens färgnamn.
-   	       Player_Colour_Length);               -- Spelarens färgnamnlängd.
-      
-      
-      -------------------------------------Skickar
-      --------------------------------------------   
-      for J in 1..Num_Players loop
-	 Put_Line(Sockets(J), Game.Players(I).
-		    Name(1..Game.Players(I).NameLength));  -- Spelarnas namn
-	 Put_Line(Sockets(J), 
-		  Player_Colour(1..Player_Colour_Length)); -- Spelarnas Färger
-      end loop;
-      --------------------------------------------
-      --------------------------------------------
-   end loop;
-   --------------------------------------------
-   --------------------------------------------  
-
-
    
    Put("Spelet är igång!");
+   --------------------------------------------------
+   --------------------------------------------------
+   
+   
+   -- Skip_Line;
+   
+   
+   
+   
    ----------------------------------------------------------------------------------------------------
    --|
    --| Game loop
@@ -768,24 +596,34 @@ begin
    Set_Default_Values(Num_Players, Game);
    
    
-   Loop_Counter := 0;
+   Loop_Counter := 1;
    
    Generate_World(Game.Layout);  -- Genererar en helt ny bana med raka väggar. / Eric
    
    Set_Buffer_Mode(Off);
    Set_Echo_Mode(Off);
    
-   Direction := 1; --tillfälligt för att röreslerna ska fungera tills jag tänkt ut det bättre // Tobias
+   --Testar att skapa olika typer av väggar
+   Create_Object(ObstacleType(1), 2, 20, Light, Obstacle_List);
+   Create_Object(ObstacleType(2), 10, 20, Hard , Obstacle_List);
+   Create_Object(ObstacleType(3), 25, 20, Light, Obstacle_List);
+   
+ 
+   Create_Object(PowerUpType(2), 40, 15, 0, Powerup_List);
+   Create_Object(PowerUpType(3), 50, 20, 0, Powerup_List);
    
    loop 
-      
-      
+ 
       
       --  for I in 1..Num_Players loop
       --  	 Put_Line(Sockets(I),Loop_Counter);  -- Skickar Serverns loop_Count till klienterna / Eric
       --  end loop;
       
 
+      
+
+			 
+      
       
       delay(0.01);      -- En delay så att servern inte fyller socket bufferten till klienterna. / Eric
       
@@ -798,37 +636,9 @@ begin
       --  	 New_Top_Row(Game.Layout);          -- Genererar två nya väggar längst upp på banan på var sida.
       --  	 Move_Rows_Down(Game.Layout);       -- Flyttar ner hela banan ett steg.
       --  end if;
-      
 
       
-      --      Print_Player_Input(Sockets); -- för test av input   -- Funkar inte än / Eric
-      
-      --update world /Andreas  // Fanns med i packetet som jag gjorde tidigare, 
-      --  det är dom två procedurerna "New_Top_Row" & "Move_Rows_Down" / Eric
-      --update ship /andreas
-      
-      
-   --    if Loop_Counter = First_Wave_Limit then                             -- Vid vissa tidpunkter spawnas
-     -- Num_To_Spawn := 6;  	 
-     -- Spawn_Wave(Num_To_Spawn, Game.Wave, 3, 10, 4);      
-      --  	 -- nya fiendewaves som rör sig på olika
-      --  	 -- sätt och skjuter olika mycket och
-      --  elsif Loop_Counter = Second_Wave_Limit then                         -- är olika svåra att döda. / Tobias
-      --  	 Spawn_Wave(Num_To_Spawn, Game.Wave, Num_Lives, Shot_Difficulty, Movement_selector);
-      
-    --  end if; -- osv
-      
-      
-      --for I in Enemies'Range loop
-	 
-       	-- if Game.Wave(I).Active = true  then -- bara om det finns levande skepp.
-	    
-	  --  Update_Enemy_position(Loop_counter, Game.Wave, 6, Direction); --/ Tobias 6:an har med 6:an ovan att göra.
-	                                                          -- 1:an är riktning.
-	  --  exit;
---	 end if;
-	 
-  --    end loop;
+
 
       -- Hitbox_Procedure/compare_coordinates_procedure i en for loop för alla skepp/skott    //Andreas
       
@@ -836,11 +646,30 @@ begin
       
       
       for I in 1..Num_Players loop
-	 Put_Game_Data(Sockets(I),Game);
+	 if Game.Players(I).Ship.Health = 0 then
+	    Game.Players(I).Playing := False;
+	 end if;
+		 
+	 if Game.Players(I).Playing then
+	 Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
+				   Game.Players(I).Ship.XY(2),
+				   Game.Players(I).Ship, --Uppdaterar ship_spec
+				   Shot_List);           --Om spelare träffas
+	 end if;                                         --Av skott.
+
+	      
+	 Put(Sockets(I), Shot_List);
+	 Put(Sockets(I), Obstacle_List);
+	 Put(Sockets(I), Powerup_List);
+      	 Put_Game_Data(Sockets(I),Game);
       end loop;
       
-      Get_Player_Input(Sockets, Num_Players, Game);
-
+      Get_Player_Input(Sockets, Num_Players, Game, Shot_List, Obstacle_List, Powerup_List);
+      
+      --Uppdatera skottens position med delay
+      --if Loop_Counter mod 2 = 1 then
+	 Shot_Movement(Shot_List);
+      --end if;
       
       Loop_Counter := Loop_Counter + 1;
       
@@ -857,7 +686,16 @@ begin
       Remove_Player(Sockets(I), I);
       
    end loop; 
-   
+exception
+   when GNAT.SOCKETS.SOCKET_ERROR => 
+      
+      DeleteList(Shot_List);
+      DeleteList(Obstacle_List);
+      DeleteList(Powerup_List);
+      New_Line;
+      Put("Someone disconnected!");
+      
+      
 
 end Server;
 
