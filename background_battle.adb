@@ -47,15 +47,16 @@ package body Background_Battle is
 	   
 	 Set_Colours(Bright_Yellow, Old_Background); 
 	 
-	 if World_X_Length > 90 and World_Y_Length >40 then
+	 if World_X_Length > 90 and World_Y_Length >38 then
 	   Goto_XY(7+X,38+Y);       Put(".");
 	   Goto_XY(89+X,25+Y);      Put("."); 
-	   Goto_XY(84+X,14+Y);       Put("✶");
+	   Goto_XY(84+X,14+Y);      Put("✶");
+	   Goto_XY(79+X,31+Y);      Put("✶");
 	 end if;
 	   
 	     
-	 Goto_XY(45+X,20+Y);      Put("✶");  
-	 Goto_XY(4+X,29+Y);      Put("✶"); 
+	 Goto_XY(40+X,20+Y);        Put("✶");  
+	 Goto_XY(4+X,29+Y);         Put("✶"); 
 	 
 	 	 
 	 --  Set_Colours(Cyan, Old_Background); 
