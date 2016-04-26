@@ -57,11 +57,11 @@ package Enemy_Ship_Handling is
    
    procedure Spawn_ship(Enemy_Type, X, Y, Difficulty, Num_Lives, Direction, Movement_Type : in Integer;
 			Enemies_List : in out Enemy_List);
-   procedure Spawn_Wave(Num_To_Spawn  : in out Integer;
-			Enemy_Type    : in Integer;
-			Movement_Type : in Integer;
-			Direction     : in Integer;
-			Enemies_List  : in out Enemy_List);
+   procedure Spawn_Wave(Num_To_Spawn  : in Integer;
+                        Enemy_Type    : in Integer;
+		        Movement_Type : in Integer;
+		        Direction     : in Integer;
+		        Enemies_List  : in out Enemy_List);
    procedure Update_Enemy_Position(Enemies : in out Enemy_List;
 				   Shot_List : in out Object_List);
    function Last_List(All_Enemies : in Enemy_List_Array) return Integer;
@@ -69,6 +69,7 @@ package Enemy_Ship_Handling is
    function Next_To_Wall(Enemies : in Enemy_List) return Boolean;
    procedure Move_To_Side(Enemies : in out Enemy_List);
    procedure Change_Direction(Enemies : in out Enemy_List);
+   procedure Remove_Ship(Enemies : in out Enemy_List);
    procedure Destroy_Ship(Enemies   : in out Enemy_List;
 			  Hit_Coord : in XY_Type);
    procedure Put_Enemy_Ships(Enemies : in Enemy_List;
@@ -79,7 +80,9 @@ package Enemy_Ship_Handling is
    			       Shot_List : in out Object_List);
    procedure Shot_Generator(Enemies : in out Enemy_List;
    			    Chance_For_Shot : in out Generator;
-   			      Shot_List : in out Object_List);
+			    Shot_List : in out Object_List);
+   procedure Delete_Enemy_list(Enemies : in out Enemy_List);
+   
    
    
    
