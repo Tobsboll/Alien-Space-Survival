@@ -26,19 +26,19 @@ package body Box_Hantering is
       
       Goto_XY(X,Y);
       Put(Upper_Left_Corner);
-      Put(Horisontal_Line,Width);
+      Put(Horisontal_Line,Width-2);
       Put(Upper_Right_Corner);
       
-      for I in 1 .. Height loop
+      for I in 1 .. Height-1 loop
 	 Goto_XY(X,Y+I);
 	 Put(Vertical_Line);
-	 Goto_XY(X+Width+1,Y+I);
+	 Goto_XY(X+Width-1,Y+I);
 	 Put(Vertical_Line);
       end loop;
       
       Goto_XY(X,Y+Height);
       Put(Lower_Left_Corner);
-      Put(Horisontal_Line,Width);
+      Put(Horisontal_Line,Width-2);
       Put(Lower_Right_Corner);
       
       Set_Graphical_Mode(Off);                            -- Stänger av grafiken
@@ -69,21 +69,21 @@ package body Box_Hantering is
       
       Goto_XY(X,Y);
       Put("╔");
-      for I in 1 .. Width loop
+      for I in 1 .. Width-2 loop
 	 Put("═");
       end loop;
       Put("╗");
       
-      for I in 1 .. Height loop
+      for I in 1 .. Height-1 loop
 	 Goto_XY(X,Y+I);
 	 Put("║");
-	 Goto_XY(X+Width+1,Y+I);
+	 Goto_XY(X+Width-1,Y+I);
 	 Put("║");
       end loop;
       
       Goto_XY(X,Y+Height);
       Put("╚");
-      for I in 1 .. Width loop
+      for I in 1 .. Width-2 loop
 	 Put("═");
       end loop;
       Put("╝");
@@ -113,21 +113,21 @@ package body Box_Hantering is
       
       Goto_XY(X,Y);
       Put("▛");
-      for I in 1 .. Width loop
+      for I in 1 .. Width-2 loop
 	 Put("▀");
       end loop;
       Put("▜");
       
-      for I in 1 .. Height loop
+      for I in 1 .. Height-1 loop
 	 Goto_XY(X,Y+I);
 	 Put("▌");
-	 Goto_XY(X+Width+1,Y+I);
+	 Goto_XY(X+Width-1,Y+I);
 	 Put("▐");
       end loop;
       
       Goto_XY(X,Y+Height);
       Put("▙");
-      for I in 1 .. Width loop
+      for I in 1 .. Width-2 loop
 	 Put("▄");
       end loop;
       Put("▟");      
