@@ -178,8 +178,9 @@ package body Enemy_Ship_Handling is
       if Enemies /= null then
 	 
    	 if Alien_Shot_Probability <= Enemies.Difficulty then
-   	     Create_enemy_Shot(Enemies.Enemy_type, Enemies.XY(1), Enemies.XY(2), Shot_List);
-   	    null;
+	    Create_enemy_Shot(Enemies.Enemy_type, Enemies.XY(1), Enemies.XY(2), Shot_List);
+	    Put("SKOTTJÄVEL!");
+    
    	 end if;
 	 
    	 Shot_Generator(Enemies.Next, Chance_For_Shot, Shot_list); -- rekursion
@@ -252,7 +253,8 @@ package body Enemy_Ship_Handling is
       
    begin 
       
-     
+      if Enemies /= null then
+      
       -- if Wave.Movement_selector = 0 så står vi still = skippar koden.
       
       ----------------------------------
@@ -296,6 +298,8 @@ package body Enemy_Ship_Handling is
 	 null;
       end if;
       
+      end if;
+      
       
    end Update_Enemy_position;
 
@@ -307,12 +311,13 @@ package body Enemy_Ship_Handling is
 --------------------------------------------------
 -- SPAWN WAVE
 --------------------------------------------------
-procedure Spawn_Wave(Num_To_Spawn  : in out Integer;
+procedure Spawn_Wave(Num_To_Spawn  : in Integer;
                      Enemy_Type    : in Integer;
 		     Movement_Type : in Integer;
 		     Direction     : in Integer;
 		     Enemies_List  : in out Enemy_List) is
    
+   Num_Ships : Integer;
    Min_X_Interval : constant Integer := 6;
    Y_Interval     : constant Integer := 3;
    X, X_Interval, Y : Integer; 
@@ -322,8 +327,9 @@ procedure Spawn_Wave(Num_To_Spawn  : in out Integer;
    
 begin
    
+   Num_Ships := Num_To_Spawn;
    X := 0;
-   Y := 20; -- ingen aning.
+   Y := 0; -- ingen aning.
    
    if Enemy_Type = 1 then
       Difficulty := 10;
@@ -338,27 +344,28 @@ begin
    
    Counter := 0;
    
-   while Num_To_Spawn > 8 loop
+--  for I in 1..8 loop 
+   while Num_Ships > 8 loop
       
       
       Spawn_Ship(Enemy_Type, X+Min_X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
       
       X := X + Min_X_Interval;
-      Num_To_Spawn := Num_To_Spawn - 1;
+      Num_Ships := Num_Ships - 1;
       Counter := Counter + 1;
       
-      if Counter mod 8 = 0 then	 
-	 Y := Y + Y_Interval;
-	 X := 0;
-      end if;
+      --  if Counter mod 8 = 0 then	 
+      --  	 Y := Y + Y_Interval;
+      --  	 X := 0;
+      --  end if;
       
       
    end loop;
-   
-   X_Interval := World_X_Length/(Num_To_Spawn + 1);
+
+   X_Interval := World_X_Length/(Num_Ships + 1);
    X := 0;
    
-   for I in 1..Num_To_Spawn loop
+   for I in 1..Num_Ships loop
       
       Spawn_Ship(Enemy_Type, X + X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
       
@@ -370,6 +377,24 @@ end Spawn_Wave;
 --------------------------------------------------
 
 
+--------------------------------------------------
+-- REMOVE SHIP
+--------------------------------------------------
+procedure Remove_Ship(Enemies : in out Enemy_List) is
+   
+   Temporary : Enemy_List; 
+   
+begin
+   
+   Temporary := Enemies;
+   Enemies   := Enemies.Next;
+   Free(Temporary);
+   
+end Remove_Ship;
+--------------------------------------------------
+-- end REMOVE SHIP
+--------------------------------------------------
+
    --------------------------------------------------
    -- DESTROY SHIP
    --------------------------------------------------
@@ -377,20 +402,6 @@ end Spawn_Wave;
    procedure Destroy_Ship(Enemies   : in out Enemy_List;
 			  Hit_Coord : in XY_Type) is
       
-      
-      ------------------------------------------------
-      procedure Remove_Ship(Enemies : in out Enemy_List) is
-	 
-	 Temporary : Enemy_List; 
-	 
-      begin
-	 
-	 Temporary := Enemies;
-	 Enemies   := Enemies.Next;
-	 Free(Temporary);
-	 
-      end Remove_Ship;
-      ------------------------------------------------
       
    begin
       
@@ -490,6 +501,26 @@ end Spawn_Wave;
    
    --------------------------------------------------
    --end GET_ENEMY_SHIPS 
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   -- DELETE_ENEMY_LIST
+   --------------------------------------------------
+   
+   procedure Delete_Enemy_list(Enemies : in out Enemy_List) is
+      
+   begin
+      
+      if Enemies /= null then
+	 
+	 Remove_Ship(Enemies);
+	 Delete_Enemy_List(Enemies);
+	 
+      end if;
+      
+   end Delete_Enemy_List;
+   --------------------------------------------------
+   -- end DELETE_ENEMY_LIST
    --------------------------------------------------
    
 end Enemy_Ship_Handling;
