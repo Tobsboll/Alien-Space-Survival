@@ -89,10 +89,28 @@ package Definitions is
    ---------------------------------------------------
    --| Färginställningarna
    ---------------------------------------------------
-   Background_Colour_1  : constant Colour_Type := Black;  -- Terminalen
-   Text_Colour_1        : constant Colour_Type := White;  -- Terminalen
-   Background_Colour_2  : constant Colour_Type := Black;  -- Scorewindow
-   Text_Colour_2        : constant Colour_Type := White;  -- Scorewindow
+   Background_Colour_1   : constant Colour_Type := Black;     -- Terminalen
+   Text_Colour_1         : constant Colour_Type := White;     -- Terminalen
+   Background_Colour_2   : constant Colour_Type := Black;     -- Scorewindow
+   Text_Colour_2         : constant Colour_Type := White;     -- Scorewindow
+   Menu_Background       : constant Colour_Type := Dark_Grey; -- Startmenu
+   Menu_Selected         : constant Colour_Type := Blue;      -- Startmenu
+   Menu_Non_Selected     : constant Colour_Type := Green;     -- Startmenu
+   Nickname_Border_Box   : constant Colour_Type := Green;     -- Enter Nickname
+   Nickname_Write_Box    : constant Colour_Type := Blue;      -- Enter Nickname
+   Alien_Body            : constant Colour_Type := Green;     -- Background
+   Alien_Eyes            : constant Colour_Type := Yellow;    -- Background
+   ---------------------------------------------------
+   
+   
+   ---------------------------------------------------
+   --| Animation
+   ---------------------------------------------------   
+   Background_Battle_Bigship         : constant Boolean := True;
+   Background_Battle_Bigship_Shot    : constant Boolean := True;
+   Background_Battle_Smallship       : constant Boolean := True;
+   Background_Battle_Earth           : constant Boolean := True;
+   Background_Battle_Alien           : constant Boolean := False;
    ---------------------------------------------------
    
    
