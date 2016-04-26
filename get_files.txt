@@ -14,6 +14,15 @@ wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/wind
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/box_hantering.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/box_hantering.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/key_codes
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/background_battle.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/background_battle.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/input.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/input.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu_options.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu_options.ads
+
 
 gnatmake $(~TDDD11/TJa-lib/bin/tja_config) server.adb
 gnatmake $(~TDDD11/TJa-lib/bin/tja_config) klient.adb
