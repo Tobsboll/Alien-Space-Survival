@@ -13,11 +13,11 @@ package body Menu is
       Max_Length : Integer := 10;
       
    begin
-      if Choice = 'S' then                         -- At start enters nickname
-	 Choose_Nickname(Option, Position_X, Position_Y);        -- A window you write in
+      if Choice = 'S' then          -- At start enters nickname
+	 Choose_Nickname_Window;    -- A window for entering nickname
 	 Cursor_Visible;
 	 Get_String(Player_Name, Player_Name_Length, Max_Length,  -- procedure that gets and put what you write
-		    Position_X+42, Position_Y+18, White, Dark_Grey );
+		    (World_X_Length/2-5)+Gameborder_X, Gameborder_Y+18, White, Menu_Background);
 	 Cursor_Invisible;
 	 Set_Echo(Off);
 	 Choice := '1';
