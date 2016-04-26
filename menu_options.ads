@@ -1,8 +1,8 @@
+with Definitions;       use Definitions;
+
 package Menu_Options is
    
-   procedure Choose_Nickname(Option : in Integer;
-			     X : in Integer;
-			     Y : in Integer);
+   procedure Choose_Nickname_Window;
    
    procedure Menu_Start(Option : in Integer;
 			X      : in Integer;
