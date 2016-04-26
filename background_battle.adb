@@ -2,6 +2,7 @@ with Window_Handling;     use Window_Handling;
 with Ada.Text_IO;         use Ada.Text_IO;
 with Box_Hantering;       use Box_Hantering;
 with TJa.Window.Text;     use TJa.Window.Text;
+with Definitions;         use Definitions;
 
 package body Background_Battle is
    
@@ -14,42 +15,54 @@ package body Background_Battle is
       procedure Put_Stars (X,Y, World_X_Length, World_Y_Length : in Integer)is
 	 
 	 Old_Background  : Colour_Type;
-	 Alien_Body      : Colour_Type := Green;
-	 Alien_Eyes      : Colour_Type := Yellow;
 	 
       begin
 	 Old_Background  := Get_Background_Colour; 
 	 Set_Colours(Yellow, Old_Background);  
-	 Goto_XY(2+X,21+Y);       Put(".");
-	 Goto_XY(3+X,2+Y);        Put(".");  
+	 Goto_XY(3+X,2+Y);        Put("."); 
 	 Goto_XY(9+X,10+Y);       Put("."); 
-	 Goto_XY(7+X,38+Y);       Put(".");  
-	 Goto_XY(15+X,26+Y);      Put(".");  
 	 Goto_XY(17+X,5+Y);       Put(".");  
-	 Goto_XY(25+X,11+Y);      Put(".");
-	 Goto_XY(29+X,21+Y);      Put(".");
-	 Goto_XY(35+X,27+Y);      Put("."); 
-	 Goto_XY(39+X,36+Y);      Put("."); 
-	 Goto_XY(49+X,15+Y);      Put("."); 
-	 Goto_XY(57+X,3+Y);       Put(".");  
-	 Goto_XY(59+X,21+Y);      Put(".");  
-	 Goto_XY(61+X,27+Y);      Put(".");   
-	 Goto_XY(65+X,11+Y);      Put(".");  
-	 Goto_XY(79+X,10+Y);      Put(".");
-	 Goto_XY(89+X,25+Y);      Put("."); 
 	 
+	 if World_X_Length > 60 and World_Y_Length > 25 then
+	   Goto_XY(2+X,21+Y);       Put(".");  
+	   Goto_XY(15+X,26+Y);      Put(".");
+	   Goto_XY(25+X,11+Y);      Put("."); 
+	   Goto_XY(29+X,21+Y);      Put("."); 
+	   Goto_XY(49+X,15+Y);      Put("."); 
+	   Goto_XY(57+X,3+Y);       Put(".");  
+	   Goto_XY(59+X,21+Y);      Put(".");
+	 end if;
+	 
+	 if World_X_Length > 66 and World_Y_Length > 30 then
+	   Goto_XY(35+X,27+Y);      Put(".");  
+	   Goto_XY(61+X,27+Y);      Put(".");   
+	   Goto_XY(65+X,11+Y);      Put("."); 
+	 end if;
+	 
+	 
+	 if World_X_Length > 80 and World_Y_Length > 37 then 
+	   Goto_XY(39+X,36+Y);      Put(".");  
+	   Goto_XY(79+X,10+Y);      Put(".");
+	 end if;
+	   
 	 Set_Colours(Bright_Yellow, Old_Background); 
-	 Goto_XY(84+X,14+Y);       Put("✶");  
-	 Goto_XY(50+X,35+Y);      Put("✶");  
-	 Goto_XY(42+X,5+Y);       Put("✶");  
-	 Goto_XY(4+X,31+Y);      Put("✶"); 
+	 
+	 if World_X_Length > 90 and World_Y_Length >40 then
+	   Goto_XY(7+X,38+Y);       Put(".");
+	   Goto_XY(89+X,25+Y);      Put("."); 
+	   Goto_XY(84+X,14+Y);       Put("✶");
+	 end if;
+	   
+	     
+	 Goto_XY(45+X,20+Y);      Put("✶");  
+	 Goto_XY(4+X,29+Y);      Put("✶"); 
 	 
 	 	 
 	 --  Set_Colours(Cyan, Old_Background); 
 	 --  Goto_XY(92+X,8+Y);      Put("o");  
 	 --  Goto_XY(48+X,37+Y);      Put("o"); 
 	 
-	 
+	 if Background_Battle_Earth then
 	 Goto_XY(X+15,1+Y);  Set_Colours(White, Old_Background); Put("_______");  Set_Colours(Blue, Old_Background);
 	 Goto_XY(X,2+Y);  Put("            .-");  Set_Colours(White, Old_Background); Put("""*#####*""");  Set_Colours(Blue, Old_Background); Put("-.");
 	 Goto_XY(X,3+Y);  Put("         .-'");	 Set_Colours(Green, Old_Background); Put("8888P8L  ##");  Set_Colours(Blue, Old_Background); Put("  `-.");
@@ -68,7 +81,10 @@ package body Background_Battle is
 	 Goto_XY(X,16+Y); Put("       `.          ");	 Set_Colours(Green, Old_Background); Put("888PP'");  Set_Colours(Blue, Old_Background); Put("    ,'");
 	 Goto_XY(X,17+Y); Put("         `-.      ");	 Set_Colours(Green, Old_Background); Put("d8P'");  Set_Colours(Blue, Old_Background); Put("    ,-'");              --CJ- Art by Christian 'CeeJay' Jensen 
 	 Goto_XY(X,18+Y); Put("            `-.,");	 Set_Colours(white, Old_Background); Put("______");  Set_Colours(Blue, Old_Background); Put(",.-'");
+	 end if;
 	 
+	 
+	 if Background_Battle_Alien then
 	 Set_Foreground_Colour(Alien_Body);
 	 
 	 Goto_XY(World_X_Length+X-25,World_Y_Length+Y-24);           Put("___----------___");
@@ -96,7 +112,7 @@ package body Background_Battle is
 	 Goto_XY(World_X_Length+X-22,World_Y_Length+Y-2);               Put("/     ..\");
 	 Goto_XY(World_X_Length+X-23,World_Y_Length+Y-1);              Put("/  .   .::\");
 	 
-	 
+	 end if;
 --    .     .  :     .    .. :. .___---------___.
 --         .  .   .    .  :.:. _".^ .^ ^.  '.. :"-_. .
 --      .  :       .  .  .:../:            . .^  :.:\.
@@ -294,10 +310,10 @@ package body Background_Battle is
       Clear_Window;
       
       Put_Stars(X,Y,World_X_Length, World_Y_Length);
-	 
+      
       Put_Double_Line_Box(X,Y,World_X_Length+2,World_Y_Length,Black,Dark_Grey);
       
-      if Loop_Counter > 5 then
+      if Loop_Counter > 5 and Background_Battle_Bigship then
 	 Put_Big_Ship(Move(1),X,1+Y,World_X_Length);
 	 
 	 if Loop_Counter mod 8 = 0 then
@@ -305,38 +321,41 @@ package body Background_Battle is
 	 end if;
       end if;
       
-      
-      if Loop_Counter > 200 then
-	 Put_Small_Ship(Move(2),X+1,16+Y,World_X_Length);
+      if Background_Battle_Smallship then
+	 if Loop_Counter > 200 then
+	    Put_Small_Ship(Move(2),X+1,16+Y,World_X_Length);
+	    
+	    if Loop_Counter mod 3 = 0 then
+	       Move(2) := Move(2) + 1 ;
+	    end if;
+	 end if;
 	 
-	 if Loop_Counter mod 3 = 0 then
-	    Move(2) := Move(2) + 1 ;
+	 
+	 if Loop_Counter > 500 then
+	    Put_Small_Ship(Move(3),X+1,23+Y,World_X_Length);
+	    
+	    if Loop_Counter mod 2 = 0 then
+	       Move(3) := Move(3) + 1 ;
+	    end if;
+	 end if;
+	 
+	 
+	 if Loop_Counter > 5 then
+	    Put_Small_Ship(Move(4),X+1,30+Y,World_X_Length);
+	    
+	    if Loop_Counter mod 4 = 0 then
+	       Move(4) := Move(4) + 1 ;
+	    end if;
 	 end if;
       end if;
       
       
-      if Loop_Counter > 500 then
-	 Put_Small_Ship(Move(3),X+1,23+Y,World_X_Length);
+      if Background_Battle_Bigship_Shot then
+	 Put_ALL_Shot(Shot,Move,X,Y,World_X_Length);
 	 
-	 if Loop_Counter mod 2 = 0 then
-	    Move(3) := Move(3) + 1 ;
+	 if Loop_Counter mod 1 = 0 then
+	    Shot(1) := Shot(1) + 1;
 	 end if;
-      end if;
-      
-      
-      if Loop_Counter > 5 then
-	 Put_Small_Ship(Move(4),X+1,30+Y,World_X_Length);
-	 
-	 if Loop_Counter mod 4 = 0 then
-	    Move(4) := Move(4) + 1 ;
-	 end if;
-      end if;
-      
-      
-      Put_ALL_Shot(Shot,Move,X,Y,World_X_Length);
-      
-      if Loop_Counter mod 1 = 0 then
-	 Shot(1) := Shot(1) + 1;
       end if;
       
       Loop_Counter := Loop_Counter + 1;
