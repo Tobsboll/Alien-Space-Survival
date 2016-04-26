@@ -262,110 +262,209 @@ begin
    
    loop
       
-      --| Koden som är bortkommenterad nedanför är för själva startmenyn
-      --| Den är bortkommenterad då det kanske är jobbigt att bläddra i menyn
-      --| varje gång man vill testa sin kod.
+      --  --| Koden som är bortkommenterad nedanför är för själva startmenyn
+      --  --| Den är bortkommenterad då det kanske är jobbigt att bläddra i menyn
+      --  --| varje gång man vill testa sin kod.
       
-      -------------------------------------------------------------
-      --| Start of Menu -------------------------------------------    -- NYA
-      -------------------------------------------------------------
-      loop
-      	 delay(0.1);
-      	 Put_Spacebattle(Move, Shot, Gameborder_X, GameBorder_Y, 
-      			 World_X_Length, World_Y_Length);
+      --  -------------------------------------------------------------
+      --  --| Start of Menu -------------------------------------------    -- NYA
+      --  -------------------------------------------------------------
+      --  loop
+      --  	 delay(0.1);
+      --  	 Put_Spacebattle(Move, Shot, Gameborder_X, GameBorder_Y, 
+      --  			 World_X_Length, World_Y_Length);
 	 
-      	 Put_Menu(Choice, NumPlayers, Portadress, Ipadress, 
-      		  Data.Players(1).Name, Data.Players(1).NameLength);
+      --  	 Put_Menu(Choice, NumPlayers, Portadress, Ipadress, 
+      --  		  Data.Players(1).Name, Data.Players(1).NameLength);
 	 
-      	 exit when Choice = 'C' or Choice ='J' or Choice = 'E';
+      --  	 exit when Choice = 'C' or Choice ='J' or Choice = 'E';
 	 
-      end loop;
-      -------------------------------------------------------------
-      --| End of Menu ---------------------------------------------     -- NYA
-      -------------------------------------------------------------
+      --  end loop;
+      --  -------------------------------------------------------------
+      --  --| End of Menu ---------------------------------------------     -- NYA
+      --  -------------------------------------------------------------
       
       
-      if Choice = 'E' then -- Exit
+      --  if Choice = 'E' then -- Exit
 	 
-      	 -- Put_Exiting_Game;                   -- A screen shuting down the game.
+      --  	 -- Put_Exiting_Game;                   -- A screen shuting down the game.
 	 
-      	 exit;
-      end if;
+      --  	 exit;
+      --  end if;
       
       begin
-	 -------------------------------------------------------------
-	 --| Player setup before the game ----------------------------     -- NYA
-	 -------------------------------------------------------------
+	 --  	 -------------------------------------------------------------
+      --  	 --| Player setup before the game ----------------------------     -- NYA
+      --  	 -------------------------------------------------------------
 	 
+      --  	 -- Initierar en socket, detta krävs för att kunna ansluta denna till
+      --  	 -- servern.
+      --  	 Initiate(Socket);
+	 
+      --  	 --      Put_Waiting_For_Server;             -- A screen that waits for server.
+      --  	 Put_Line("Waiting for connection");
+      --  	 Connect(Socket, Argument(1), Positive'Value(Argument(2)));      -- Connects to the server
+      --  	 Put_Line("You are connected to the server");
+	 
+	 
+      --  	 Put(Socket, Choice);                        -- Sends the playerchoice (Join/Create)
+      --  	 Put_line(Socket, NumPlayers);               -- Join = 0 / Create = 1,2,3,4
+	 
+      --  	 Set_Colours(Text_Colour_1, Background_Colour_1);  -- Change colour on the terminalen
+      --  	 Clear_Window;
+	 
+      --  	 --------------------------------------
+      --  	 ------------------------------Tar Emot
+      --  	 Put_Line("Waiting for someone to create a game");
+      --  	 Get(Socket, NumPlayers);                -- Number of Players.
+	 
+      --  	 if NumPlayers = 5 then                  -- If someone already created a game
+      --  	    Clear_Window;
+      --  	    Get(Socket, NumPlayers);             -- Gets the total number of player
+      --  	    Put("Someone was faster than you and created a game with ");
+      --  	    Put(NumPlayers, Width => 0);
+      --  	    Put_Line(" Players");
+      --  	    Put("Press Enter to join the game");
+      --  	    Skip_Line;
+      --  	    New_Line;
+      --  	 end if;
+	 
+      --  	 Put_Line("Waiting for players to join the game");
+      --  	 Get(Socket, Klient_Number);                -- Players klient Number
+	 
+      --  	 Set_Window_Title("Klient",Klient_Number);  -- Change the window title
+      --  						    --------------------------------------
+      --  						    --------------------------------------
+	 
+      --  	 Skip_Line(Socket);                      -- Ligger ett entertecken kvar i socketen.
+	 
+      --  	 --------------------------------------
+      --  	 -------------------------------Skickar
+      --  	 Put_Line(Socket, Data.Players(1).Name(1..Data.Players(1).NameLength)); -- Sends the players nickname
+	 
+      --  	 if Klient_Number = 1 then
+      --  	    Put_Line(Socket,"Blue");        -- Player Colour
+      --  	 elsif Klient_Number = 2 then
+      --  	    Put_Line(Socket,"Green");
+      --  	 elsif Klient_Number = 3 then
+      --  	    Put_Line(Socket,"Yellow");
+      --  	 elsif Klient_Number = 4 then
+      --  	    Put_Line(Socket,"Red");
+      --  	 end if;
+      --  	 --------------------------------------
+      --  	 --------------------------------------   
+	 
+	 
+      --  	 --      Put_Waiting_For_Players(Socket);                     -- A screen that waits for players
+	 
+	 
+      --  	 Put_Line("Waiting for players");
+      --  	 --------------------------------------
+      --  	 ------------------------------Tar Emot   
+      --  	 for I in 1 .. NumPlayers loop
+      --  	    Get_Line(Socket, Data.Players(I).Name,                  -- Spelarnas Namn 
+      --  		     Data.Players(I).NameLength);                   -- Spelarnas Namn Längder
+      --  	    Get_Line(Socket, Player_Colour,                         -- Spelarnas Färger
+      --  		     Player_Colour_Length);                         -- Spelarnas Färg Längder
+	    
+	    
+      --  	    --| Översätter sträng till Colour_Type (Lite fult tyvärr...)        
+      --  	    if Player_Colour(1 .. Player_Colour_Length) = "Blue" then
+      --  	       Data.Players(I).Colour := Blue;
+      --  	    elsif Player_Colour(1 .. Player_Colour_Length) = "Green" then
+      --  	       Data.Players(I).Colour := Green;
+      --  	    elsif Player_Colour(1 .. Player_Colour_Length) = "Yellow" then
+      --  	       Data.Players(I).Colour := Yellow;
+      --  	    elsif Player_Colour(1 .. Player_Colour_Length) = "Red" then
+      --  	       Data.Players(I).Colour := Red;
+      --  	    end if;
+      --  	 end loop;	 
+      --  	 -------------------------------------------------------------
+      --  	 --| Done with the player setup ------------------------------   -- NYA
+      --  	 -------------------------------------------------------------
+	 
+	 
+	 -------------------------------------------------------------
+	 --| Player setup before the game ----------------------------     -- Gamla
+	 -------------------------------------------------------------	 
 	 -- Initierar en socket, detta krävs för att kunna ansluta denna till
 	 -- servern.
 	 Initiate(Socket);
 	 
-	 --      Put_Waiting_For_Server;             -- A screen that waits for server.
-	 Put_Line("Waiting for connection");
-	 Connect(Socket, Argument(1), Positive'Value(Argument(2)));      -- Connects to the server
-	 Put_Line("You are connected to the server");
-	 
-	 
-	 Put(Socket, Choice);                        -- Sends the playerchoice (Join/Create)
-	 Put_line(Socket, NumPlayers);               -- Join = 0 / Create = 1,2,3,4
-	 
-	 Set_Colours(Text_Colour_1, Background_Colour_1);  -- Change colour on the terminalen
+	 Set_Colours(Text_Colour_1, Background_Colour_1);  -- Ändrar färgen på terminalen
 	 Clear_Window;
 	 
+
+	 
+	 
+	 Put("Join eller Create, J eller C: ");
+
+	 
+	 loop	 
+	    Get(Choice);
+	    if Choice = 'J' then
+	       Put("Waiting for connection...");
+	       Connect(Socket, Argument(1), Positive'Value(Argument(2)));
+	       Put("You are connected!");
+	       exit;
+	    elsif Choice = 'C' then
+	       New_Line;
+	       Connect(Socket, Argument(1), Positive'Value(Argument(2)));
+	       Put("Välj antal spelare ");
+	       Get(NumPlayers);
+	       Put_Line(Socket, NumPlayers);
+	       New_Line;
+	       Put("Waiting for players to join");
+	       exit;
+	    else
+	       Put("Skriv C eller J!");
+
+	    end if;
+	 end loop;
+	 
+
+
 	 --------------------------------------
 	 ------------------------------Tar Emot
-	 Put_Line("Waiting for someone to create a game");
-	 Get(Socket, NumPlayers);                -- Number of Players.
-	 
-	 if NumPlayers = 5 then                  -- If someone already created a game
-	    Clear_Window;
-	    Get(Socket, NumPlayers);             -- Gets the total number of player
-	    Put("Someone was faster than you and created a game with ");
-	    Put(NumPlayers, Width => 0);
-	    Put_Line(" Players");
-	    Put("Press Enter to join the game");
-	    Skip_Line;
-	    New_Line;
-	 end if;
-	 
-	 Put_Line("Waiting for players to join the game");
-	 Get(Socket, Klient_Number);                -- Players klient Number
-	 
-	 Set_Window_Title("Klient",Klient_Number);  -- Change the window title
-						    --------------------------------------
-						    --------------------------------------
+	 Get(Socket, NumPlayers);                -- Antal spelare som spelar
+	 Put(NumPlayers);
+	 Get(Socket, Klient_Number);             -- Spelarens Klient nummer
+	 Put(Klient_Number);
+	 New_Line;
+	 Set_Window_Title("Klient",Klient_Number);
+	 --------------------------------------
+	 --------------------------------------
 	 
 	 Skip_Line(Socket);                      -- Ligger ett entertecken kvar i socketen.
 	 
+	 Put_line("Skickar spelarens namn och färg");
 	 --------------------------------------
 	 -------------------------------Skickar
-	 Put_Line(Socket, Data.Players(1).Name(1..Data.Players(1).NameLength)); -- Sends the players nickname
-	 
 	 if Klient_Number = 1 then
-	    Put_Line(Socket,"Blue");        -- Player Colour
+	    Put_Line(Socket,"Andreas");     -- Namn
+	    Put_Line(Socket,"Blue");        -- Spelarens Färg
 	 elsif Klient_Number = 2 then
+	    Put_Line(Socket,"Tobias");      -- and so on..  
 	    Put_Line(Socket,"Green");
 	 elsif Klient_Number = 3 then
+	    Put_Line(Socket,"Eric");
 	    Put_Line(Socket,"Yellow");
 	 elsif Klient_Number = 4 then
+	    Put_Line(Socket,"Kalle");
 	    Put_Line(Socket,"Red");
 	 end if;
 	 --------------------------------------
 	 --------------------------------------   
 	 
 	 
-	 --      Put_Waiting_For_Players(Socket);                     -- A screen that waits for players
-	 
-	 
-	 Put_Line("Waiting for players");
+	 Put_line("Tar emot spelarnas namn och färger");
 	 --------------------------------------
 	 ------------------------------Tar Emot   
 	 for I in 1 .. NumPlayers loop
 	    Get_Line(Socket, Data.Players(I).Name,                  -- Spelarnas Namn 
-		     Data.Players(I).NameLength);                   -- Spelarnas Namn Längder
+	 	     Data.Players(I).NameLength);                   -- Spelarnas Namn Längder
 	    Get_Line(Socket, Player_Colour,                         -- Spelarnas Färger
-		     Player_Colour_Length);                         -- Spelarnas Färg Längder
+	 	     Player_Colour_Length);                         -- Spelarnas Färg Längder
 	    
 	    
 	    --| Översätter sträng till Colour_Type (Lite fult tyvärr...)        
@@ -378,110 +477,11 @@ begin
 	    elsif Player_Colour(1 .. Player_Colour_Length) = "Red" then
 	       Data.Players(I).Colour := Red;
 	    end if;
-	 end loop;	 
+	 end loop;
+	 
 	 -------------------------------------------------------------
-	 --| Done with the player setup ------------------------------   -- NYA
+	 --| Done with the player setup ------------------------------   -- Gamla
 	 -------------------------------------------------------------
-	 
-	 
-	 --  -------------------------------------------------------------
-	 --  --| Player setup before the game ----------------------------     -- Gamla
-	 --  -------------------------------------------------------------	 
-	 --  -- Initierar en socket, detta krävs för att kunna ansluta denna till
-	 --  -- servern.
-	 --  Initiate(Socket);
-	 
-	 --  Set_Colours(Text_Colour_1, Background_Colour_1);  -- Ändrar färgen på terminalen
-	 --  Clear_Window;
-	 
-
-	 
-	 
-	 --  Put("Join eller Create, J eller C: ");
-
-	 
-	 --  loop	 
-	 --     Get(Choice);
-	 --     if Choice = 'J' then
-	 --        Put("Waiting for connection...");
-	 --        Connect(Socket, Argument(1), Positive'Value(Argument(2)));
-	 --        Put("You are connected!");
-	 --        exit;
-	 --     elsif Choice = 'C' then
-	 --        New_Line;
-	 --        Connect(Socket, Argument(1), Positive'Value(Argument(2)));
-	 --        Put("Välj antal spelare ");
-	 --        Get(NumPlayers);
-	 --        Put_Line(Socket, NumPlayers);
-	 --        New_Line;
-	 --        Put("Waiting for players to join");
-	 --        exit;
-	 --     else
-	 --        Put("Skriv C eller J!");
-
-	 --     end if;
-	 --  end loop;
-	 
-
-
-	 --  --------------------------------------
-	 --  ------------------------------Tar Emot
-	 --  Get(Socket, NumPlayers);                -- Antal spelare som spelar
-	 --  Put(NumPlayers);
-	 --  Get(Socket, Klient_Number);             -- Spelarens Klient nummer
-	 --  Put(Klient_Number);
-	 --  New_Line;
-	 --  Set_Window_Title("Klient",Klient_Number);
-	 --  --------------------------------------
-	 --  --------------------------------------
-	 
-	 --  Skip_Line(Socket);                      -- Ligger ett entertecken kvar i socketen.
-	 
-	 --  Put_line("Skickar spelarens namn och färg");
-	 --  --------------------------------------
-	 --  -------------------------------Skickar
-	 --  if Klient_Number = 1 then
-	 --     Put_Line(Socket,"Andreas");     -- Namn
-	 --     Put_Line(Socket,"Blue");        -- Spelarens Färg
-	 --  elsif Klient_Number = 2 then
-	 --     Put_Line(Socket,"Tobias");      -- and so on..  
-	 --     Put_Line(Socket,"Green");
-	 --  elsif Klient_Number = 3 then
-	 --     Put_Line(Socket,"Eric");
-	 --     Put_Line(Socket,"Yellow");
-	 --  elsif Klient_Number = 4 then
-	 --     Put_Line(Socket,"Kalle");
-	 --     Put_Line(Socket,"Red");
-	 --  end if;
-	 --  --------------------------------------
-	 --  --------------------------------------   
-	 
-	 
-	 --  Put_line("Tar emot spelarnas namn och färger");
-	 --  --------------------------------------
-	 --  ------------------------------Tar Emot   
-	 --  for I in 1 .. NumPlayers loop
-	 --     Get_Line(Socket, Data.Players(I).Name,                  -- Spelarnas Namn 
-	 --  	     Data.Players(I).NameLength);                   -- Spelarnas Namn Längder
-	 --     Get_Line(Socket, Player_Colour,                         -- Spelarnas Färger
-	 --  	     Player_Colour_Length);                         -- Spelarnas Färg Längder
-	    
-	    
-	 --     --| Översätter sträng till Colour_Type (Lite fult tyvärr...)        
-	 --     if Player_Colour(1 .. Player_Colour_Length) = "Blue" then
-	 --        Data.Players(I).Colour := Blue;
-	 --     elsif Player_Colour(1 .. Player_Colour_Length) = "Green" then
-	 --        Data.Players(I).Colour := Green;
-	 --     elsif Player_Colour(1 .. Player_Colour_Length) = "Yellow" then
-	 --        Data.Players(I).Colour := Yellow;
-	 --     elsif Player_Colour(1 .. Player_Colour_Length) = "Red" then
-	 --        Data.Players(I).Colour := Red;
-	 --     end if;
-	 --  end loop;
-	 
-	 --  -------------------------------------------------------------
-	 --  --| Done with the player setup ------------------------------   -- Gamla
-	 --  -------------------------------------------------------------
 	 
 	 Put_line("Tar emot banan");
 	 for I in World'Range loop
