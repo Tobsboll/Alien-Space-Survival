@@ -2,8 +2,8 @@ with TJa.Window.Text;         use TJa.Window.Text;
 
 package Definitions is
    
-   World_X_Length : constant Integer := 62;
-   World_Y_Length : constant Integer := 30;
+   World_X_Length : constant Integer := 100;
+   World_Y_Length : constant Integer := 40;
    
    Up              : constant Integer := -1;
    Down            : constant Integer := 1;
@@ -43,7 +43,7 @@ package Definitions is
    type Player_Type is
       record
   	 Playing    : Boolean;
-  	 Name       : String(1..24);
+  	 Name       : String(1..10);
   	 NameLength : Integer;
   	 Ship       : Ship_Spec;
 	 Colour     : Colour_Type;
@@ -66,16 +66,24 @@ package Definitions is
    ---------------------------------------------------
    --| X,Y Koordinater för alla fönster
    ---------------------------------------------------
-   SpelPlanen_X : constant Integer := 1; 
-   SpelPlanen_Y : constant Integer := 1;
+   Gameborder_X : constant Integer := 1; 
+   Gameborder_Y : constant Integer := 1;
    
-   Highscore_Ruta_X      : constant Integer := SpelPlanen_X+World_X_Length+2;
-   Highscore_Ruta_Y      : constant Integer := SpelPlanen_Y;
-   Highscore_Ruta_Width  : constant Integer := 30;
-   Highscore_Ruta_Height : constant Integer := 2;
+   World_Box_X      : constant Integer := Gameborder_X;
+   World_Box_Y      : constant Integer := Gameborder_Y;
+   World_Box_Length : constant Integer := World_X_Length;
+   World_Box_Heigth : constant Integer := World_Y_Length;
    
-   Highscore_X : constant Integer := Highscore_Ruta_X+1;
-   Highscore_Y : constant Integer := Highscore_Ruta_Y+1;
+   Highscore_Window_X      : constant Integer := Gameborder_X+world_X_Length;
+   Highscore_Window_Y      : constant Integer := Gameborder_Y;
+   Highscore_Window_Width  : constant Integer := 33;
+   Highscore_Window_Height : constant Integer := 2;
+   
+   Highscore_X : constant Integer := Highscore_Window_X+1;
+   Highscore_Y : constant Integer := Highscore_Window_Y+1;
+   
+   Chatt_Window_X : constant Integer := Gameborder_X;
+   Chatt_Window_Y : constant Integer := Gameborder_Y+World_Y_Length+1;
    ---------------------------------------------------
    
    ---------------------------------------------------
