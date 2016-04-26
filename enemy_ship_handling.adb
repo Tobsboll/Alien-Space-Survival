@@ -346,20 +346,20 @@ begin
    
 --  for I in 1..8 loop 
    while Num_Ships > 8 loop
-      
+     
+     for I in 1..8 loop
       
       Spawn_Ship(Enemy_Type, X+Min_X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
       
       X := X + Min_X_Interval;
       Num_Ships := Num_Ships - 1;
       Counter := Counter + 1;
-      
-      --  if Counter mod 8 = 0 then	 
-      --  	 Y := Y + Y_Interval;
-      --  	 X := 0;
-      --  end if;
-      
-      
+
+     end loop;
+ 
+      Y := Y + Y_Interval;
+      X := 0;
+     
    end loop;
 
    X_Interval := World_X_Length/(Num_Ships + 1);
