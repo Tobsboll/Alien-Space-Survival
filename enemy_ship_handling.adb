@@ -48,13 +48,13 @@ package body Enemy_Ship_Handling is
 
 	 if Enemies.Direction = 1 then -- höger 
 	    
-	    if Enemies.XY(1) >= World_X_Length -1 then return True;
+	    if Enemies.XY(1) >= World_X_Length + GameBorder_X -1 - 3 then return True;
 	    else return Next_To_Wall(Enemies.Next);
 	    end if;
 	    
 	 elsif Enemies.Direction = -1 then -- vänster 
 	    
-	    if Enemies.XY(1) <= 2 then return True;
+	    if Enemies.XY(1) <= GameBorder_X + 1 then return True;
 	    else return Next_To_Wall(Enemies.Next); --rekursion
 	    end if;
 	    
@@ -129,7 +129,7 @@ package body Enemy_Ship_Handling is
 	 
 	 Move_One_Down(Enemies.Next); -- rekursion
 	 
-	 if Enemies.XY(2) >= (World_Y_Length - 10) then -- vågen sätts till att stå stilla i y
+	 if Enemies.XY(2) >= (GameBorder_Y + World_Y_Length - 10) then -- vågen sätts till att stå stilla i y
 				     -- Enemies.Movement_Type := 2;
 	    Change_Movement_Type(Enemies, 2);
 	 end if;
@@ -359,8 +359,8 @@ procedure Spawn_Wave(Num_To_Spawn  : in Integer;
 begin
    
    Num_Ships := Num_To_Spawn;
-   X := 1;
-   Y := 1; -- ingen aning.
+   X := GameBorder_X + 1;
+   Y := GameBorder_Y + 1; -- ingen aning.
    
    if Enemy_Type = 1 then
       Difficulty := 1;
@@ -389,13 +389,13 @@ begin
       end loop;
       
       Y := Y + Y_Interval;
-      X := 1;
+      X := GameBorder_X + 1;
       
    end loop;
 
 
    X_Interval := World_X_Length/(Num_Ships + 1);
-   X := 1;
+   X := GameBorder_X + 1;
    
    for I in 1..Num_Ships loop
       
