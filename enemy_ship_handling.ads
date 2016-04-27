@@ -68,6 +68,8 @@ package Enemy_Ship_Handling is
    function At_Lower_limit(Enemies : in Enemy_List) return Boolean;
    function Next_To_Wall(Enemies : in Enemy_List) return Boolean;
    procedure Move_To_Side(Enemies : in out Enemy_List);
+   procedure Change_Movement_Type(Enemies  : in out Enemy_List;
+				     New_Type : in Integer);
    procedure Change_Direction(Enemies : in out Enemy_List);
    procedure Remove_Ship(Enemies : in out Enemy_List);
    procedure Destroy_Ship(Enemies   : in out Enemy_List;
