@@ -17,6 +17,7 @@ package Object_Handling is
    --|
    --| -shots
    --| -walls
+   --| -obstacles
    --------------------------------------------------
    
 
