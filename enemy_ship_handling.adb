@@ -93,6 +93,29 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    
    --------------------------------------------------
+   -- CHANGE MOVEMENT TYPE
+   --------------------------------------------------
+   
+   procedure Change_Movement_Type(Enemies  : in out Enemy_List;
+				  New_Type : in Integer) is
+      
+   begin
+      
+      if Enemies /= null then
+	 
+	 Enemies.Movement_Type := 2;
+	 Change_Movement_Type(Enemies.Next, New_type);
+	 
+      end if;
+      
+   end Change_Movement_Type;
+   
+   --------------------------------------------------
+   -- end CHANGE MOVEMENT TYPE
+   --------------------------------------------------
+   
+   
+   --------------------------------------------------
    -- MOVE ONE DOWN
    --------------------------------------------------
    
@@ -106,8 +129,9 @@ package body Enemy_Ship_Handling is
 	 
 	 Move_One_Down(Enemies.Next); -- rekursion
 	 
-	 if Enemies.XY(2) >= 60 then -- vågen sätts till att stå stilla i y
-	    Enemies.Movement_Type := 2;
+	 if Enemies.XY(2) >= (World_Y_Length - 10) then -- vågen sätts till att stå stilla i y
+				     -- Enemies.Movement_Type := 2;
+	    Change_Movement_Type(Enemies, 2);
 	 end if;
      
       end if;
@@ -174,12 +198,19 @@ package body Enemy_Ship_Handling is
    begin
       
       Alien_Shot_Probability := Random(Chance_For_shot); -- 1-20
+         --  Alien_Shot_Probability := 20;
+      New_Line;
+      Put("Shot prob:  ");
+      Put(Alien_Shot_Probability);
+      New_Line;
       
       if Enemies /= null then
 	 
    	 if Alien_Shot_Probability <= Enemies.Difficulty then
 	    Create_enemy_Shot(Enemies.Enemy_type, Enemies.XY(1), Enemies.XY(2), Shot_List);
-	    Put("SKOTTJÄVEL!");
+	    Put("SKOTTJÄVEL!   ");
+	    Put(Enemies.XY(1), 0);
+	    Put(Enemies.XY(2), 5);
     
    	 end if;
 	 
@@ -332,42 +363,45 @@ begin
    Y := 0; -- ingen aning.
    
    if Enemy_Type = 1 then
-      Difficulty := 10;
+      Difficulty := 2;
       Num_Lives  := 2;
    elsif Enemy_Type = 2 then
-     Difficulty := 15;
+     Difficulty := 10;
      Num_Lives := 3;
    elsif Enemy_Type = 3 then
-     Difficulty := 3;
+     Difficulty := 15;
      Num_Lives := 5;
    end if;
    
    Counter := 0;
    
---  for I in 1..8 loop 
+--  --  for I in 1..8 loop 
    while Num_Ships > 8 loop
-     
-     for I in 1..8 loop
       
-      Spawn_Ship(Enemy_Type, X+Min_X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
-      
-      X := X + Min_X_Interval;
-      Num_Ships := Num_Ships - 1;
-      Counter := Counter + 1;
+      for I in 1..8 loop
+	 
+	 Spawn_Ship(Enemy_Type, X+Min_X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
+	 
+	 X := X + Min_X_Interval;
+	 Num_Ships := Num_Ships - 1;
+	 Counter := Counter + 1;
 
-     end loop;
- 
+      end loop;
+      
       Y := Y + Y_Interval;
       X := 0;
-     
+      
    end loop;
+
 
    X_Interval := World_X_Length/(Num_Ships + 1);
    X := 0;
    
    for I in 1..Num_Ships loop
       
-      Spawn_Ship(Enemy_Type, X + X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
+      Spawn_Ship(Enemy_Type, (X + X_Interval), Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
+      
+      X := X + X_Interval;
       
    end loop;
    
