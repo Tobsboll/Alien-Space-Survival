@@ -229,6 +229,9 @@ procedure Klient is
    Obstacle_List  : Object_List;
    Powerup_List   : Object_List;
    
+   Enemies1, Enemies2, Enemies3, Enemies4 : Enemy_List;
+   Waves          : Enemy_List_array;
+   
    Klient_Number        : Integer;               -- Servern skickar klientnumret
    Player_Colour        : String(1..15);         -- Används i början till att överföra spelarnas färger
    Player_Colour_Length : Integer;               -- Används för att hålla koll hur lång färgnamnet är
@@ -293,6 +296,7 @@ begin
       --  end if;
       
       begin
+         Waves := (Enemies1, Enemies2, Enemies3, Enemies4);
 	 --  	 -------------------------------------------------------------
       --  	 --| Player setup before the game ----------------------------     -- NYA
       --  	 -------------------------------------------------------------
@@ -520,6 +524,22 @@ begin
 	    -- Hämtar all data från servern
 	    Get_Game_Data(Socket,Data);
 	    --end if;
+	    
+      -----------------------------------
+      -- GET ENEMY WAVE
+      -----------------------------------
+      
+      for I in waves'range loop
+
+	 Delete_enemy_list(Waves(I));
+
+	 Get_Enemy_Ships(Waves(I), Socket); -- Tobias
+
+      end loop;
+      
+      -----------------------------------
+      -- end GET ENEMY WAVE
+      -----------------------------------
 	    
 	    Clear_Window;
 	    --------------------------------
