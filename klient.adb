@@ -554,7 +554,11 @@ begin
 	    --------------------------------
 	    
 	    Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
-							 -- Put_Enemies();
+			
+		for I in Waves'range loop					 
+		Put_enemies(Waves(I));
+		end loop;
+		
 	    Put_Objects(Shot_List);
 	    Put_Objects(Obstacle_List);
 	    Put_Objects(Powerup_List);
