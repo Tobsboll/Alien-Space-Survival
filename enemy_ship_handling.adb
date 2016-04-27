@@ -557,4 +557,15 @@ end Remove_Ship;
    -- end DELETE_ENEMY_LIST
    --------------------------------------------------
    
+       --------------------------------------------------
+   -- EMPTY
+   --------------------------------------------------OK
+   
+   function Empty(L : in Enemy_List) return Boolean is
+      
+   begin
+       return L = null;	
+      
+   end Empty;
+   
 end Enemy_Ship_Handling;
