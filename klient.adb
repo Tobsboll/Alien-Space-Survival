@@ -19,35 +19,10 @@ with Background_Battle;       use Background_Battle;
 with Menu;                    use Menu;
 with Window_Handling;         use Window_Handling;
 with Box_Hantering;           use Box_Hantering;
-with Space_Map;  
+with Space_Map;               use Space_Map;
 
 procedure Klient is
 
-   
-   -------------------------------------------------------------
-
-   -- Packet som hanterar banan.
-   package Bana is
-      new Space_map(X_Width => World_X_Length,
-		    Y_Height => World_Y_Length);
-   use Bana;
-   
-   --------------------------------------------------------------
-   --------------------------------------------------------------
-   --| Början på Game Datan
-   --------------------------------------------------------------
-   --------------------------------------------------------------
-   type Game_Data is
-      record
-   	 Layout   : Bana.World;        -- Banan är i packetet så att både klienten och servern 
-   	                               -- hanterar samma datatyp / Eric
-   	 Players  : Player_Array;      -- Underlättade informationsöverföringen mellan klient och server.
-	 
-   	 Ranking  : Ranking_List;      -- Vem som har mest poäng
-   	 Settings : Setting_Type;      -- Inställningar.
-      end record; 
-   -------------------------------------------------------------
-   -------------------------------------------------------------
    
    
    -- Tar emot datan som skickas från servern till klienten   
@@ -81,8 +56,8 @@ procedure Klient is
       Get(Socket, Gen_Map_Active);
       if Gen_Map_Active = 1 then
 	 Data.Settings.Generate_Map := True;       -- Generering av banan är inaktiv
-	 for I in World'Range loop
-	    for J in X_Led'Range loop
+	 for I in Data.Layout'First..Data.Layout'Last loop
+	    for J in Data.Layout(I)'First..Data.Layout(I)'last loop
 	       Get(Socket, Data.Layout(I)(J));      -- Tar emot Banan.
 	    end loop;
 	 end loop;
@@ -491,8 +466,8 @@ begin
 	 -------------------------------------------------------------
 	 
 	 Put_line("Tar emot banan");
-	 for I in World'Range loop
-	    for J in X_Led'Range loop
+	 for I in Data.Layout'First..Data.Layout'Last loop
+	    for J in Data.Layout(I)'First..Data.Layout(I)'last loop
 	       Get(Socket, Data.Layout(I)(J));      -- Tar emot Banan.
 	    end loop;
 	 end loop;
