@@ -59,5 +59,24 @@ package body Graphics is
       
    end Put_Objects;
    
+    --------------------------------------------------
+   --| Put Enemies
+   --|
+   --| Allmän procedur som ritar ut fiender beroende på vilken typ det är 
+   --------------------------------------------------
+   procedure Put_Enemies (L : in Enemy_List) is
+      
+   begin
+      if not Empty(L) then
+	 Goto_XY(L.XY(1), L.XY(2));
+	 Put("ENE");
+	 Goto_XY(L.XY(1), L.XY(2)+1);
+	 Put("MY!");
+	 
+	 Put_Enemies(L.Next);
+      end if;
+      
+   end Put_Enemies;
+   
    
 end Graphics;
