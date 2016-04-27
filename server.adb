@@ -670,8 +670,8 @@ begin
    
    -- Skickar startbanan till alla klienter 
    for I in 1..Num_Players loop
-      for J in Data.Layout'First..Data.Layout'Last loop
-	 for K in Data.Layout(I)'First..Data.Layout(I)'last loop
+      for J in Game.Layout'First..Game.Layout'Last loop
+	 for K in Game.Layout(I)'First..Game.Layout(I)'last loop
 	    Put_line(Sockets(I), Game.Layout(J)(K)); -- Skickar Banan till klienterna
 	 end loop;
       end loop;
