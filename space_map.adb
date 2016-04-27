@@ -32,7 +32,7 @@ package body Space_Map is
    ----------------------------------------------------------
    -- Genererar en helt vanlig bana som har raka väggar
    ----------------------------------------------------------
-   procedure Generate_World(Map : out World) is
+   procedure Generate_World(Map : out Definitions.World) is
       
    begin  
       for I in World'Range loop
@@ -109,7 +109,7 @@ package body Space_Map is
    ---------------------------------------------------------------
    -- Genererar en ny vägg kant på var sida.
    --------------------------------------------------------------
-   procedure New_Top_Row(Map : in out World) is
+   procedure New_Top_Row(Map : in out Definitions.World) is
       
       G,M : Random.Generator;
       A,R,O : Integer := 0;
@@ -158,7 +158,7 @@ package body Space_Map is
 	    -- Om Left_Border är mellan vänsterväggen och begränsningen
 	    -----------------------------------------------
 	 elsif Left_Border > 2 and 
-	   Left_Border < X_Led'Last/(3+Num_Players-Difficult) then -- Begränsningen
+	   Left_Border < X_Led'Last/(3) then -- Begränsningen
 	    if A = -1 and Map(2)(Left_Border) = '|' then 
 	       Left_Border := Left_Border + A;
 	       Map(1)(Left_Border) := '\';
@@ -236,7 +236,7 @@ package body Space_Map is
 	    -- Om Right_Border är mellan högerväggen och begränsningen
 	    -----------------------------------------------
 	    elsif Right_Border < X_Led'Last-1 and                        -- Högerväggen
-	      Right_Border > X_Led'Last-(X_Led'Last/(3+Num_Players-Difficult)) then-- Begränsningen
+	      Right_Border > X_Led'Last-(X_Led'Last/3) then-- Begränsningen
 	       if A = -1 and Map(2)(Right_Border) = '|' then 
 		  Right_Border := Right_Border + A;
 		  Map(1)(Right_Border) := '\';
@@ -282,7 +282,7 @@ package body Space_Map is
    ----------------------------------------------
    -- Flyttar ner alla rader
    -----------------------------------------------
-   procedure Move_Rows_Down(Map : in out World) is
+   procedure Move_Rows_Down(Map : in out Definitions.World) is
       
    begin
       for I in reverse World'First+1 .. World'last  loop
@@ -296,7 +296,7 @@ package body Space_Map is
    --------------------------------------------------------
    -- Räknar ut och skickar tillbaka vart vänster vägg är
    --------------------------------------------------------
-   procedure Border_Left(Map : in World;
+   procedure Border_Left(Map : in Definitions.World;
 			 X   : out Integer;
 			 Y   : in Integer) is
       
@@ -315,7 +315,7 @@ package body Space_Map is
    --------------------------------------------------------
    -- Räknar ut och skickar tillbaka vart höger vägg är
    --------------------------------------------------------
-   procedure Border_Right(Map : in World;
+   procedure Border_Right(Map : in Definitions.World;
 			  X   : out Integer;
 			  Y   : in Integer) is
       
@@ -332,7 +332,7 @@ package body Space_Map is
    --------------------------------------------------------
    -- Räknar ut och skickar tillbaka vart vänster vägg är
    --------------------------------------------------------
-   function Border_Left(Map : in World;
+   function Border_Left(Map : in Definitions.World;
 			Y   : in Integer) return Integer is
       
    begin
@@ -349,7 +349,7 @@ package body Space_Map is
    --------------------------------------------------------
    -- Räknar ut och skickar tillbaka vart höger vägg är
    --------------------------------------------------------
-   function Border_Right(Map : in World;
+   function Border_Right(Map : in Definitions.World;
 			 Y   : in Integer) return Integer is
       
    begin
@@ -364,7 +364,7 @@ package body Space_Map is
    --------------------------------------------------------------
    --- Räknar hur långt in väggen är maximalt från varje sida.
    --------------------------------------------------------------
-   procedure Border_Min_Max(Map : in World;
+   procedure Border_Min_Max(Map : in Definitions.World;
 			    Min : out Integer;
 			    Max : out Integer) is
       
@@ -484,7 +484,7 @@ package body Space_Map is
 	 -- Går igenom alla Astroider
 	 --------------------------------
 	 for I in Astroid_Type'Range loop
-	    if Astroid(I).Y > 6-Difficult or Astroid(I).Y = 0 then
+	    if Astroid(I).Y > 6 or Astroid(I).Y = 0 then
 	       Check := True;
 	    else
 	       Check := False;
@@ -590,7 +590,7 @@ package body Space_Map is
    begin
       for I in Astroid_Type'Range loop
 	 if Astroid(I).Y /= 0 then
-	    if Astroid(I).Y > Y_Height then
+	    if Astroid(I).Y > World_Y_Length then
 	       Astroid(I).Y := 0;
 	    else
 	       Astroid(I).Y := Astroid(I).Y +1;
