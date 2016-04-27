@@ -164,8 +164,8 @@ procedure Klient is
       Goto_XY(X+2,Y);	 
       Set_Text_Modes(On,Off,Off);  -- Understreck på utskriften
       Put("Nickname");
-      Goto_XY(X+15,Y);
-      Put("Health");
+      Goto_XY(X+13,Y);
+      Put(" Health  ");
       Goto_XY(X+25,Y);
       Put("Score");
       Set_Text_Modes(Off,Off,Off); -- Återställer utskrift inställningarna
@@ -178,12 +178,9 @@ procedure Klient is
 	 Set_Text_Modes(Off,Off,On);  -- Fet stil på utskriften
 	 Put(Data.Players( Data.Ranking(I) ).Name( 1..Data.Players( Data.Ranking(I) ).NameLength)); -- Skriver ut spelarens namn.
 	 
-	 for J in 1 .. (13-Data.Players( Data.Ranking(I) ).NameLength) loop  -- Fyller ut mellan namn och liv
-	    Put(' ');
-	 end loop;
 	 
 	 Set_Foreground_Colour(Red);                             -- Ställer in färgen på hjärtan.
-	 
+	 Goto_XY(X+13,Y+I);
 	 
 	 if Data.Players( Data.Ranking(I) ).Ship.Health = 0 then            -- Om död.
 	    Put("R.I.P.");
@@ -191,17 +188,21 @@ procedure Klient is
 	 elsif Data.Players( Data.Ranking(I) ).Ship.Health > 0 then         -- annars lever
 	    
 	    for J in 1 .. Data.Players( Data.Ranking(I) ).Ship.Health loop
-	       Put("♥ ");                                               -- Antal liv
-	    end loop;
-	    
-	    for J in 1 .. 3-Data.Players( Data.Ranking(I) ).Ship.Health loop
-	       Put(' ');                                               -- Ersätter förloarade liv med mellanrum.
-	       Put(' ');    
+	       if J = Data.Players( Data.Ranking(I) ).Ship.Health and J mod 2 = 1 then
+		  Set_Foreground_Colour(Dark_Grey);
+		  Put("♥ ");                                -- Ställer in färgen på hjärtan.
+	       else
+		  if J mod 2 = 0 then
+		     Set_Foreground_Colour(Red);                             -- Ställer in färgen på hjärtan.
+		     Put("♥ ");   
+		  end if;
+	       end if;                                            -- Antal liv
 	    end loop;
 	 end if;
 	 Set_Text_Modes(Off,Off,Off);
 	 Set_Foreground_Colour(Old_Text_Colour);                    -- Ställer tillbaka till text färgen.
-	 Put(Data.Players( Data.Ranking(I) ).Score, Width => 9);    -- skriver ut spelarens poäng
+	 Goto_XY(X+25,Y+I);
+	 Put(Data.Players( Data.Ranking(I) ).Score, Width => 5);    -- skriver ut spelarens poäng
 	 Set_BackGround_Colour(Old_Background);                     -- Ställer tillbaka till bakgrunds färgen.
       end loop;
    end Put_Score;
@@ -326,6 +327,7 @@ begin
       --  	 if NumPlayers = 5 then                  -- If someone already created a game
       --  	    Clear_Window;
       --  	    Get(Socket, NumPlayers);             -- Gets the total number of player
+      --  	    Skip_Line(Socket);                   -- Ligger ett entertecken kvar i socketen.
       --  	    Put("Someone was faster than you and created a game with ");
       --  	    Put(NumPlayers, Width => 0);
       --  	    Put_Line(" Players");
