@@ -487,6 +487,9 @@ procedure Server is
    Game                   : Game_Data;
    Loop_Counter           : Integer;
    
+   Enemies1, Enemies2, Enemies3, Enemies4 : Enemy_List;
+   Waves                  : Enemy_List_Array;
+   
    Shot_List              : Object_List; --shot_handling.ads
    Obstacle_List          : Object_List;
    Powerup_List           : Object_List;
@@ -677,7 +680,7 @@ begin
    --|
    ----------------------------------------------------------------------------------------------------
    Set_Default_Values(Num_Players, Game);
-   
+   Waves := (Enemies1, Enemies2, Enemies3, Enemies4);
    Loop_Counter := 1;
    
    
@@ -699,6 +702,17 @@ begin
    
    Create_Object(PowerUpType(2), 40, 15, 0, Powerup_List);
    Create_Object(PowerUpType(3), 50, 20, 0, Powerup_List);
+   
+   
+   -----------------------------------
+   -- SPAWN FIRST WAVE
+   -----------------------------------
+   
+   Spawn_Wave(8, 1, 1, 1, waves(1));
+   
+   -----------------------------------
+   -- end SPAWN FIRST WAVE
+   -----------------------------------
    
    loop 
       
@@ -743,6 +757,22 @@ begin
 	 Put(Sockets(I), Powerup_List);
       	 Put_Game_Data(Sockets(I),Game);
       end loop;
+      
+      Update_Enemy_Position(Waves(1), Shot_List);
+           
+      -----------------------------------
+      -- PUT ENEMY SHIPS
+      -----------------------------------
+      
+      for I in 1..Num_Players loop
+	 for J in Waves'Range loop
+	    Put_Enemy_ships(Waves(J), Sockets(I));
+	 end loop;
+      end loop;
+      
+      -----------------------------------
+      -- end PUT ENEMY SHIPS
+      -----------------------------------   
       
       Get_Player_Input(Sockets, Num_Players, Game, Shot_List, Obstacle_List, Powerup_List);
       
