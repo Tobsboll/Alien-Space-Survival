@@ -13,7 +13,7 @@ with Definitions;                  use Definitions;
 with Gnat.Sockets;
 
 with Window_Handling;              use Window_Handling;
-with Space_Map;
+with Space_Map;                    use Space_Map;
 
 procedure Server is
    
@@ -34,33 +34,6 @@ procedure Server is
    
    --------------------------------------------------------------
 
-   
-   -- Paket som hanterar banan.
-   package Bana is
-      new Space_map(X_Width => World_X_Length,
-		    Y_Height => World_Y_Length);
-   use Bana;
-   
-   --------------------------------------------------------------
-   --| Början på Game Datan
-   --------------------------------------------------------------
-   --------------------------------------------------------------
-   type Game_Data is
-      record
-	 Layout   : Bana.World;     -- Måste klura lite till med detta.. / Eric
-	 Players  : Player_Array;
-	 
-	 Ranking  : Ranking_List;   -- Vem som har mest poäng
-	 Settings : Setting_Type;   -- Inställningar.
-      end record; 
-   
-   --------------------------------------------------------------
-   --------------------------------------------------------------
-   --| Slut på Game Datan
-   --------------------------------------------------------------
-   
-   
-   
    
    ---------------------------------------------------------------
    -- Skickar all Spelinformation till klienterna. / Eric
@@ -89,8 +62,8 @@ procedure Server is
 	 
 	 Put_Line(Socket, 1);
 	 
-	 for I in World'Range loop
-	    for J in X_Led'Range loop
+	 for I in Data.Layout'First..Data.Layout'Last loop
+	    for J in Data.Layout(I)'First..Data.Layout(I)'last loop
 	       Put_line(Socket, Data.Layout(I)(J)); -- Skickar Banan till klienterna
 	    end loop;
 	 end loop;
@@ -697,8 +670,8 @@ begin
    
    -- Skickar startbanan till alla klienter 
    for I in 1..Num_Players loop
-      for J in World'Range loop
-	 for K in X_Led'Range loop
+      for J in Data.Layout'First..Data.Layout'Last loop
+	 for K in Data.Layout(I)'First..Data.Layout(I)'last loop
 	    Put_line(Sockets(I), Game.Layout(J)(K)); -- Skickar Banan till klienterna
 	 end loop;
       end loop;
