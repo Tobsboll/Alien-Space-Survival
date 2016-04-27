@@ -208,9 +208,9 @@ package body Enemy_Ship_Handling is
 	 
    	 if Alien_Shot_Probability <= Enemies.Difficulty then
 	    Create_enemy_Shot(Enemies.Enemy_type, Enemies.XY(1), Enemies.XY(2), Shot_List);
-	    Put("SKOTTJÄVEL!   ");
-	    Put(Enemies.XY(1), 0);
-	    Put(Enemies.XY(2), 5);
+	  --  Put("SKOTTJÄVEL!   ");
+	   -- Put(Enemies.XY(1), 0);
+	   -- Put(Enemies.XY(2), 5);
     
    	 end if;
 	 
@@ -480,11 +480,11 @@ end Remove_Ship;
 	 Put_line(Socket, Enemies.Num_Lives); -- skickar över antal liv för ev print eller 
 					      -- olika print beroende på skada	 
 	 ------------------------------ TEST
-	 New_Line;
-	 Put("Ship Cordinates: ");
-	 Put(Enemies.XY(1), 0);
-	 Put(",      ");
-	 Put(Enemies.XY(2), 0);
+	-- New_Line;
+	 --Put("Ship Cordinates: ");
+	 --Put(Enemies.XY(1), 0);
+	 --Put(",      ");
+	-- Put(Enemies.XY(2), 0);
 	 ------------------------------
 	 
 	 Put_Enemy_Ships(Enemies.Next, Socket); --rekursion
