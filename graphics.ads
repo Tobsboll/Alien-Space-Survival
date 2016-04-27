@@ -1,6 +1,7 @@
 with Ada.Text_IO;             use Ada.Text_IO;
 with tja.window.Elementary;   use tja.window.Elementary;
 with Object_Handling;         use Object_Handling;
+with Enemy_ship_handling;     use Enemy_ship_handling;
 
 package Graphics is
    
