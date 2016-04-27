@@ -6,7 +6,8 @@ with TJa.Sockets;             use TJa.Sockets;
 with TJa.Keyboard;            use TJa.Keyboard;
 with TJa.Keyboard.Keys;       use TJa.Keyboard.Keys;
 with TJa.Window.Text;         use TJa.Window.Text;
-with Ada.Strings;             use Ada.Strings;          
+with Ada.Strings;             use Ada.Strings; 
+with Enemy_ship_handling;     use Enemy_Ship_handling;
 
 with Object_Handling;         use Object_Handling;
 with Graphics;                use Graphics;
