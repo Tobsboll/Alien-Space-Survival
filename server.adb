@@ -4,6 +4,7 @@ with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
 with Ada.Command_Line;             use Ada.Command_Line;
 with TJa.Sockets;                  use TJa.Sockets;
 with TJa.Window.Text;              use TJa.Window.Text;
+with Enemy_ship_handling;          use Enemy_Ship_handling;
 with Ada.Numerics.Discrete_Random; 
 
 with Object_Handling;              use Object_Handling;
