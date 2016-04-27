@@ -359,8 +359,8 @@ procedure Spawn_Wave(Num_To_Spawn  : in Integer;
 begin
    
    Num_Ships := Num_To_Spawn;
-   X := 0;
-   Y := 0; -- ingen aning.
+   X := 1;
+   Y := 1; -- ingen aning.
    
    if Enemy_Type = 1 then
       Difficulty := 1;
@@ -389,13 +389,13 @@ begin
       end loop;
       
       Y := Y + Y_Interval;
-      X := 0;
+      X := 1;
       
    end loop;
 
 
    X_Interval := World_X_Length/(Num_Ships + 1);
-   X := 0;
+   X := 1;
    
    for I in 1..Num_Ships loop
       
