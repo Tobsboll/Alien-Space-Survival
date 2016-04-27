@@ -5,6 +5,9 @@ package Definitions is
    World_X_Length : constant Integer := 100;
    World_Y_Length : constant Integer := 40;
    
+   type X_Led is array(1 .. World_X_Length) of Character;
+   type World is array(1 .. World_Y_Length) of X_Led;
+   
    Up              : constant Integer := -1;
    Down            : constant Integer := 1;
    Light           : constant Integer := 1;
@@ -62,6 +65,20 @@ package Definitions is
 	 Astroid_Active : Boolean;     -- Generering av astroider Activ/Inaktiv
       end record;
    ---------------------------------------------------
+   
+   ---------------------------------------------------
+   --| Game_Data
+   ---------------------------------------------------
+   
+      type Game_Data is
+      record
+   	 Layout   : World;             -- Banan är i packetet så att både klienten och servern 
+   	                               -- hanterar samma datatyp / Eric
+   	 Players  : Player_Array;      -- Underlättade informationsöverföringen mellan klient och server.
+	 
+   	 Ranking  : Ranking_List;      -- Vem som har mest poäng
+   	 Settings : Setting_Type;      -- Inställningar.
+      end record; 
    
    ---------------------------------------------------
    --| X,Y Koordinater för alla fönster
