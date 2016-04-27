@@ -178,7 +178,7 @@ package body Enemy_Ship_Handling is
       
    begin -- courtesy of Andreas ^^
       
-      Create_Object(ShotType(1), X, Y, Down, Shot_List); --nummer?
+      Create_Object(ShotType(1), X+1, Y+1, Down, Shot_List); --nummer?
       
    end Create_Enemy_Shot;
    --------------------------------------------------
@@ -363,7 +363,7 @@ begin
    Y := 0; -- ingen aning.
    
    if Enemy_Type = 1 then
-      Difficulty := 2;
+      Difficulty := 1;
       Num_Lives  := 2;
    elsif Enemy_Type = 2 then
      Difficulty := 10;
