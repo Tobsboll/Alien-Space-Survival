@@ -431,7 +431,7 @@ procedure Server is
 	 Xpos := Xpos + Interval;
 	 
 	 --Equipment
-	 Game.Players(K).Ship.Health := 3;
+	 Game.Players(K).Ship.Health := 10;
 	 Game.Players(K).Ship.Laser_Type := 1;
 	 Game.Players(K).Ship.Missile_Ammo := 5;
       end loop;
@@ -575,9 +575,18 @@ begin
    --  for I in 1..Num_Players loop
    --     Get_Line(Sockets(I), Game.Players(I).Name,    -- Spelarens namn
    --  	       Game.Players(I).NameLength);         -- Spelarens namn längd
+      
+   --     if Game.Players(I).NameLength = Game.Players(I).Name'Last then
+   --  	 Skip_Line(Sockets(I));
+   --     end if;
+      
+      
    --     Get_Line(Sockets(I), Player_Colour,           -- Spelarens färgnamn.
    --  	       Player_Colour_Length);               -- Spelarens färgnamnlängd.
       
+   --     if Player_Colour_Length = Player_Colour'Last then
+   --  	 Skip_Line(Sockets(I));
+   --     end if;
       
    --     -------------------------------------Skickar
    --     --------------------------------------------   
@@ -586,6 +595,7 @@ begin
    --  		    Name(1..Game.Players(I).NameLength));  -- Spelarnas namn
    --  	 Put_Line(Sockets(J), 
    --  		  Player_Colour(1..Player_Colour_Length)); -- Spelarnas Färger
+
    --     end loop;
    --     --------------------------------------------
    --     --------------------------------------------
