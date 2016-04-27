@@ -84,7 +84,7 @@ package Enemy_Ship_Handling is
    			    Chance_For_Shot : in out Generator;
 			    Shot_List : in out Object_List);
    procedure Delete_Enemy_list(Enemies : in out Enemy_List);
-   
+   function Empty(L : in Enemy_List) return Boolean;	
    
    
    
