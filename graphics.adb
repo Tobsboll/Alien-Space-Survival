@@ -1,3 +1,4 @@
+with TJa.Window.Text;         use TJa.Window.Text;
 
 package body Graphics is
    
@@ -22,11 +23,13 @@ package body Graphics is
    --------------------------------------------------
    procedure Put_Objects ( L : in Object_List) is
       
-      
+       Old_Text_Colour : Colour_Type;
    begin
       
     
       if not Empty(L) then
+	  Old_Text_Colour := Get_Foreground_Colour;
+	 
 	 --Om det är ett skott:
 	 if L.Object_Type in ShotGraphics'Range then
 	    Goto_XY(L.XY_Pos(1) , L.XY_Pos(2));
@@ -36,9 +39,14 @@ package body Graphics is
 	       Put("î");
 	    else 
 	       
-	    --Färg på skott kommer att bero på L.Attribute senare
+	       if L.Attribute = Up then
+		  Set_Foreground_Colour(Player_Laser_1);
+	       elsif L.Attribute = Down then
+		  Set_Foreground_Colour(Enemy_Laser_1);
+	       end if;
+	   
 	    Put(ShotGraphics(L.Object_Type));
-	    
+	    Set_Foreground_Colour(Old_Text_Colour);
 	    end if;
 	    
 	    --Om det är ett hinder:
@@ -53,9 +61,17 @@ package body Graphics is
 	 elsif L.Object_Type in PowerUp'Range then
 	    Goto_XY(L.XY_Pos(1)-1 , L.XY_Pos(2));
 	    Put(PowerUp(L.Object_Type));
+	    
+	    --Om det är en fiende:
+	 --  elsif L.Object_Type in Enemy'Range then
+	 --  Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
+	 --  Put("ENE");
+	 --  Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+	 --  Put("MY!");
 	 end if;
-	 Put_Objects(L.Next);
+	   Put_Objects(L.Next);
       end if;
+
       
    end Put_Objects;
    
@@ -69,9 +85,9 @@ package body Graphics is
    begin
       if not Empty(L) then
 	 Goto_XY(L.XY(1), L.XY(2));
-	 Put("ENE");
+	 Put( Enemy_1(1) );
 	 Goto_XY(L.XY(1), L.XY(2)+1);
-	 Put("MY!");
+	 Put( Enemy_1(2) );
 	 
 	 Put_Enemies(L.Next);
       end if;
