@@ -84,12 +84,14 @@ package body Graphics is
       
    begin
       if not Empty(L) then
+         if L.XY(1) > 1 then        -- Hindrar koden från att gå utanför vänstra kanten på terminalen
 	 Goto_XY(L.XY(1), L.XY(2)); --Här blir det CONSTRAINT_ERROR lite då och då av någon anledning...
 	 Put( Enemy_1(1) );
 	 Goto_XY(L.XY(1), L.XY(2)+1);
 	 Put( Enemy_1(2) );
 	 
 	 Put_Enemies(L.Next);
+	 end if;
       end if;
       
    end Put_Enemies;
