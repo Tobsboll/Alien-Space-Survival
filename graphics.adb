@@ -84,7 +84,7 @@ package body Graphics is
       
    begin
       if not Empty(L) then
-	 Goto_XY(L.XY(1), L.XY(2));
+	 Goto_XY(L.XY(1), L.XY(2)); --Här blir det CONSTRAINT_ERROR lite då och då av någon anledning...
 	 Put( Enemy_1(1) );
 	 Goto_XY(L.XY(1), L.XY(2)+1);
 	 Put( Enemy_1(2) );
