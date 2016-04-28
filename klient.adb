@@ -621,6 +621,12 @@ begin
 	    DeleteList(Shot_List);
 	    DeleteList(Obstacle_List);
 	    DeleteList(Powerup_List);
+	    
+	    for I in waves'range loop
+	    
+	    Delete_enemy_list(Waves(I));
+	    
+	    end loop;
 	    -- Close(Socket);
 	    Cursor_visible;
 	    New_Line;
