@@ -65,7 +65,7 @@ package body Enemy_Ship_Handling is
       return False;
       
    end Next_To_Wall;
-      
+   
    --------------------------------------------------
    -- end NEXT TO WALL
    --------------------------------------------------
@@ -119,7 +119,8 @@ package body Enemy_Ship_Handling is
    -- MOVE ONE DOWN
    --------------------------------------------------
    
-   procedure Move_One_Down(Enemies : in out Enemy_List) is
+   procedure Move_One_Down(Enemies : in out Enemy_List;
+			   Obstacle_Y: in Integer) is
       
    begin
       
@@ -127,13 +128,13 @@ package body Enemy_Ship_Handling is
 	 
 	 Enemies.XY(2) := Enemies.XY(2) + 1;
 	 
-	 Move_One_Down(Enemies.Next); -- rekursion
+	 Move_One_Down(Enemies.Next, Obstacle_Y); -- rekursion
 	 
-	 if Enemies.XY(2) >= (GameBorder_Y + World_Y_Length - 10) then -- vågen sätts till att stå stilla i y
-				     -- Enemies.Movement_Type := 2;
+	 if Enemies.XY(2) >= (Obstacle_Y - 2) then -- vågen sätts till att stå stilla i y
+						   -- Enemies.Movement_Type := 2;
 	    Change_Movement_Type(Enemies, 2);
 	 end if;
-     
+	 
       end if;
       
    end Move_One_Down;
@@ -198,7 +199,7 @@ package body Enemy_Ship_Handling is
    begin
       
       Alien_Shot_Probability := Random(Chance_For_shot); -- 1-20
-         --  Alien_Shot_Probability := 20;
+							 --  Alien_Shot_Probability := 20;
       New_Line;
       Put("Shot prob:  ");
       Put(Alien_Shot_Probability);
@@ -208,10 +209,10 @@ package body Enemy_Ship_Handling is
 	 
    	 if Alien_Shot_Probability <= Enemies.Difficulty then
 	    Create_enemy_Shot(Enemies.Enemy_type, Enemies.XY(1), Enemies.XY(2), Shot_List);
-	  --  Put("SKOTTJÄVEL!   ");
-	   -- Put(Enemies.XY(1), 0);
-	   -- Put(Enemies.XY(2), 5);
-    
+	    --  Put("SKOTTJÄVEL!   ");
+	    -- Put(Enemies.XY(1), 0);
+	    -- Put(Enemies.XY(2), 5);
+	    
    	 end if;
 	 
    	 Shot_Generator(Enemies.Next, Chance_For_Shot, Shot_list); -- rekursion
@@ -238,7 +239,7 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    -- end AT LOWER LIMIT
    --------------------------------------------------
-	
+   
    --------------------------------------------------
    -- LAST_LIST
    --------------------------------------------------
@@ -270,9 +271,10 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    --UPDATE ENEMY POSITION
    --------------------------------------------------
- 
+   
    procedure Update_Enemy_Position(Enemies : in out Enemy_List;
-				   Shot_List : in out Object_List) is
+				   Shot_List : in out Object_List;
+				   Obstacle_Y: in Integer) is
       
       -- Movement_selector:
       -- 0) stand still
@@ -285,50 +287,50 @@ package body Enemy_Ship_Handling is
    begin 
       
       if Enemies /= null then
-      
-      -- if Wave.Movement_selector = 0 så står vi still = skippar koden.
-      
-      ----------------------------------
-      -- Classic space invaders movement
-      ----------------------------------
-      
-      if Enemies.Movement_Type = 1 then -- alla till en pekare har samma movement selector.
 	 
-	 if not Next_To_Wall(Enemies) then
-	    Move_To_Side(Enemies); 
-	 elsif not At_Lower_Limit(Enemies) then
-	    Move_One_Down(Enemies);
-	    Change_Direction(Enemies);
-	 else
-	    Change_Direction(Enemies);
+	 -- if Wave.Movement_selector = 0 så står vi still = skippar koden.
+	 
+	 ----------------------------------
+	 -- Classic space invaders movement
+	 ----------------------------------
+	 
+	 if Enemies.Movement_Type = 1 then -- alla till en pekare har samma movement selector.
+	    
+	    if not Next_To_Wall(Enemies) then
+	       Move_To_Side(Enemies); 
+	    elsif not At_Lower_Limit(Enemies) then
+	       Move_One_Down(Enemies, Obstacle_Y);
+	       Change_Direction(Enemies);
+	    else
+	       Change_Direction(Enemies);
+	    end if;
+	    
+	    Reset(Chance_For_shot);
+	    Shot_Generator(Enemies, Chance_For_Shot, Shot_List);
+	    
+	    ---------------------------------
+	    -- Only zig-zag
+	    ---------------------------------
+	    
+	 elsif Enemies.Movement_Type = 2 then
+	    
+	    if not Next_To_Wall(Enemies) then
+	       Move_To_Side(Enemies); 
+	    else
+	       Change_Direction(Enemies);
+	    end if;
+	    
+	    Reset(Chance_For_shot);
+	    Shot_Generator(Enemies, Chance_For_Shot, Shot_List);
+	    
+	    ---------------------------------
+	    -- Interceptor movement
+	    ---------------------------------
+	    
+	 elsif Enemies.Movement_Type = 3 then
+	    null;
 	 end if;
 	 
-	 Reset(Chance_For_shot);
-	 Shot_Generator(Enemies, Chance_For_Shot, Shot_List);
-	 
-	 ---------------------------------
-	 -- Only zig-zag
-	 ---------------------------------
-	 
-      elsif Enemies.Movement_Type = 2 then
-	 
-	 if not Next_To_Wall(Enemies) then
-	    Move_To_Side(Enemies); 
-	 else
-	    Change_Direction(Enemies);
-	 end if;
-	 
-	 Reset(Chance_For_shot);
-	 Shot_Generator(Enemies, Chance_For_Shot, Shot_List);
-	 
-	 ---------------------------------
-	 -- Interceptor movement
-	 ---------------------------------
-	 
-      elsif Enemies.Movement_Type = 3 then
-	 null;
-      end if;
-      
       end if;
       
       
@@ -339,95 +341,95 @@ package body Enemy_Ship_Handling is
    --end UPDATE ENEMY POSITION
    --------------------------------------------------
    
---------------------------------------------------
--- SPAWN WAVE
---------------------------------------------------
-procedure Spawn_Wave(Num_To_Spawn  : in Integer;
-                     Enemy_Type    : in Integer;
-		     Movement_Type : in Integer;
-		     Direction     : in Integer;
-		     Enemies_List  : in out Enemy_List) is
-   
-   Num_Ships : Integer;
-   Min_X_Interval : constant Integer := 6;
-   Y_Interval     : constant Integer := 3;
-   X, X_Interval, Y : Integer; 
-   Difficulty : Integer;
-   Num_Lives  : Integer;
-   Counter    : Integer;  
-   
-begin
-   
-   Num_Ships := Num_To_Spawn;
-   X := GameBorder_X + 1;
-   Y := GameBorder_Y + 1; -- ingen aning.
-   
-   if Enemy_Type = 1 then
-      Difficulty := 1;
-      Num_Lives  := 2;
-   elsif Enemy_Type = 2 then
-     Difficulty := 10;
-     Num_Lives := 3;
-   elsif Enemy_Type = 3 then
-     Difficulty := 15;
-     Num_Lives := 5;
-   end if;
-   
-   Counter := 0;
-   
---  --  for I in 1..8 loop 
-   while Num_Ships > 8 loop
+   --------------------------------------------------
+   -- SPAWN WAVE
+   --------------------------------------------------
+   procedure Spawn_Wave(Num_To_Spawn  : in Integer;
+			Enemy_Type    : in Integer;
+			Movement_Type : in Integer;
+			Direction     : in Integer;
+			Enemies_List  : in out Enemy_List) is
       
-      for I in 1..8 loop
+      Num_Ships : Integer;
+      Min_X_Interval : constant Integer := 6;
+      Y_Interval     : constant Integer := 3;
+      X, X_Interval, Y : Integer; 
+      Difficulty : Integer;
+      Num_Lives  : Integer;
+      Counter    : Integer;  
+      
+   begin
+      
+      Num_Ships := Num_To_Spawn;
+      X := GameBorder_X + 1;
+      Y := GameBorder_Y + 1; -- ingen aning.
+      
+      if Enemy_Type = EnemyType(1) then
+	 Difficulty := 1;
+	 Num_Lives  := 2;
+      elsif Enemy_Type = EnemyType(2) then
+	 Difficulty := 10;
+	 Num_Lives := 3;
+      elsif Enemy_Type = EnemyType(3) then
+	 Difficulty := 15;
+	 Num_Lives := 5;
+      end if;
+      
+      Counter := 0;
+      
+      --  --  for I in 1..8 loop 
+      while Num_Ships > 8 loop
 	 
-	 Spawn_Ship(Enemy_Type, X+Min_X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
-	 
-	 X := X + Min_X_Interval;
-	 Num_Ships := Num_Ships - 1;
-	 Counter := Counter + 1;
+	 for I in 1..8 loop
+	    
+	    Spawn_Ship(Enemy_Type, X+Min_X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
+	    
+	    X := X + Min_X_Interval;
+	    Num_Ships := Num_Ships - 1;
+	    Counter := Counter + 1;
 
+	 end loop;
+	 
+	 Y := Y + Y_Interval;
+	 X := GameBorder_X + 1;
+	 
       end loop;
-      
-      Y := Y + Y_Interval;
+
+
+      X_Interval := World_X_Length/(Num_Ships + 1);
       X := GameBorder_X + 1;
       
-   end loop;
-
-
-   X_Interval := World_X_Length/(Num_Ships + 1);
-   X := GameBorder_X + 1;
-   
-   for I in 1..Num_Ships loop
+      for I in 1..Num_Ships loop
+	 
+	 Spawn_Ship(Enemy_Type, (X + X_Interval), Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
+	 
+	 X := X + X_Interval;
+	 
+      end loop;
       
-      Spawn_Ship(Enemy_Type, (X + X_Interval), Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
-      
-      X := X + X_Interval;
-      
-   end loop;
-   
-end Spawn_Wave;
---------------------------------------------------
--- end SPAWN WAVE
---------------------------------------------------
+   end Spawn_Wave;
+   --------------------------------------------------
+   -- end SPAWN WAVE
+   --------------------------------------------------
 
 
---------------------------------------------------
--- REMOVE SHIP
---------------------------------------------------
-procedure Remove_Ship(Enemies : in out Enemy_List) is
-   
-   Temporary : Enemy_List; 
-   
-begin
-   
-   Temporary := Enemies;
-   Enemies   := Enemies.Next;
-   Free(Temporary);
-   
-end Remove_Ship;
---------------------------------------------------
--- end REMOVE SHIP
---------------------------------------------------
+   --------------------------------------------------
+   -- REMOVE SHIP
+   --------------------------------------------------
+   procedure Remove_Ship(Enemies : in out Enemy_List) is
+      
+      Temporary : Enemy_List; 
+      
+   begin
+      
+      Temporary := Enemies;
+      Enemies   := Enemies.Next;
+      Free(Temporary);
+      
+   end Remove_Ship;
+   --------------------------------------------------
+   -- end REMOVE SHIP
+   --------------------------------------------------
 
    --------------------------------------------------
    -- DESTROY SHIP
@@ -445,7 +447,7 @@ end Remove_Ship;
 	    
 	    Remove_ship(Enemies);
 	    --Enemy_Explosion(Enemies.Enemy_Type, Hit_Coord);
-	
+	    
 	 else
 	    
 	    Destroy_Ship(Enemies.Next, Hit_Coord);
@@ -473,19 +475,20 @@ end Remove_Ship;
       -- Skicka över koordinater, liv, typ, mer behövs ej?
 
       if Enemies /= null then
+      --if not Empty(Enemies) then
 	 
 	 Put_line(Socket, Enemies.Enemy_Type); -- skickar fiendens typ
 	 Put_line(Socket, Enemies.XY(1)); --skickar fiendens koordinater.
 	 Put_line(Socket, Enemies.XY(2));	 
 	 Put_line(Socket, Enemies.Num_Lives); -- skickar över antal liv för ev print eller 
 					      -- olika print beroende på skada	 
-	 ------------------------------ TEST
-	-- New_Line;
-	 --Put("Ship Cordinates: ");
-	 --Put(Enemies.XY(1), 0);
-	 --Put(",      ");
-	-- Put(Enemies.XY(2), 0);
-	 ------------------------------
+					      ------------------------------ TEST
+					      -- New_Line;
+					      --Put("Ship Cordinates: ");
+					      --Put(Enemies.XY(1), 0);
+					      --Put(",      ");
+					      -- Put(Enemies.XY(2), 0);
+					      ------------------------------
 	 
 	 Put_Enemy_Ships(Enemies.Next, Socket); --rekursion
 	 
@@ -506,7 +509,7 @@ end Remove_Ship;
    --------------------------------------------------
    
    procedure Get_Enemy_Ships(Enemies : in out Enemy_List;
-			     Socket  : in Socket_Type) is
+   			     Socket  : in Socket_Type) is
       
       Input : Integer;
       Enemy_Type : Integer;
@@ -520,17 +523,18 @@ end Remove_Ship;
       
       if Input /= 0 then -- listan inte null.
 	 
-	 Enemy_Type := Input;
-	 Get(Socket, X);
-	 Get(Socket, Y);
-	 Get(Socket, Num_Lives);
+   	 Enemy_Type := Input;
+   	 Get(Socket, X);
+   	 Get(Socket, Y);
+   	 Get(Socket, Num_Lives);
 	 
-	 Spawn_Ship(Enemy_Type, X, Y, 10, Num_Lives, 1, 1, Enemies);
+   	 Spawn_Ship(Enemy_Type, X, Y, 10, Num_Lives, 1, 1, Enemies);
+   	 --Create_Object(Enemy_Type, X, Y, 0, Enemies);
 	 
-	 Get_Enemy_Ships(Enemies.Next, Socket); --rekursion
+   	 Get_Enemy_Ships(Enemies.Next, Socket); --rekursion
 	 
       end if;
-     
+      
    end Get_Enemy_Ships;
    
    --------------------------------------------------
@@ -557,14 +561,14 @@ end Remove_Ship;
    -- end DELETE_ENEMY_LIST
    --------------------------------------------------
    
-       --------------------------------------------------
+   --------------------------------------------------
    -- EMPTY
    --------------------------------------------------OK
    
    function Empty(L : in Enemy_List) return Boolean is
       
    begin
-       return L = null;	
+      return L = null;	
       
    end Empty;
    
