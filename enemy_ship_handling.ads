@@ -63,7 +63,8 @@ package Enemy_Ship_Handling is
 		        Direction     : in Integer;
 		        Enemies_List  : in out Enemy_List);
    procedure Update_Enemy_Position(Enemies : in out Enemy_List;
-				   Shot_List : in out Object_List);
+				   Shot_List : in out Object_List;
+				   Obstacle_Y: in Integer);
    function Last_List(All_Enemies : in Enemy_List_Array) return Integer;
    function At_Lower_limit(Enemies : in Enemy_List) return Boolean;
    function Next_To_Wall(Enemies : in Enemy_List) return Boolean;
@@ -77,7 +78,7 @@ package Enemy_Ship_Handling is
    procedure Put_Enemy_Ships(Enemies : in Enemy_List;
 			     Socket  : in Socket_Type);
    procedure Get_Enemy_Ships(Enemies : in out Enemy_List;
-			     Socket  : in Socket_Type);
+   			     Socket  : in Socket_Type);
    procedure Create_Enemy_Shot(Enemy_Type, X, Y : in Integer;
    			       Shot_List : in out Object_List);
    procedure Shot_Generator(Enemies : in out Enemy_List;
