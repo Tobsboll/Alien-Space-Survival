@@ -22,6 +22,8 @@ wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu_options.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu_options.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/game_engine.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/game_engine.ads
 
 
 gnatmake $(~TDDD11/TJa-lib/bin/tja_config) server.adb
