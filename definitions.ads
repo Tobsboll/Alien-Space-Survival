@@ -1,9 +1,10 @@
 with TJa.Window.Text;         use TJa.Window.Text;
+with TJa.Sockets;                  use TJa.Sockets;
 
 package Definitions is
    
-   World_X_Length : constant Integer := 100;
-   World_Y_Length : constant Integer := 40;
+   World_X_Length : constant Integer := 110;
+   World_Y_Length : constant Integer := 30;
    
    type X_Led is array(1 .. World_X_Length) of Character;
    type World is array(1 .. World_Y_Length) of X_Led;
@@ -16,7 +17,12 @@ package Definitions is
    
    Move_Horisontal : constant Integer := 2;
    
+   Obstacle_Y_Pos  : constant Integer := World_Y_Length*2/3;
+   
    type XY_Type is array(1 .. 2) of Integer;
+   
+   type Socket_Array is
+	array (1..4) of Socket_Type;
    
     --Types represented by integerz
    type Shot_Array_Type is array (1..10) of Integer;
@@ -27,6 +33,8 @@ package Definitions is
    type PowerUp_Array_Type is array (1..10) of Integer;
    PowerUpType : PowerUp_Array_Type := (21, 22, 23, 24, 25, 26, 27, 28, 29, 30);
    
+   type Enemy_Array_Type is array (1..10) of Integer;
+   EnemyType : Enemy_Array_Type := (31, 32, 33, 34, 35, 36, 37, 38, 39, 40);
    
    type Ranking_List is array (1 .. 4) of Integer;
 
@@ -117,6 +125,9 @@ package Definitions is
    Nickname_Write_Box    : constant Colour_Type := Blue;      -- Enter Nickname
    Alien_Body            : constant Colour_Type := Green;     -- Background
    Alien_Eyes            : constant Colour_Type := Yellow;    -- Background
+   
+   Enemy_Laser_1         : constant Colour_Type := Bright_Green;
+   Player_Laser_1        : constant Colour_Type := Bright_Red;
    ---------------------------------------------------
    
    
