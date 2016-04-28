@@ -14,6 +14,7 @@ with Gnat.Sockets;
 
 with Window_Handling;              use Window_Handling;
 with Space_Map;                    use Space_Map;
+with Game_Engine;                  use Game_Engine;
 
 procedure Server is
    
@@ -24,13 +25,12 @@ procedure Server is
    
    
    
-   type Socket_Array is
-     array (1..4) of Socket_Type;
+
    
    Socket1, Socket2, Socket3, Socket4 : Socket_Type;
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
    Listener                           : Listener_Type;
-   Keyboard_Input                     : Character;
+   --Keyboard_Input                     : Character;
    
    --------------------------------------------------------------
 
@@ -148,301 +148,9 @@ procedure Server is
    --------------------------------------------------
 
    --------------------------------------------------
-   
-   --------------------------------------------------
-   
-   --------------------------------------------------
-   function Player_Collide (X,Y : in Integer;
-			    L   : in Object_List
-			   ) return Boolean is
-      Object_X : Integer; 
-      Object_Y : Integer;
-   begin
-      if not Empty(L) then
-	 Object_X := L.XY_Pos(1);
-	 Object_Y := L.XY_Pos(2);
-	 --------------------------------------------------
-	 --Med hinder:
-	 --------------------------------------------------
-	 if L.Object_Type in 11..20 then
-	    
-	    --Jämför Hindrets koord. med hela ship top:
-	    --------------------------------------------------
-	    for A in 1..2 loop      --Obstacle height
-	       for I in 1..3 loop      --Ship top
-		  for K in 1..3 loop   --Obstacle width
-		     
-		     if X+I = Object_X+K-1 and Y = Object_Y+A-1 then
-			return True;
-		     end if;
-		  end loop;
-	       end loop;
-	    end loop;
-	    
-	    --Jämför Hindrets koord. med hela ship bottom:
-	    --------------------------------------------------
-	    for A in 1..2 loop      --Obstacle height
-	       for I in 1..5 loop      --Ship bottom
-		  for K in 1..3 loop   --Obstacle width
-		     
-		     if X+I-1 = Object_X+K-1 and Y+1 = Object_Y+A-1 then
-			return True;
-		     end if;
-		  end loop;
-	       end loop;
-	    end loop;
-	    
-	    
-	    return Player_Collide(X,Y,L.Next);
-	    --------------------------------------------------
-	    --Med PowerUps:
-	    --------------------------------------------------
-	 elsif L.Object_Type in 21..30 then
-	    
-	    for I in 1..3 loop      --Ship top
-	       for K in 1..3 loop   --Object width
-		  
-		  if X+I = Object_X+K-2 and Y = Object_Y then
-		     return True;
-		  end if;
-	       end loop;
-	    end loop;
-	    
-	    for I in 1..5 loop      --Ship bottom
-	       for K in 1..3 loop   --Object width
-		  
-		  if X+I-1 = Object_X+K-2 and Y+1 = Object_Y then
-		     return True;
-		  end if;
-	       end loop;
-	    end loop;
-	    
-	    --return Player_Collide(X,Y,L.Next);
-	    
-	    --------------------------------------------------
-	    --Med Skott:
-	    --------------------------------------------------
-	 elsif L.Object_Type in 1..10 then
-	    for I in 1..3 loop      --Ship top
-	       
-	       if X+I = Object_X and Y = Object_Y then
-		  return True;
-	       end if;
-	    end loop;
-	    
-	    
-	    for I in 1..5 loop      --Ship bottom
-	       
-	       
-	       if X+I-1 = Object_X and Y+1 = Object_Y then
-		  return True;
-	       end if;
-	       
-	    end loop;
-	    --return Player_Collide(X,Y,L.Next);
-	    
-	 end if;
-	 
-      end if;
-      
-      --Vid listans slut: 
-      return False;
-      
-   end Player_Collide;
-   --------------------------------------------------
-   procedure Player_Collide_In_Object ( X,Y         : in Integer;
-					--Data        : out Integer;
-					Player_Ship : in out Ship_Spec;
-					L           : in out Object_List) is
-      
-   begin
-      if not Empty(L) then
-	 
-	 if Player_Collide (X, Y, L) then
-	    
-	    --------------------------------------------------
-	    --Beskjuten?
-	    --------------------------------------------------
-	    if L.Object_Type in 1..10 then
-	       if L.Object_Type = ShotType(1) then
-		  Player_Ship.Health := Player_Ship.Health-1;
-		  
-	       elsif L.Object_Type = ShotType(2) then
-		  Player_Ship.Health := Player_Ship.Health-1;
-	       end if;
-	       Remove(L);
-	       
-	       --------------------------------------------------
-	       --PowerUp?
-	       --------------------------------------------------
-	    elsif L.Object_Type in 21..30 then
-	       
-	       if L.Object_Type = PowerUpType(1) then
-		  null; --Öka Ship.Health
-	       elsif L.Object_Type = PowerUpType(2) then
-		  
-		  Player_Ship.Missile_Ammo := Player_Ship.Missile_Ammo + 10;
-		  
-	       elsif L.Object_Type = PowerUpType(3) then
-		  Player_Ship.Laser_Type := ShotType(2);
-		  
-		  --else
-		  --Rekursion:
-		  -- Player_Collide_In_Object(X,Y,Player_Ship,L.Next);
-	       end if;
-	       Remove(L);
-	       
-	       
-	    end if;
-	 else
-	    Player_Collide_In_Object(X,Y,Player_Ship, L.Next);
-	 end if;
-      end if;
-      
-      
-   end Player_Collide_In_Object;
-   
-   --------------------------------------------------
-   -- procedure Handle_PowerUp (
-   
-   --------------------------------------------------
-   --| PLAYER INPUT                              |--===========|===|
-   --------------------------------------------------
-   procedure Get_Player_Input(Sockets : in Socket_Array;
-			      Num_Players : in Integer; --Num_Players ej längre global
-			      Data : in out Game_Data;
-			      Shot_List : in out Object_List;
-			      Obstacle_List : in Object_List;
-			      Powerup_List  : in out Object_List
-			     ) is
-      X          : Integer;
-      Y          : Integer;
-      Laser_Type : Integer;
-      Ammo       : Integer;
-      --Player_Ship: Ship_Spec;
-   begin
-      
-      for I in 1..Num_Players loop
-	 X          := Data.Players(I).Ship.XY(1);
-	 Y          := Data.Players(I).Ship.XY(2);
-	 Laser_Type := Data.Players(I).Ship.Laser_Type;
-	 Ammo       := Data.Players(I).Ship.Missile_Ammo;
-	 --Player_Ship:= Data.Players(I).Ship;
-	 
-	 Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
-	 Skip_Line(Sockets(I)); -- DETTA kan bli problem om server går långsammare än klienterna!! /Andreas
-				--------------------------------------------------
-				--| Movement tjafs 
-				--|
-				--| #Bruteforce
-				--------------------------------------------------
-	 
-	 if Keyboard_Input /= 'o' then -- = om det fanns nollskild, giltig input.        
-	    
-	    
-	    if Keyboard_Input = 'w' and then not Player_Collide(X,Y-1, Obstacle_List) then 
-	       Data.Players(I).Ship.XY(2) := Integer'Max(2 , Y-1);
-	       
-	    elsif Keyboard_Input = 's' and then not Player_Collide(X,Y+1, Obstacle_List) then 
-	       Data.Players(I).Ship.XY(2) := Integer'Min(World_Y_Length-1 , Y+1);
-	       
-	    elsif Keyboard_Input = 'a' and then not Player_Collide(X-Move_Horisontal,Y, Obstacle_List) then
-	       Data.Players(I).Ship.XY(1) := Integer'Max(2 , X - Move_Horisontal);
-	       
-	    elsif Keyboard_Input = 'd' and then not Player_Collide(X+Move_Horisontal, Y , Obstacle_List) then
-	       Data.Players(I).Ship.XY(1) := Integer'Min(World_X_Length - Player_Width ,X + Move_Horisontal);
-	    elsif Keyboard_input = ' ' then 
-	       --Data.Players(I).Playing := False;  --Suicide
-	       
-	       Create_Object(ShotType(Laser_Type),
-			     X+2,
-			     Y,
-			     Up,
-			     Shot_List                );
-	    elsif Keyboard_input = 'm' and then Ammo > 0 then
-	       
-	       Create_Object(ShotType(4), -- 4 = Missile
-			     X+2,
-			     Y,
-			     Up,
-			     Shot_List                );
-	       Data.Players(I).Ship.Missile_Ammo := Ammo - 1;
-	       
-	    elsif Keyboard_Input = 'e' then exit; -- betyder "ingen input" för servern.
-	    end if;
-	    
-	    Player_Collide_In_Object(X,Y, Data.Players(I).Ship, Powerup_List); -- Returnerar hur mycket extra ammo man får
-									       --  Data.Players(I).Ship.Missile_Ammo := Data.Players(I).Ship.Missile_Ammo + Ammo;
-	 end if;
-	 
-      end loop;
-      
-   end Get_Player_Input;
-   
-   
-   --------------------------------------------------
-   --|  DEFAULT VALUES
-   --|  Här 
-   --------------------------------------------------
-   procedure Set_Default_Values (Num_Players : in Integer;
-				 Game        : in out Game_Data
-				   --World_X_Length, World_Y_Length : in Integer   --GLOBALA VARIABLER
-				) is
-      Xpos : Integer;
-      Interval : constant Integer := World_X_Length/(1+Num_Players);
-   begin
-      --------------------------------------------------
-      --| Ships
-      --------------------------------------------------
-      Xpos := 0;
-      
-      for K in 1..Num_Players loop
-	 --Spawning
-	 Game.Players(K).Ship.XY(2) := World_Y_Length - 1;  -- + border_Length
-	 Game.Players(K).Ship.XY(1) := Xpos + Interval; -- + border_Length;
-	 Game.Players(K).Playing := True; 
-	 Xpos := Xpos + Interval;
-	 
-	 --Equipment
-	 Game.Players(K).Ship.Health := 10;
-	 Game.Players(K).Ship.Laser_Type := 1;
-	 Game.Players(K).Ship.Missile_Ammo := 5;
-      end loop;
-      
-      -------------------------------------------------
-      --| Banan
-      -------------------------------------------------
-      Generate_World(Game.Layout);  -- Genererar en helt ny bana med raka väggar. / Eric
-      Game.Settings.Generate_Map := False; -- Sätter i början att banan inte ska genereras.   
-      
-      --------------------------------------------------
-      
-      
-      
-   end Set_Default_Values;
-   
-   --------------------------------------------------
-   --|  SHOT MOVEMENT
-   --|  
-   --------------------------------------------------
-   
-   procedure Shot_Movement ( L : in out Object_List ) is
-      Direction : Integer; -- := L.Attribute;
-      Ydiff     : constant Integer := 1;
-   begin
-      
-      if not Empty(L) then
-	 Direction := L.Attribute;
-	 L.XY_Pos(2) := L.XY_Pos(2) + Ydiff*Direction;
-	 if L.XY_Pos(2) = 0 or L.XY_Pos(2) = World_Y_Length+1 then
-	    Remove(L);
-	    Shot_Movement(L);
-	 else
-	    Shot_Movement(L.Next);
-	 end if;
-      end if;
-      
-   end Shot_Movement; 
+
+
+
    
 
    
@@ -467,12 +175,13 @@ procedure Server is
    Shot_List              : Object_List; --shot_handling.ads
    Obstacle_List          : Object_List;
    Powerup_List           : Object_List;
+   Obstacle_Y             : Integer;
    
    Player_Colour          : String(1..15);           -- Inhämtning (innan GameLoopen) av spelarnas färger
    Player_Colour_Length   : Integer;
    Background_Colour_1    : Colour_Type := Black;    -- Bakgrundsfärg till (Scoreboard, Hela Terminalen)
    Text_Colour_1          : Colour_Type := White;    -- Teckenfärg    till (Scoreboard, Hela Terminalen)
-
+   
    
 begin
    Set_Window_Title("Server");
@@ -677,22 +386,47 @@ begin
       end loop;
    end loop;   
    
+   Obstacle_Y := Obstacle_Y_Pos; --konstant från definitions, men kan varieras nedan. (Jag har en plan)
+   
    
    --Testar att skapa olika typer av väggar
-   Create_Object(ObstacleType(1), 2, 20, Light, Obstacle_List);
-   Create_Object(ObstacleType(2), 10, 20, Hard , Obstacle_List);
-   Create_Object(ObstacleType(3), 25, 20, Light, Obstacle_List);
+   --Create_Object(ObstacleType(1), 2, Obstacle_Y, Light, Obstacle_List);
+   Create_Object(ObstacleType(2), 10, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 15, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 20, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 25, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 30, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 35, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 40, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 45, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 50, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 55, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 60, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 65, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 70, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 75, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 80, 20, Obstacle_Y, Obstacle_List);
+    Create_Object(ObstacleType(2), 85, 20, Obstacle_Y, Obstacle_List);
+    -- Create_Object(ObstacleType(3), 25, 20, Obstacle_Y, Obstacle_List);
+    
+   --for I in 1..6 loop
+   --Create_Wall(Obstacle_List, Obstacle_Y-(I*2));
+   -- end loop;
+   --Create_Wall(Obstacle_List, Obstacle_Y);
    
-   
-   Create_Object(PowerUpType(2), 40, 15, 0, Powerup_List);
-   Create_Object(PowerUpType(3), 50, 20, 0, Powerup_List);
+   Create_Object(PowerUpType(2), 40, Obstacle_Y_Pos+3, 0, Powerup_List);
+   Create_Object(PowerUpType(3), 50, Obstacle_Y_Pos+5, 0, Powerup_List);
    
    
    -----------------------------------
    -- SPAWN FIRST WAVE
    -----------------------------------
    
-   Spawn_Wave(8, 1, 1, 1, waves(1));
+   Spawn_Wave(8, --Antal
+   	      EnemyType(1), --Typ
+   	      1,
+   	      1,
+   	      waves(1));
    
    -----------------------------------
    -- end SPAWN FIRST WAVE
@@ -701,7 +435,7 @@ begin
    loop 
       
 
-      delay(0.01);      -- En delay så att servern inte fyller socket bufferten till klienterna. / Eric
+      delay(0.05);      -- En delay så att servern inte fyller socket bufferten till klienterna. / Eric
       
       
       --------------------------------------------------
@@ -728,6 +462,8 @@ begin
 	    Game.Players(I).Playing := False;
 	 end if;
 	 
+	--exit when Players_Are_Dead(Game.Players);  --detta ballar ur.
+	 
 	 if Game.Players(I).Playing then
 	    Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				      Game.Players(I).Ship.XY(2),
@@ -740,9 +476,10 @@ begin
 	 Put(Sockets(I), Obstacle_List);
 	 Put(Sockets(I), Powerup_List);
       	 Put_Game_Data(Sockets(I),Game);
+
       end loop;
       
-      Update_Enemy_Position(Waves(1), Shot_List);
+      Update_Enemy_Position(Waves(1), Shot_List, Obstacle_Y);
            
       -----------------------------------
       -- PUT ENEMY SHIPS
@@ -760,10 +497,9 @@ begin
       
       Get_Player_Input(Sockets, Num_Players, Game, Shot_List, Obstacle_List, Powerup_List);
       
-      --Uppdatera skottens position med delay
-      --if Loop_Counter mod 2 = 1 then
+      --Uppdatera skottens position
       Shot_Movement(Shot_List);
-      --end if;
+      Shots_Collide_In_Objects(Shot_List, Obstacle_List);
       
       Loop_Counter := Loop_Counter + 1;
       
@@ -788,6 +524,12 @@ exception
       DeleteList(Powerup_List);
       New_Line;
       Put("Someone disconnected!");
+   when STORAGE_ERROR =>
+      DeleteList(Shot_List);
+      DeleteList(Obstacle_List);
+      DeleteList(Powerup_List);
+      New_Line;
+      Put("VI HAR EN MINNESLÄCKAA!");
       
 
 end Server;
