@@ -2,6 +2,7 @@ with Ada.Text_IO;             use Ada.Text_IO;
 with tja.window.Elementary;   use tja.window.Elementary;
 with Object_Handling;         use Object_Handling;
 with Enemy_ship_handling;     use Enemy_ship_handling;
+with Definitions;             use Definitions;
 
 package Graphics is
    
@@ -71,6 +72,25 @@ package Graphics is
 					"( )"
 				      );
    
+   ---
+   type Ship_Parts is array (1..2) of String(1..3); --skeppets topp och botten
+   Enemy_1 : Ship_Parts := ("|'|",
+			    "\V/");
+   
+   type Enemy_Graphics_Type is array(31..40) of Ship_Parts;
+   Enemy : Enemy_Graphics_Type; --:= (Enemy_1,
+				   --  Enemy_1,
+				   --  Enemy_1,
+				   --  Enemy_1,
+				   --  Enemy_1,
+				   --  Enemy_1,
+				   --  Enemy_1,
+				   --  Enemy_1,
+				   --  Enemy_1,
+				   --  Enemy_1);
+			      
+   ---
+     
    --  Ship_Width_Type is array (1..Player_Width) of Character;
    --  Ship_Type is array (1..Player_Height) of Ship_Width_Type;
    --  --Ships is array (1..Num_Different_Ships) of Ship_Type   --Olika skepp i framtiden?
