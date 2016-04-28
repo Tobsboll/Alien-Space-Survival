@@ -20,6 +20,7 @@ with Menu;                    use Menu;
 with Window_Handling;         use Window_Handling;
 with Box_Hantering;           use Box_Hantering;
 with Space_Map;               use Space_Map;
+with Game_Engine;             use Game_Engine;
 
 procedure Klient is
 
@@ -207,7 +208,11 @@ procedure Klient is
    Powerup_List   : Object_List;
    
    Enemies1, Enemies2, Enemies3, Enemies4 : Enemy_List;
+
+   ---
    Waves          : Enemy_List_array;
+   Enemies        : Object_List;
+   --
    
    Klient_Number        : Integer;               -- Servern skickar klientnumret
    Player_Colour        : String(1..15);         -- Används i början till att överföra spelarnas färger
@@ -503,6 +508,12 @@ begin
 	    Get_Game_Data(Socket,Data);
 	    --end if;
 	    
+	    	    --Följande ballar ur.
+	    --  if Players_Are_Dead(Data.Players) then
+	    --     --exit;
+	    --     raise GNAT.SOCKETS.SOCKET_ERROR;
+	    --  end if;
+	    
       -----------------------------------
       -- GET ENEMY WAVE
       -----------------------------------
@@ -512,7 +523,8 @@ begin
 	 Delete_enemy_list(Waves(I));
 
 	 Get_Enemy_Ships(Waves(I), Socket); -- Tobias
-
+	    --DeleteList(Enemies);
+	    --Get(Socket, Enemies);
       end loop;
       
       -----------------------------------
@@ -535,6 +547,7 @@ begin
 			
 		for I in Waves'range loop					 
 		Put_enemies(Waves(I));
+		 --Put(Enemies);
 		end loop;
 		
 	    Put_Objects(Shot_List);
@@ -570,7 +583,9 @@ begin
 	    Get_Input;
 	    
 	    --------------------------------------------------
-	    if Is_Esc then-- måste ändras
+	    if Is_Esc
+	    --or Players_Are_Dead(Data.Players)
+	    then -- måste ändras
 	       Put("Exiting...");
 	       Skip_Line;
 	       Put_Line(Socket, 'e');
@@ -584,6 +599,8 @@ begin
 	    --delay(0.005); -- senare bra om vi gör så att server och
 	    -- klient synkar exakt!
 	    -- Loop_Counter := Loop_Counter + 1;
+	    
+	     --exit when Players_Are_Dead(Data.Players);  --Ballar ur.
 	 end loop;
 	 
 	 
