@@ -13,7 +13,7 @@ with Definitions;                  use Definitions;
 with Gnat.Sockets;
 
 with Window_Handling;              use Window_Handling;
-with Space_Map;                    use Space_Map;
+with Map_Handling;                 use Map_Handling;
 with Game_Engine;                  use Game_Engine;
 
 procedure Server is
@@ -58,21 +58,6 @@ procedure Server is
       
       
    begin
-      if Data.Settings.Generate_Map then            -- Skickar banan om den generarar väggar
-	 
-	 Put_Line(Socket, 1);
-	 
-	 for I in Data.Layout'First..Data.Layout'Last loop
-	    for J in Data.Layout(I)'First..Data.Layout(I)'last loop
-	       Put_line(Socket, Data.Layout(I)(J)); -- Skickar Banan till klienterna
-	    end loop;
-	 end loop;
-	 
-      elsif Data.Settings.Generate_Map = False then -- Genererar inte ny vägg ( Ingen uppdatering )
-	 Put(Socket, 0);
-      end if;
-      
-      
       --------------------------------------------------------
       -- Skickar spelarnas Information
       --------------------------------------------------------
@@ -351,10 +336,6 @@ begin
    Game.Players(2).Score :=  94;
    Game.Players(3).Score :=  26;
    Game.Players(4).Score :=   2;
-   
-   for I in 1..Num_Players loop
-      Game.Ranking(I) := I;
-   end loop;
    ---------------------------------------------------------------
 
    
@@ -377,36 +358,36 @@ begin
    Loop_Counter := 1;
    
    
-   -- Skickar startbanan till alla klienter 
    for I in 1..Num_Players loop
-      for J in Game.Layout'First..Game.Layout'Last loop
-	 for K in Game.Layout(I)'First..Game.Layout(I)'last loop
-	    Put_line(Sockets(I), Game.Layout(J)(K)); -- Skickar Banan till klienterna
-	 end loop;
-      end loop;
-   end loop;   
+      Game.Ranking(I) := I;  -- Ställer bara in poängplaceringen.
+      
+      -- Skickar startbanan till alla klienter 
+      Send_Map(Sockets(I), Game, Check_Update => False);     -- Map_Handling
+   end loop;    
    
    Obstacle_Y := Obstacle_Y_Pos; --konstant från definitions, men kan varieras nedan. (Jag har en plan)
    
    
    --Testar att skapa olika typer av väggar
    --Create_Object(ObstacleType(1), 2, Obstacle_Y, Light, Obstacle_List);
-   Create_Object(ObstacleType(2), 10, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 15, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 20, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 25, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 30, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 35, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 40, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 45, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 50, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 55, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 60, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 65, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 70, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 75, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 80, 20, Obstacle_Y, Obstacle_List);
-    Create_Object(ObstacleType(2), 85, 20, Obstacle_Y, Obstacle_List);
+   
+   --  Create_Object(ObstacleType(2), 10, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 15, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 20, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 25, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 30, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 35, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 40, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 45, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 50, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 55, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 60, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 65, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 70, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 75, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 80, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 85, 20, Obstacle_Y, Obstacle_List);
+   
     -- Create_Object(ObstacleType(3), 25, 20, Obstacle_Y, Obstacle_List);
     
    --for I in 1..6 loop
@@ -434,21 +415,43 @@ begin
    
    loop 
       
-
-      delay(0.05);      -- En delay så att servern inte fyller socket bufferten till klienterna. / Eric
-      
+      --  if Num_Players = 1 then
+      --  	 delay(0.05);
+      --  elsif Num_Players = 2 then
+      --  	 delay(0.01);
+      --  elsif Num_Players = 3 then
+      --  	 delay(0.01);
+      --  elsif Num_Players = 4 then
+      --  	 delay(0.01);
+      --  end if;
       
       --------------------------------------------------
       --| SCROLLING MAP 
       --| "Level 2" => därför ej nödvändig än
       --------------------------------------------------
       if Game.Settings.Generate_Map then       -- Bestämmer under spelet om banan ska börja genereras eller inte.
-	 if Loop_Counter mod 4 = 0 then
-	    New_Top_Row(Game.Layout);          -- Genererar två nya väggar längst upp på banan på var sida.
-	    Move_Rows_Down(Game.Layout);       -- Flyttar ner hela banan ett steg.
-	 end if;
-      end if;    
+      	 if Loop_Counter mod 4 = 0 then
+      	    if Loop_Counter > 50 and Loop_Counter < 100 then
 
+      	       New_Top_Row(Game.Map, Close => True);  -- Banan blir mindre
+	       
+
+      	    elsif Loop_Counter > 150 and Loop_Counter < 225 then
+	       
+      	       New_Top_Row(Game.Map);                 -- Vanlig randomisering
+      	    else
+
+      	       New_Top_Row(Game.Map, Straigt => True);-- Raka väggar
+	       
+      	    end if;   
+      	    Move_Rows_Down(Game.Map);       -- Flyttar ner hela banan ett steg.
+      	 end if;
+      end if;
+      
+
+      if Loop_Counter > 225 then
+      	 Loop_Counter := 0;
+      end if;
       
 
 
@@ -475,6 +478,7 @@ begin
 	 Put(Sockets(I), Shot_List);
 	 Put(Sockets(I), Obstacle_List);
 	 Put(Sockets(I), Powerup_List);
+	 Send_Map(Sockets(I), Game);      -- Map_Handling
       	 Put_Game_Data(Sockets(I),Game);
 
       end loop;
