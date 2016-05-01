@@ -1,9 +1,8 @@
 with TJa.Window.Text;   use TJa.Window.Text;
 with Definitions;       use Definitions;
+with TJa.Sockets;       use TJa.Sockets;
    
-package Space_Map is
-   
-
+package Map_Handling is
    
    type Astroid_Spec is
       record
@@ -15,41 +14,78 @@ package Space_Map is
    type Astroid_Type is array(1 .. world'Last) of Astroid_spec; 
    
    
-   -- Används till att hålla koll vart väggen är när genereringen utförs
+   --| Används till att hålla koll vart väggen är när genereringen utförs
    --------------------------------------------------------------------------
    Left_Border  : Integer := X_Led'First;
    Right_Border : Integer := X_Led'Last;
    
+   
    ----------------------------------------------------------
-   -- Genererar en helt vanlig bana som har raka väggar
+   --| Tar emot banan från servern
+   ----------------------------------------------------------  
+   procedure Get_Map(Socket       : in  Socket_Type;
+		     Data         : out Game_Data;
+		     Check_Update : in  Boolean := True);
+   
+   
+   ----------------------------------------------------------
+   --| Skickar banan till klient
+   ----------------------------------------------------------     
+   procedure Send_Map(Socket       : in Socket_Type;
+		      Data         : in Game_Data;
+		      Check_Update : in Boolean := True);
+   
+   ----------------------------------------------------------
+   --| Genererar en helt vanlig bana som har raka väggar
    ----------------------------------------------------------
    procedure Generate_World(Map : out Definitions.World); -- Behöver en variabel som innehåller banan.
    
+   -----------------------------------------------------------
+   --| Put a row with space with a selected colour.
+   -----------------------------------------------------------
+   procedure Put_Space(Width : in Integer;
+		       Colour: in Colour_Type);
+   
    
    ----------------------------------------------------------------
-   -- Skriver ut hela banan där X,Y bestämmer vart i terminalen.
+   --| Skriver ut hela banan där X,Y bestämmer vart i terminalen.
    ----------------------------------------------------------------
-   procedure Put_World(Map : in Definitions.World;
-		       X   : in Integer;
-		       Y   : in Integer;
-		       Background : Colour_Type;
-		       Text       : Colour_Type;
-		       Boarder    : Boolean := True);
+   procedure Put_World(Map             : World;
+		       X               : Integer;
+		       Y               : Integer;
+		       Wall_Background : Colour_Type;
+		       Wall_Line       : Colour_Type);
    
    --------------------------------------------------------------------
-   -- Genererar en ny rad längst upp.
+   --| Genererar en ny rad längst upp.
    --------------------------------------------------------------------
-   procedure New_Top_Row(Map : in out World);
+   procedure New_Top_Row(Map     : in out World;
+			 Straigt : in Boolean := False;
+			 Open    : in Boolean := False;
+			 Close   : in Boolean := False);
    
    
    --------------------------------------------------------------------
-   -- Flyttar ner hela banan med 1 rad.
+   --| Flyttar ner hela banan med 1 rad.
    --------------------------------------------------------------------
    procedure Move_Rows_Down(Map : in out Definitions.World);
    
    
+   --------------------------------------------------------------
+   --| Räknar hur långt in väggen är maximalt från varje sida.
+   --------------------------------------------------------------
+   procedure Border_Min_Max(Map : in Definitions.World;
+			    Min : out Integer;
+			    Max : out Integer);
+   
+   -------------------------------------------------------
+   --| Räknar fram avståndet mellan väggarna
+   -------------------------------------------------------
+   function Border_Difference(Map : in World) return Integer;
+   
+   
    -------------------------------------------------------------------
-   -- Returerar X-koordinaten på väggen till vänster på raden Y.
+   --| Returerar X-koordinaten på väggen till vänster på raden Y.
    -------------------------------------------------------------------
    procedure Border_Left(Map : in Definitions.World;
 			 X   : out Integer;
@@ -57,7 +93,7 @@ package Space_Map is
    
    
    -------------------------------------------------------------------
-   -- Returerar X-koordinaten på väggen till Höger på raden Y.
+   --| Returerar X-koordinaten på väggen till Höger på raden Y.
    -------------------------------------------------------------------
    procedure Border_Right(Map : in Definitions.World;
 			  X   : out Integer;
@@ -65,21 +101,21 @@ package Space_Map is
    
       
    --------------------------------------------------------
-   -- Räknar ut och skickar tillbaka vart vänster vägg är
+   --| Räknar ut och skickar tillbaka vart vänster vägg är
    --------------------------------------------------------
    function Border_Left(Map : in Definitions.World;
 			Y   : in Integer) return Integer;
 
    
    --------------------------------------------------------
-   -- Räknar ut och skickar tillbaka vart höger vägg är
+   --| Räknar ut och skickar tillbaka vart höger vägg är
    --------------------------------------------------------
    function Border_Right(Map : in Definitions.World;
 			 Y   : in Integer) return Integer;
       
    
    -------------------------------------------------------------------
-   -- Genererar astroider
+   --| Genererar astroider
    --------------------------------------------------------------------
    procedure Gen_Astroid(Map      : in Definitions.World;
 			 Astroid  : in out Astroid_Type;  
@@ -88,13 +124,13 @@ package Space_Map is
    
    
    ---------------------------------------------------------------------
-   -- Flyttar ner alla "fallande" astroider en Y-rad
+   --| Flyttar ner alla "fallande" astroider en Y-rad
    ---------------------------------------------------------------------
    procedure Move_Astroid(Astroid : in out Astroid_Type);
    
    
    --------------------------------------------------------------------
-   -- Returerar Boolean om någon astroid finns vid X,Y koordinaterna.
+   --| Returerar Boolean om någon astroid finns vid X,Y koordinaterna.
    ---------------------------------------------------------------------
    function Is_Astroid_There(Astroid : in Astroid_Type;
 			     X       : in Integer;
@@ -102,7 +138,7 @@ package Space_Map is
    
    
    -----------------------------------------------------------------------
-   -- Returerar astroidens nummret i Astroid arrayen som finns på X,Y koordinaterna.
+   --| Returerar astroidens nummret i Astroid arrayen som finns på X,Y koordinaterna.
    -----------------------------------------------------------------------
    procedure Get_Astroid_Nr(Astroid : in Astroid_Type;
 			    X       : in Integer;
@@ -113,14 +149,14 @@ package Space_Map is
    
    
    ---------------------------------------------------------------------
-   -- Tar bort och återställer en fallande Astroid med Astroid nummer
+   --| Tar bort och återställer en fallande Astroid med Astroid nummer
    ---------------------------------------------------------------------
    procedure Remove_Astroid(Astroid : in out Astroid_Type;
 			    Nr      : in Integer);
    
    
-     ---------------------------------------------------------------------
-   -- Tar bort och återställer en fallande Astroid med X,Y koordinater.
+   ---------------------------------------------------------------------
+   --| Tar bort och återställer en fallande Astroid med X,Y koordinater.
    ---------------------------------------------------------------------
    procedure Remove_Astroid(Astroid : in out Astroid_Type;
 			    X       : in Integer;
@@ -128,11 +164,11 @@ package Space_Map is
    
    
    ---------------------------------------------------------------------
-   -- Skriver ut alla fallande (aktiva) astroider)
+   --| Skriver ut alla fallande (aktiva) astroider)
    ----------------------------------------------------------------------   
    procedure Put_Astroid(Astroid : in Astroid_Type;
 			 X   : in Integer;
 			 Y   : in Integer);
    
 
-end Space_Map;
+end Map_Handling;
