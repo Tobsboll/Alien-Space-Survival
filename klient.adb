@@ -19,7 +19,7 @@ with Background_Battle;       use Background_Battle;
 with Menu;                    use Menu;
 with Window_Handling;         use Window_Handling;
 with Box_Hantering;           use Box_Hantering;
-with Space_Map;               use Space_Map;
+with Map_Handling;            use Map_Handling;
 with Game_Engine;             use Game_Engine;
 
 procedure Klient is
@@ -53,19 +53,6 @@ procedure Klient is
 
       
    begin
-      -- Tar emot Banan.
-      Get(Socket, Gen_Map_Active);
-      if Gen_Map_Active = 1 then
-	 Data.Settings.Generate_Map := True;       -- Generering av banan är inaktiv
-	 for I in Data.Layout'First..Data.Layout'Last loop
-	    for J in Data.Layout(I)'First..Data.Layout(I)'last loop
-	       Get(Socket, Data.Layout(I)(J));      -- Tar emot Banan.
-	    end loop;
-	 end loop;
-      elsif Gen_Map_Active = 0 then
-	 Data.Settings.Generate_Map := False;       -- Generering av banan är inaktiv
-      end if;
-      
       -- Tar emot spelarnas Information
       for I in Player_Array'Range loop
 	 -- Tar emot om spelaren spelar.
@@ -185,7 +172,138 @@ procedure Klient is
    --------------------------------------------------
    --------------------------------------------------
    
+   procedure Put_Background (NumPlayers : in Integer) is
+      
+      Game_Length : constant Integer := World_X_Length + Gameborder_X + HighScore_Window_Width;
+      Game_Height : constant Integer := World_Y_Length + Gameborder_Y + 4;
+   begin
 
+      
+      if Auto_Background then
+	 -------------------------------------------------
+	 --| Border around everything
+	 -------------------------------------------------
+	 Put_Space_Box(1, 1, Game_Length, Game_Height, Dark_Grey);
+	 -------------------------------------------------
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Top
+	 -------------------------------------------------
+	 Goto_XY(2,2);
+	 Put_Space(Game_Length-2, Top_BG_Colour);
+	 Goto_XY(2,3);
+	 Put_Space(Game_Length-2, Top_BG_Colour);
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Side
+	 -------------------------------------------------
+	 if GameBorder_X > 2 then
+	    for I in 1 .. World_Y_Length-1 loop
+	       Goto_XY(2, GameBorder_Y+I);
+	       Put_Space(GameBorder_X-2, Game_Wall_Background);
+	    end loop;
+	    
+	    for I in (GameBorder_Y+HighScore_Window_Height+NumPlayers) .. World_Y_Length loop
+	       Goto_XY(GameBorder_X + World_X_Length, GameBorder_Y+I-1);
+	       Put_Space(HighScore_Window_Width, Game_Wall_Background);
+	    end loop;
+	 end if;
+	 
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Bottom
+	 -------------------------------------------------
+	 Goto_XY(2,GameBorder_Y+World_Y_Length);
+	 Put_Space(Game_Length-2, Bottom_BG_Colour);
+	 
+	 Goto_XY(2,GameBorder_Y+World_Y_Length+1);
+	 Put_Space(GameBorder_X-2, Bottom_BG_Colour);
+	 Goto_XY(2,GameBorder_Y+World_Y_Length+2);
+	 Put_Space(GameBorder_X-2, Bottom_BG_Colour);
+	 Goto_XY(2,GameBorder_Y+World_Y_Length+3);
+	 Put_Space(GameBorder_X-2, Bottom_BG_Colour);
+	 
+	 Goto_XY(GameBorder_X+World_X_Length,GameBorder_Y+World_Y_Length+1);
+	 Put_Space(HighScore_Window_Width, Bottom_BG_Colour);
+	 Goto_XY(GameBorder_X+World_X_Length,GameBorder_Y+World_Y_Length+2);
+	 Put_Space(HighScore_Window_Width, Bottom_BG_Colour);
+	 Goto_XY(GameBorder_X+World_X_Length,GameBorder_Y+World_Y_Length+3);
+	 Put_Space(HighScore_Window_Width, Bottom_BG_Colour);
+	 
+	 Goto_XY(2,GameBorder_Y+World_Y_Length+4);
+	 Put_Space(Game_Length-2, Bottom_BG_Colour);
+	 -------------------------------------------------
+      else
+	 -------------------------------------------------
+	 --| Border around everything
+	 -------------------------------------------------
+	 Set_Background_Colour(Dark_Grey);	 
+	 Goto_XY(1,1);
+	 Put("                                                                                                                                                    ");
+	 
+	 for I in 1 .. Game_Height-1 loop
+	    Goto_XY(1,1+I);
+	    Put(' ');
+	    Goto_XY(1+Game_Length-1,1+I);
+	    Put(' ');
+	 end loop;
+	 
+	 
+	 Goto_XY(1,Game_Height+1);
+	 Put("                                                                                                                                                    ");
+	 
+	 -------------------------------------------------
+	 --| Game Colour Top
+	 -------------------------------------------------
+	 Set_Background_Colour(Top_BG_Colour);
+	 Goto_XY(2,2);
+	 Put("                                                                                                                                                  ");
+	 Goto_XY(2,3);
+	 Put("                                                                                                                                                  ");
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Side
+	 -------------------------------------------------
+	 Set_Background_Colour(Game_Wall_Background);
+	 for I in 1 .. World_Y_Length-1 loop
+	    Goto_XY(2,GameBorder_Y+I);
+	    Put("   ");
+	 end loop;
+	 
+	 
+	 for I in GameBorder_Y+HighScore_Window_Height+NumPlayers .. World_Y_Length loop
+	    Goto_XY(Gameborder_X+World_X_Length, GameBorder_Y+I-1);
+	      Put("                                 ");
+	 end loop;
+	 
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Bottom
+	 -------------------------------------------------
+	 Set_Background_Colour(Bottom_BG_Colour);
+	 Goto_XY(2,GameBorder_X+World_Y_Length-2);
+	 Put("                                                                                                                                                  ");
+	 
+	 for I in 1 .. 3 loop
+	    Goto_XY(2,GameBorder_Y+World_Y_Length+I);
+	    Put("   ");
+	    Goto_XY(GameBorder_X+World_X_Length, GameBorder_Y+World_Y_Length+I);
+	    Put("                                 ");
+	 end loop;
+	 
+	 Goto_XY(2,GameBorder_X+World_Y_Length+2);
+	 Put("                                                                                                                                                  ");
+	 
+	 
+	 
+	 
+      end if;
+   end Put_Background;
    
    
    
@@ -258,12 +376,12 @@ begin
       --  	 delay(0.1);
       --  	 Put_Spacebattle(Move, Shot, Gameborder_X, GameBorder_Y, 
       --  			 World_X_Length, World_Y_Length);
-	 
+      
       --  	 Put_Menu(Choice, NumPlayers, Portadress, Ipadress, 
       --  		  Data.Players(1).Name, Data.Players(1).NameLength);
-	 
+      
       --  	 exit when Choice = 'C' or Choice ='J' or Choice = 'E';
-	 
+      
       --  end loop;
       --  -------------------------------------------------------------
       --  --| End of Menu ---------------------------------------------     -- NYA
@@ -271,104 +389,104 @@ begin
       
       
       --  if Choice = 'E' then -- Exit
-	 
+      
       --  	 -- Put_Exiting_Game;                   -- A screen shuting down the game.
-	 
+      
       --  	 exit;
       --  end if;
       
       begin
          Waves := (Enemies1, Enemies2, Enemies3, Enemies4);
 	 --  	 -------------------------------------------------------------
-      --  	 --| Player setup before the game ----------------------------     -- NYA
-      --  	 -------------------------------------------------------------
+	 --  	 --| Player setup before the game ----------------------------     -- NYA
+	 --  	 -------------------------------------------------------------
 	 
-      --  	 -- Initierar en socket, detta krävs för att kunna ansluta denna till
-      --  	 -- servern.
-      --  	 Initiate(Socket);
+	 --  	 -- Initierar en socket, detta krävs för att kunna ansluta denna till
+	 --  	 -- servern.
+	 --  	 Initiate(Socket);
 	 
-      --  	 --      Put_Waiting_For_Server;             -- A screen that waits for server.
-      --  	 Put_Line("Waiting for connection");
-      --  	 Connect(Socket, Argument(1), Positive'Value(Argument(2)));      -- Connects to the server
-      --  	 Put_Line("You are connected to the server");
-	 
-	 
-      --  	 Put(Socket, Choice);                        -- Sends the playerchoice (Join/Create)
-      --  	 Put_line(Socket, NumPlayers);               -- Join = 0 / Create = 1,2,3,4
-	 
-      --  	 Set_Colours(Text_Colour_1, Background_Colour_1);  -- Change colour on the terminalen
-      --  	 Clear_Window;
-	 
-      --  	 --------------------------------------
-      --  	 ------------------------------Tar Emot
-      --  	 Put_Line("Waiting for someone to create a game");
-      --  	 Get(Socket, NumPlayers);                -- Number of Players.
-	 
-      --  	 if NumPlayers = 5 then                  -- If someone already created a game
-      --  	    Clear_Window;
-      --  	    Get(Socket, NumPlayers);             -- Gets the total number of player
-      --  	    Skip_Line(Socket);                   -- Ligger ett entertecken kvar i socketen.
-      --  	    Put("Someone was faster than you and created a game with ");
-      --  	    Put(NumPlayers, Width => 0);
-      --  	    Put_Line(" Players");
-      --  	    Put("Press Enter to join the game");
-      --  	    Skip_Line;
-      --  	    New_Line;
-      --  	 end if;
-	 
-      --  	 Put_Line("Waiting for players to join the game");
-      --  	 Get(Socket, Klient_Number);                -- Players klient Number
-	 
-      --  	 Set_Window_Title("Klient",Klient_Number);  -- Change the window title
-      --  						    --------------------------------------
-      --  						    --------------------------------------
-	 
-      --  	 Skip_Line(Socket);                      -- Ligger ett entertecken kvar i socketen.
-	 
-      --  	 --------------------------------------
-      --  	 -------------------------------Skickar
-      --  	 Put_Line(Socket, Data.Players(1).Name(1..Data.Players(1).NameLength)); -- Sends the players nickname
-	 
-      --  	 if Klient_Number = 1 then
-      --  	    Put_Line(Socket,"Blue");        -- Player Colour
-      --  	 elsif Klient_Number = 2 then
-      --  	    Put_Line(Socket,"Green");
-      --  	 elsif Klient_Number = 3 then
-      --  	    Put_Line(Socket,"Yellow");
-      --  	 elsif Klient_Number = 4 then
-      --  	    Put_Line(Socket,"Red");
-      --  	 end if;
-      --  	 --------------------------------------
-      --  	 --------------------------------------   
+	 --  	 --      Put_Waiting_For_Server;             -- A screen that waits for server.
+	 --  	 Put_Line("Waiting for connection");
+	 --  	 Connect(Socket, Argument(1), Positive'Value(Argument(2)));      -- Connects to the server
+	 --  	 Put_Line("You are connected to the server");
 	 
 	 
-      --  	 --      Put_Waiting_For_Players(Socket);                     -- A screen that waits for players
+	 --  	 Put(Socket, Choice);                        -- Sends the playerchoice (Join/Create)
+	 --  	 Put_line(Socket, NumPlayers);               -- Join = 0 / Create = 1,2,3,4
+	 
+	 --  	 Set_Colours(Text_Colour_1, Background_Colour_1);  -- Change colour on the terminalen
+	 --  	 Clear_Window;
+	 
+	 --  	 --------------------------------------
+	 --  	 ------------------------------Tar Emot
+	 --  	 Put_Line("Waiting for someone to create a game");
+	 --  	 Get(Socket, NumPlayers);                -- Number of Players.
+	 
+	 --  	 if NumPlayers = 5 then                  -- If someone already created a game
+	 --  	    Clear_Window;
+	 --  	    Get(Socket, NumPlayers);             -- Gets the total number of player
+	 --  	    Skip_Line(Socket);                   -- Ligger ett entertecken kvar i socketen.
+	 --  	    Put("Someone was faster than you and created a game with ");
+	 --  	    Put(NumPlayers, Width => 0);
+	 --  	    Put_Line(" Players");
+	 --  	    Put("Press Enter to join the game");
+	 --  	    Skip_Line;
+	 --  	    New_Line;
+	 --  	 end if;
+	 
+	 --  	 Put_Line("Waiting for players to join the game");
+	 --  	 Get(Socket, Klient_Number);                -- Players klient Number
+	 
+	 --  	 Set_Window_Title("Klient",Klient_Number);  -- Change the window title
+	 --  						    --------------------------------------
+	 --  						    --------------------------------------
+	 
+	 --  	 Skip_Line(Socket);                      -- Ligger ett entertecken kvar i socketen.
+	 
+	 --  	 --------------------------------------
+	 --  	 -------------------------------Skickar
+	 --  	 Put_Line(Socket, Data.Players(1).Name(1..Data.Players(1).NameLength)); -- Sends the players nickname
+	 
+	 --  	 if Klient_Number = 1 then
+	 --  	    Put_Line(Socket,"Blue");        -- Player Colour
+	 --  	 elsif Klient_Number = 2 then
+	 --  	    Put_Line(Socket,"Green");
+	 --  	 elsif Klient_Number = 3 then
+	 --  	    Put_Line(Socket,"Yellow");
+	 --  	 elsif Klient_Number = 4 then
+	 --  	    Put_Line(Socket,"Red");
+	 --  	 end if;
+	 --  	 --------------------------------------
+	 --  	 --------------------------------------   
 	 
 	 
-      --  	 Put_Line("Waiting for players");
-      --  	 --------------------------------------
-      --  	 ------------------------------Tar Emot   
-      --  	 for I in 1 .. NumPlayers loop
-      --  	    Get_Line(Socket, Data.Players(I).Name,                  -- Spelarnas Namn 
-      --  		     Data.Players(I).NameLength);                   -- Spelarnas Namn Längder
-      --  	    Get_Line(Socket, Player_Colour,                         -- Spelarnas Färger
-      --  		     Player_Colour_Length);                         -- Spelarnas Färg Längder
-	    
-	    
-      --  	    --| Översätter sträng till Colour_Type (Lite fult tyvärr...)        
-      --  	    if Player_Colour(1 .. Player_Colour_Length) = "Blue" then
-      --  	       Data.Players(I).Colour := Blue;
-      --  	    elsif Player_Colour(1 .. Player_Colour_Length) = "Green" then
-      --  	       Data.Players(I).Colour := Green;
-      --  	    elsif Player_Colour(1 .. Player_Colour_Length) = "Yellow" then
-      --  	       Data.Players(I).Colour := Yellow;
-      --  	    elsif Player_Colour(1 .. Player_Colour_Length) = "Red" then
-      --  	       Data.Players(I).Colour := Red;
-      --  	    end if;
-      --  	 end loop;	 
-      --  	 -------------------------------------------------------------
-      --  	 --| Done with the player setup ------------------------------   -- NYA
-      --  	 -------------------------------------------------------------
+	 --  	 --      Put_Waiting_For_Players(Socket);                     -- A screen that waits for players
+	 
+	 
+	 --  	 Put_Line("Waiting for players");
+	 --  	 --------------------------------------
+	 --  	 ------------------------------Tar Emot   
+	 --  	 for I in 1 .. NumPlayers loop
+	 --  	    Get_Line(Socket, Data.Players(I).Name,                  -- Spelarnas Namn 
+	 --  		     Data.Players(I).NameLength);                   -- Spelarnas Namn Längder
+	 --  	    Get_Line(Socket, Player_Colour,                         -- Spelarnas Färger
+	 --  		     Player_Colour_Length);                         -- Spelarnas Färg Längder
+	 
+	 
+	 --  	    --| Översätter sträng till Colour_Type (Lite fult tyvärr...)        
+	 --  	    if Player_Colour(1 .. Player_Colour_Length) = "Blue" then
+	 --  	       Data.Players(I).Colour := Blue;
+	 --  	    elsif Player_Colour(1 .. Player_Colour_Length) = "Green" then
+	 --  	       Data.Players(I).Colour := Green;
+	 --  	    elsif Player_Colour(1 .. Player_Colour_Length) = "Yellow" then
+	 --  	       Data.Players(I).Colour := Yellow;
+	 --  	    elsif Player_Colour(1 .. Player_Colour_Length) = "Red" then
+	 --  	       Data.Players(I).Colour := Red;
+	 --  	    end if;
+	 --  	 end loop;	 
+	 --  	 -------------------------------------------------------------
+	 --  	 --| Done with the player setup ------------------------------   -- NYA
+	 --  	 -------------------------------------------------------------
 	 
 	 
 	 -------------------------------------------------------------
@@ -471,12 +589,7 @@ begin
 	 -------------------------------------------------------------
 	 
 	 Put_line("Tar emot banan");
-	 for I in Data.Layout'First..Data.Layout'Last loop
-	    for J in Data.Layout(I)'First..Data.Layout(I)'last loop
-	       Get(Socket, Data.Layout(I)(J));      -- Tar emot Banan.
-	    end loop;
-	 end loop;
-	 
+	 Get_Map(Socket, Data, Check_Update => False);
 	 
 	 
 	 Put_line("Game loopen börjar");
@@ -505,51 +618,94 @@ begin
 	    
 	    --if Loop_Counter mod 2 = 1 then
 	    -- Hämtar all data från servern
+	    Get_Map(Socket, Data);        -- Map_Handling
 	    Get_Game_Data(Socket,Data);
 	    --end if;
 	    
-	    	    --Följande ballar ur.
+	    --Följande ballar ur.
 	    --  if Players_Are_Dead(Data.Players) then
 	    --     --exit;
 	    --     raise GNAT.SOCKETS.SOCKET_ERROR;
 	    --  end if;
 	    
-      -----------------------------------
-      -- GET ENEMY WAVE
-      -----------------------------------
-      
-      for I in waves'range loop
+	    -----------------------------------
+	    -- GET ENEMY WAVE
+	    -----------------------------------
+	    
+	    for I in waves'range loop
 
-	 Delete_enemy_list(Waves(I));
+	       Delete_enemy_list(Waves(I));
 
-	 Get_Enemy_Ships(Waves(I), Socket); -- Tobias
-	    --DeleteList(Enemies);
-	    --Get(Socket, Enemies);
-      end loop;
-      
-      -----------------------------------
-      -- end GET ENEMY WAVE
-      -----------------------------------
+	       Get_Enemy_Ships(Waves(I), Socket); -- Tobias
+						  --DeleteList(Enemies);
+						  --Get(Socket, Enemies);
+	    end loop;
+	    
+	    -----------------------------------
+	    -- end GET ENEMY WAVE
+	    -----------------------------------
+	    
+	    --  if NumPlayers = 1 then
+	    --     delay(0.001);
+	    --  elsif NumPlayers = 2 then
+	    --     delay(0.05);
+	    --  elsif NumPlayers = 3 then
+	    --     delay(0.05);
+	    --  elsif NumPlayers = 4 then
+	    --     delay(0.05);
+	    --  end if;
+	    
 	    
 	    Clear_Window;
+	    
+	    -----------------------------------------------------------
+	    --------------------------------------| Utskrift Börjar |--
+	    -----------------------------------------------------------
+	    
+	    
+	    if Background then
+	       Put_Background(NumPlayers);
+	    end if;
+	    
+	    -------------------------------------------------
+	    --| Highscore fönster
+	    -------------------------------------------------
+	    Put_Block_Box(Highscore_Window_X, Highscore_Window_Y, Highscore_Window_Width, 
+			  Highscore_Window_Height+NumPlayers, HighScore_Background, HighScore_Border);     -- En låda runt scorelistan Eric
+	    
+	    Goto_XY(Highscore_Window_X+1, Highscore_Window_Y+1);
+	    Put_Space(Highscore_Window_Width-2, HighScore_Background);
+	    Goto_XY(Highscore_Window_X+1, Highscore_Window_Y+2);
+	    Put_Space(Highscore_Window_Width-2, HighScore_Background);
+	    Put_Score(Data, NumPlayers, Highscore_X, Highscore_Y, 
+		      HighScore_Background, White);    -- Skriver ut den sorterade scorelistan / Eric
+	    
+	    -------------------------------------------------
+	    
+	    -------------------------------------------------
+	    --| Där man skriver för att chatta
+	    -------------------------------------------------
+	    Put_Block_Box(Chatt_Window_X, Chatt_Window_Y,                    -- Ett litet fönster för att skriva i. / Eric 
+			  World_X_Length, 2, Chatt_Background, Chatt_Border); 
+	    Goto_XY(Gameborder_X+1,Gameborder_Y+World_Y_Length+2);
+	    Put("Här skriver man.");
+	    -------------------------------------------------
+	    
 	    --------------------------------
 	    --| Skriver ut banan
 	    --------------------------------
-	    Put_World(Data.Layout, Gameborder_X, Gameborder_Y, Background_Colour_1, Text_Colour_1, true);              -- put world // Eric
-	    Put_Double_Line_Box(World_Box_X, World_Box_Y, World_Box_Length, 
-				World_Box_Heigth, Background_Colour_1, Text_Colour_1);            -- En låda runt spelplanen / Eric
-												  --  Put_Box(Spelplanen_X, SpelPlanen_Y, World_X_Length-2, 
-												  --  	      World_Y_Length, Background_Colour_1, Text_Colour_1);            -- En låda runt spelplanen / Eric
+	    Put_World(Data.Map, Gameborder_X, Gameborder_Y, Game_Wall_Background, Game_Wall_Line);     -- put world // Eric
+	    Set_Colours(White, Black);
 	    
 	    --------------------------------
 	    
 	    Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
-			
-		for I in Waves'range loop					 
-		Put_enemies(Waves(I));
-		 --Put(Enemies);
-		end loop;
-		
+	    
+	    for I in Waves'range loop					 
+	       Put_enemies(Waves(I));
+	       --Put(Enemies);
+	    end loop;
+	    
 	    Put_Objects(Shot_List);
 	    Put_Objects(Obstacle_List);
 	    Put_Objects(Powerup_List);
@@ -559,32 +715,19 @@ begin
 	    --Put(Shot_List);
 	    
 	    
-	    --------------------------------
-	    --| Highscore fönster
-	    --------------------------------
-	    Put_Box(Highscore_Window_X, Highscore_Window_Y, Highscore_Window_Width, 
-		    Highscore_Window_Height+NumPlayers, Background_Colour_2, Text_Colour_2);     -- En låda runt scorelistan Eric
 	    
-	    Put_Score(Data, NumPlayers, Highscore_X, Highscore_Y, 
-		      Background_Colour_2, Text_Colour_2);    -- Skriver ut den sorterade scorelistan / Eric
+	    Set_Colours(White, Black);
 	    
-	    --------------------------------
 	    
-	    --------------------------------
-	    --| Där man skriver för att chatta
-	    --------------------------------
-	    Put_Box(Chatt_Window_X, Chatt_Window_Y,                    -- Ett litet fönster för att skriva i. / Eric 
-		    World_X_Length, 2, Background_Colour_1, Text_Colour_1); 
-	    Goto_XY(Gameborder_X+1,Gameborder_Y+World_Y_Length+2);
-	    Put("Här skriver man.");
-	    --------------------------------
-	    
+	    -----------------------------------------------------------
+	    ---------------------------------------| Utskrift klara |--
+	    -----------------------------------------------------------
 	    
 	    Get_Input;
 	    
 	    --------------------------------------------------
 	    if Is_Esc
-	    --or Players_Are_Dead(Data.Players)
+	      --or Players_Are_Dead(Data.Players)
 	    then -- måste ändras
 	       Put("Exiting...");
 	       Skip_Line;
@@ -600,7 +743,7 @@ begin
 	    -- klient synkar exakt!
 	    -- Loop_Counter := Loop_Counter + 1;
 	    
-	     --exit when Players_Are_Dead(Data.Players);  --Ballar ur.
+	    --exit when Players_Are_Dead(Data.Players);  --Ballar ur.
 	 end loop;
 	 
 	 
@@ -623,9 +766,9 @@ begin
 	    DeleteList(Powerup_List);
 	    
 	    for I in waves'range loop
-	    
-	    Delete_enemy_list(Waves(I));
-	    
+	       
+	       Delete_enemy_list(Waves(I));
+	       
 	    end loop;
 	    -- Close(Socket);
 	    Cursor_visible;
