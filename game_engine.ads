@@ -22,7 +22,7 @@
 ----------------------------------------------------
 with Object_Handling;        use Object_Handling; --
 with Definitions;            use Definitions;     --
-with Space_Map;              use Space_Map;       --
+with Map_Handling;           use Map_Handling;    --
 with TJa.Sockets;            use TJa.Sockets;     --
 with Ada.Text_IO;            use Ada.Text_IO;     --
 with TJa.Keyboard;           use TJa.Keyboard;    --
