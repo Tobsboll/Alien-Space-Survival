@@ -25,6 +25,13 @@ package Box_Hantering is
 			   Height      : in Integer;        -- Hur hög boxen ska vara.
 			   Background  : in Colour_Type;    -- Bakgrundfärgen
 			   Text_Colour : in Colour_Type);   -- Boxens färg
-
+   
+   procedure Put_Space_Box(X           : in Integer;        -- X Koordinat där den ska börja boxen
+			   Y           : in Integer;        -- Y Koordinat där den ska börja boxen
+			   Width       : in Integer;        -- Hur bred boxen ska vara.
+			   Height      : in Integer;        -- Hur hög boxen ska vara.
+			   Background  : in Colour_Type     -- Bakgrundfärgen
+			  );
+   
    
 end Box_Hantering;
