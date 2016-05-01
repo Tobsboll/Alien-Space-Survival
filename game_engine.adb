@@ -37,7 +37,7 @@ package body Game_Engine is
       
 
       --Banan
-      Generate_World(Game.Layout);  -- Genererar en helt ny bana med raka väggar. / Eric
+      Generate_World(Game.Map);  -- Genererar en helt ny bana med raka väggar. / Eric
       Game.Settings.Generate_Map := False; -- Sätter i början att banan inte ska genereras.   
       
       --------------------------------------------------
