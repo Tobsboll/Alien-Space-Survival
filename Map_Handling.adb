@@ -3,13 +3,13 @@ with Ada.Integer_Text_IO;               use Ada.Integer_Text_IO;
 with tja.window.Elementary;             use tja.window.Elementary;
 with Ada.Numerics.Discrete_Random;
 
-package body Space_Map is
+package body Map_Handling is
    
    -- Används till att bestämma om väggen ska gå till vänster eller höger
    ---------------------------------------------------------------------------
-   subtype MinusOne_To_One is Integer range -1 .. 1;
-   package Random is
-      new Ada.Numerics.Discrete_Random(Result_Subtype => MinusOne_To_One);
+   subtype MinusTwo_To_Two is Integer range -2 .. 2;
+   package Wall_Generation is
+      new Ada.Numerics.Discrete_Random(Result_Subtype => MinusTwo_To_Two);
    
    
    
@@ -28,6 +28,67 @@ package body Space_Map is
       new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_Ten);
    
    
+   ----------------------------------------------------------
+   -- Tar emot banan från servern
+   ----------------------------------------------------------  
+   procedure Get_Map(Socket       : in  Socket_Type;
+		     Data         : out Game_Data;
+		     Check_Update : in  Boolean := True) is
+      
+      Gen_Map_Active : Integer := 1;
+      
+   begin
+      if Check_Update then	 
+	 Get(Socket, Gen_Map_Active);              -- Check if new map
+      end if;
+      
+      if Gen_Map_Active = 1 then
+	 
+   	 Data.Settings.Generate_Map := True;       -- Randomize of wall is active
+	 
+	 for I in World'Range loop
+	    for J in X_Led'Range loop
+	       Get(Socket, Data.Map(I)(J));        -- Recives the map.
+	    end loop;
+	 end loop;
+	 
+      elsif Gen_Map_Active = 0 then
+	 
+   	 Data.Settings.Generate_Map := False;      -- Randomize of wall is inactive
+	 
+      end if;
+   end Get_Map;
+   
+   ----------------------------------------------------------
+   -- Skickar banan till klient
+   ----------------------------------------------------------  
+   procedure Send_Map(Socket       : in Socket_Type;
+		      Data         : in Game_Data;
+		      Check_Update : in Boolean := True) is
+      
+   begin
+      if Check_Update then
+	 if Data.Settings.Generate_Map then            -- Skickar banan om den generarar väggar
+	    
+	    Put_Line(Socket, 1);
+	    
+	 elsif Data.Settings.Generate_Map = False then -- Genererar inte ny vägg ( Ingen uppdatering )
+	    
+	    Put(Socket, 0);
+	    
+	 end if;
+      end if;
+      
+      if not Check_Update or Data.Settings.Generate_Map then
+	 for I in World'Range loop
+	    for J in X_Led'Range loop
+	       Put_line(Socket, Data.Map(I)(J)); -- Skickar Banan till klienterna
+	    end loop;
+	 end loop;   
+      end if;      
+      
+   end Send_Map;
+   
    
    ----------------------------------------------------------
    -- Genererar en helt vanlig bana som har raka väggar
@@ -38,244 +99,218 @@ package body Space_Map is
       for I in World'Range loop
 	 for J in X_Led'Range loop
 	    if (J) = (X_Led'first) then
-	       Map(I)(J) := '|';
+	       Map(I)(J) := '3';
 	    elsif (J) = (X_Led'Last) then
-	       Map(I)(J) := '|';
+	       Map(I)(J) := '3';
 	    else
-	       Map(I)(J) := ' ';
+	       Map(I)(J) := '0';
 	    end if;
 	 end loop;
       end loop;
    end Generate_World;
    
+   procedure Put_Space(Width : in Integer;
+		       Colour: in Colour_Type) is
+      
+   begin
+      Set_Background_Colour(Colour);
+      for I in 1 .. Width loop
+	 Put(' ');
+      end loop;
+   end Put_Space;
+   
    
    ----------------------------------------------------------
    -- Skriver ut banan
    -----------------------------------------------------------
-   procedure Put_World(Map        : World;
-		       X          : Integer;
-		       Y          : Integer;
-		       Background : Colour_Type;
-		       Text       : Colour_Type;
-		       Boarder    : Boolean := True) is
-      
-      Old_Background  : Colour_Type;
-      Old_Text_Colour : Colour_Type;
-      
+   procedure Put_World(Map             : World;
+		       X               : Integer;
+		       Y               : Integer;
+		       Wall_Background : Colour_Type;
+		       Wall_Line       : Colour_Type) is
       
    begin
-      Old_Text_Colour := Get_Foreground_Colour;           -- Sparar den tidigare textfärgen
-      Old_Background  := Get_Background_Colour;           -- Sparar den tidigare bakgrundsfärgen
       
-      Set_Colours(Text, Background);                      -- Ställer in dom inmatade färgerna.
-      
-      -- Skriver ut banan vid X,Y -Koordinater
-      -------------------------------------------
-      Goto_XY(X,Y);
-      for I in World'Range loop
-	 for J in X_Led'First .. X_Led'last loop
-	    if Boarder then
-	       Put(Map(I)(J));
-	    elsif J > X_Led'First and J < X_Led'Last then
-	       Put(Map(I)(J));
+      for I in World'First+1..World'last loop
+	 
+	 -----------------
+	 --| Left Side |--
+	 -----------------
+      	 Goto_XY(X, Y+I-1);
+	 if Map(I)(Border_Left(Map,I)) ='3' then  -- Straigt
+	    Put_Space(Border_Left(Map,I)-1,Wall_Background);
+	    Set_Colours(Game_Wall_Worm, Wall_Line);
+	    Put("┃");
+	 else
+	    Put_Space(Border_Left(Map,I)-2,Wall_Background);
+	    Set_Colours(Game_Wall_Worm, Wall_Line);
+	    if Map(I)(Border_Left(Map,I)) = '2' then -- Turn Left
+	       
+	       Put("┗"); Put("┓");
+	       
+	    elsif Map(I)(Border_Left(Map,I)) = '5' then -- Turn Right
+	       
+	       Put("┏"); Put("┛");
+		  
 	    end if;
-	 end loop;
-	 New_Line;
-	 Goto_XY(X,Y+I);
+	 end if;
+	 
+	 ------------------
+	 --| Right Side |--
+	 ------------------
+	 Goto_XY(X+Border_Right(Map,I)-1, Y+I-1);
+	 if Map(I)(Border_Right(Map,I)) ='3' then -- Straigt
+	    Put("┃");
+	    Put_Space(World_X_Length-Border_Right(Map,I),Wall_Background);
+	 else
+	    if Map(I)(Border_Right(Map,I)) = '1' then -- Turn Left
+	       
+	       Put("┗"); Put("┓");
+	       
+	    elsif Map(I)(Border_Right(Map,I)) = '4' then -- Turn Right
+	       
+	       Put("┏"); Put("┛");
+		  
+	    end if;
+	    Put_Space(World_X_Length-Border_Right(Map,I)-1,Wall_Background);
+	 end if;
+	 
       end loop;
       
-      -- Skriver ut ett tak som följer bredden mellan höger och vänster vägg.
-      -----------------------------------------------------------------------
-      if Boarder then
-	 Goto_XY(X,Y);
-	 if Left_Border /= 1 then
-	    for I in 1 .. Left_Border-1 loop
-	       Put(' ');
-	    end loop;
-	 end if;
-	 for I in Left_Border .. Right_Border loop
-	    Put('_');
-	 end loop;
-	 
-	 for I in Right_Border .. X_Led'Last loop
-	    Put(' ');
-	 end loop;
-	 Goto_XY(X,World'Last+1);
-      end if;           
-      Set_Colours(Old_Text_Colour, Old_Background);       -- Ställer tillbaka till dom tidigare färgerna. 
    end Put_World;
    
-   
-   ---------------------------------------------------------------
-   -- Genererar en ny vägg kant på var sida.
    --------------------------------------------------------------
-   procedure New_Top_Row(Map : in out Definitions.World) is
-      
-      G,M : Random.Generator;
-      A,R,O : Integer := 0;
-      Left_Max  : Boolean := False;
-      Right_Max : Boolean := False;
+   --| Gör en rak vägg.
+   --------------------------------------------------------------
+   procedure Make_Straigt_Wall(Map          : in out World;
+			      Border_Number : in Integer) is
+     
+     
+   begin
+      Map(1)(Border_Number) := ('3');
+   end Make_Straigt_Wall;
+
+   --------------------------------------------------------------
+   --| Gör en vägg åt vänster
+   --------------------------------------------------------------
+   procedure Make_Left_Wall(Map           : in out World;
+			    Border_Number : in out Integer) is
+     
+     
+   begin
+      Map(1)(Border_Number-1..Border_Number) := ('1','2');
+      Border_Number := Border_Number - 1;
+   end Make_Left_Wall;
+   
+   --------------------------------------------------------------
+   --| Gör en vägg åt Höger
+   --------------------------------------------------------------
+   procedure Make_Right_Wall(Map           : in out World;
+			     Border_Number : in out Integer) is
       
       
    begin
+      Map(1)(Border_Number..Border_Number+1) := ('4','5');
+      Border_Number := Border_Number + 1;
+   end Make_Right_Wall;
+   
+   --------------------------------------------------------------
+   --| Genererar en ny vägg kant på var sida.
+   --------------------------------------------------------------
+   procedure New_Top_Row(Map     : in out Definitions.World;
+			 Straigt : in Boolean := False;
+			 Open    : in Boolean := False;
+			 Close   : in Boolean := False) is
       
-      loop
-	 Random.Reset(G);
+      G,M : Wall_Generation.Generator;
+      Wall_Left_Randomize : Integer;
+      Wall_Right_Randomize : Integer;
+      Wall_Left_Max  : Integer;
+      Wall_Right_Max : Integer;
+      
+   begin
+      Wall_Generation.Reset(G);
+      Map(1) := (others => '0');
+      Border_Min_Max(Map, Wall_Left_Max, Wall_Right_Max);
+      
+      if Border_Difference(Map) < 30 and Left_Border > 1 and
+	   Right_Border < World_X_Length then 
+	                                      
+	 Make_Right_Wall(Map, Right_Border);  -- ┗┓   ┏┛
+	 Make_Left_Wall(Map, Left_Border);    --  ┗┓ ┏┛
 	 
-	 -- Får en mer livlig vägg då generatorn bara byter typ var 0.5 sek
-	 -------------------------------------------------------------------
-	 if A = O then
-	    A := Random.Random(G);
-	 else
-	    if A = -1 then
-	       A := 1;
-	    elsif A = 1 then
-	       A := -1;
+      else                      
+	 
+	 if Straigt then                         --┃       ┃
+	    Make_Straigt_Wall(Map, Left_Border); --┃       ┃
+	    Make_Straigt_Wall(Map, Right_Border);--┃       ┃
+	    
+	 elsif Open then
+	    
+	    if Left_Border > 1 then                --┗┓     ┏┛
+	       Make_Right_Wall(Map, Right_Border); -- ┗┓   ┏┛
+	    else                                   --  ┗┓ ┏┛
+	       Make_Straigt_Wall(Map, Right_Border);
+	    end if;
+	    
+	    if Right_Border < World_X_Length then
+	       Make_Left_Wall(Map, Left_Border);
 	    else
-	       A := 1;
-	    end if;
-	 end if;
-	 
-	 
-	 -- Om Left_Border är längst till Vänster så ska
-	 -- den endast generera vägg upp eller höger.
-	 -----------------------------------------------
-
-	 if Left_Border = X_Led'first then
-	    if A = 1 then
-	       Left_Border := Left_Border + A;
-	       Map(1)(Left_Border) := '/';
-	       Left_Border := Left_Border + A;
-	       Map(1)(Left_Border-2) := ' ';
-	    else 
-	       Map(1)(Left_Border) := '|';
-	       Map(1)(Left_Border+1) := ' ';
-	    end if;
-	    A := O;
-	    exit;
+	       Make_Straigt_Wall(Map, Left_Border);
+	    end if;  
+	    
+	 elsif Close then                        --  ┏┛ ┗┓
+	    Make_Right_Wall(Map, Left_Border);   -- ┏┛   ┗┓
+	    Make_Left_Wall(Map, Right_Border);   --┏┛     ┗┓
+	 else
 	    
 	    
-	    -- Om Left_Border är mellan vänsterväggen och begränsningen
-	    -----------------------------------------------
-	 elsif Left_Border > 2 and 
-	   Left_Border < X_Led'Last/(3) then -- Begränsningen
-	    if A = -1 and Map(2)(Left_Border) = '|' then 
-	       Left_Border := Left_Border + A;
-	       Map(1)(Left_Border) := '\';
-	       Left_Border := Left_Border + A;
-	       Map(1)(Left_Border - (2*A)) := ' ';
-	       O := A;
-	       exit;
-	    elsif A = 0 and Map(2)(Left_Border-1) = '/' then 
-	       Map(1)(Left_Border) := '|';
-	       Map(1)(Left_Border-1) := ' ';
-	       O := A;
-	       exit;
-	    elsif A = 0 and Map(2)(Left_Border+1) = '\'  then 
-	       Map(1)(Left_Border) := '|';
-	       Map(1)(Left_Border+1) := ' ';
-	       O := A;
-	       exit;
-	    elsif A = 1 and Map(2)(Left_Border) = '|' then 
-	       Left_Border := Left_Border + A;
-	       Map(1)(Left_Border) := '/';
-	       Left_Border := Left_Border + A;
-	       Map(1)(Left_Border -(2*A)) := ' ';
-	       O := A;
-	       exit;
-	    else
-	       Map(1)(Left_Border) := '|';
-	       Map(1)(Left_Border+1) := ' ';
-	       Map(1)(Left_Border-1) := ' ';
-	       exit;
-	    end if;
-	 else
-	    --- Om Left_Border har uppnått den maximala gränsen
-	    ---------------------------------------------------
-	    Map(1)(Left_Border-1) := '\';
-	    Left_Border := Left_Border -2;
-	    exit;
-	 end if;
-      end loop;
-      
-      loop
-        
-	 Random.Reset(G);
-	 
-	 -- Får en mer livlig vägg då generatorn bara byter typ var 0.5 sek
-	 -------------------------------------------------------------------
-	    if A = O then
-	       A := Random.Random(M);
-	    else
-	       if A = 1 then
-		  A := -1;
-	       elsif A = -1 then
-		  A := 1;
+	    
+	    ------------
+	    --| LEFT |--
+	    ------------	 
+	    Wall_Left_Randomize := Wall_Generation.Random(G);
+	    
+	    if Left_Border = 1 then                    -- Furthest to the left wall
+	       if Wall_Left_Randomize = 1 then
+		  Make_Right_Wall(Map, Left_Border);   -- ┏┛
 	       else
-		  A := -1;
+		  Make_Straigt_Wall(Map, Left_Border); -- ┃
 	       end if;
-	    end if;
-	    
-	    -- Om Right_Border är längst till höger så ska
-	    -- den endast generera vägg upp eller vänster.
-	    -----------------------------------------------
-	    if Right_Border = X_Led'Last then
-	       if A = -1 then
-		  Right_Border := Right_Border + A;
-		  Map(1)(Right_Border) := '\';
-		  Right_Border := Right_Border + A;
-		  Map(1)(Right_Border+2) := ' ';
-	       else 
-		  Map(1)(Right_Border) := '|';
-		  Map(1)(Right_Border-1) := ' ';
-	       end if;
-	       A := O;
-	       exit;
 	       
-	    
-	    -- Om Right_Border är mellan högerväggen och begränsningen
-	    -----------------------------------------------
-	    elsif Right_Border < X_Led'Last-1 and                        -- Högerväggen
-	      Right_Border > X_Led'Last-(X_Led'Last/3) then-- Begränsningen
-	       if A = -1 and Map(2)(Right_Border) = '|' then 
-		  Right_Border := Right_Border + A;
-		  Map(1)(Right_Border) := '\';
-		  Right_Border := Right_Border + A;
-		  Map(1)(Right_Border - (2*A)) := ' ';
-		  O := A;
-		  exit;
-	       elsif A = 0 and Map(2)(Right_Border-1) = '/' then 
-		  Map(1)(Right_Border) := '|';
-		  Map(1)(Right_Border-1) := ' ';
-		  O := A;
-		  exit;
-	       elsif A = 0 and Map(2)(Right_Border+1) = '\'  then 
-		  Map(1)(Right_Border) := '|';
-		  Map(1)(Right_Border+1) := ' ';
-		  O := A;
-		  exit;
-	       elsif A = 1 and Map(2)(Right_Border) = '|' then 
-		  Right_Border := Right_Border + A;
-		  Map(1)(Right_Border) := '/';
-		  Right_Border := Right_Border + A;
-		  Map(1)(Right_Border -(2*A)) := ' ';
-		  O := A;
-		  exit;
-	       else
-		  Map(1)(Right_Border) := '|';
-		  Map(1)(Right_Border+1) := ' ';
-		  Map(1)(Right_Border-1) := ' ';
-		  exit;
-	       end if;
+	    elsif Wall_Left_Randomize = -1 then        -- Moves to the Left
+	       Make_Left_Wall(Map, Left_Border);       -- ┗┓
+	       
+	    elsif Wall_Left_Randomize = 1 then         -- Moves to the Right
+	       Make_Right_Wall(Map, Left_Border);      -- ┏┛
+	       
 	    else
-	       --- Om Right_Border har uppnått den maximala gränsen
-	       ---------------------------------------------------
-	       Map(1)(Right_Border+1) := '/';
-	       Right_Border := Right_Border + 2; 
-	       exit;
+	       Make_Straigt_Wall(Map, Left_Border);    -- ┃
 	    end if;
-      end loop;
-      
+	    
+	    -------------
+	    --| Right |--
+	    -------------	 
+	    Wall_Right_Randomize := Wall_Generation.Random(G);
+	    
+	    if Right_Border = World_X_Length then          -- Furthest to the right wall 	 
+	       if Wall_Right_Randomize = 1 then
+		  Make_Left_Wall(Map, Right_Border);       -- ┗┓
+	       else
+		  Make_Straigt_Wall(Map, Right_Border);    -- ┃
+	       end if;
+	       
+	    elsif Wall_Right_Randomize = 1 then            -- Moves to the Right 
+	       Make_Right_Wall(Map, Right_Border);         -- ┏┛
+	       
+	    elsif Wall_Right_Randomize = -1 then           -- Moves to the Left
+	       Make_Left_Wall(Map, Right_Border);          -- ┗┓
+	       
+	    else
+	       Make_Straigt_Wall(Map, Right_Border);       -- ┃
+	    end if;
+	 end if;
+      end if;
    end New_Top_Row;
    
    
@@ -291,75 +326,6 @@ package body Space_Map is
 	 end loop;
       end loop;
    end Move_Rows_Down;
-   
-   
-   --------------------------------------------------------
-   -- Räknar ut och skickar tillbaka vart vänster vägg är
-   --------------------------------------------------------
-   procedure Border_Left(Map : in Definitions.World;
-			 X   : out Integer;
-			 Y   : in Integer) is
-      
-   begin
-      X  := X_Led'First;
-      for J in X_Led'Range loop	    
-	 if Map(Y)(J) /= ' ' then
-	    X := J;
-	    exit;
-	 end if;
-      end loop;
-   end Border_Left;
-   
-   
-   
-   --------------------------------------------------------
-   -- Räknar ut och skickar tillbaka vart höger vägg är
-   --------------------------------------------------------
-   procedure Border_Right(Map : in Definitions.World;
-			  X   : out Integer;
-			  Y   : in Integer) is
-      
-   begin
-      X := X_Led'Last;
-      for J in reverse X_Led'Range loop
-	 if Map(Y)(J) /= ' ' then
-	    X := J;        
-	    exit;
-	 end if;
-      end loop;
-   end Border_Right;
-   
-   --------------------------------------------------------
-   -- Räknar ut och skickar tillbaka vart vänster vägg är
-   --------------------------------------------------------
-   function Border_Left(Map : in Definitions.World;
-			Y   : in Integer) return Integer is
-      
-   begin
-      for J in X_Led'Range loop	    
-	 if Map(Y)(J) /= ' ' then
-	    return J;
-	    exit;
-	 end if;
-      end loop;
-   end Border_Left;
-   
-   
-   
-   --------------------------------------------------------
-   -- Räknar ut och skickar tillbaka vart höger vägg är
-   --------------------------------------------------------
-   function Border_Right(Map : in Definitions.World;
-			 Y   : in Integer) return Integer is
-      
-   begin
-      for J in reverse X_Led'Range loop
-	 if Map(Y)(J) /= ' ' then
-	    return J;        
-	    exit;
-	 end if;
-      end loop;
-   end Border_Right;
    
    --------------------------------------------------------------
    --- Räknar hur långt in väggen är maximalt från varje sida.
@@ -378,7 +344,7 @@ package body Space_Map is
 	 
 	 --- Går igenom vänsersidan
 	 for J in X_Led'Range loop	    
-	    if Map(I)(J) /= ' ' then
+	    if Map(I)(J) /= '0' then
 	       if J > Min then     -- Byter ut om den hittat en vägg
 		  Min := J;        -- som är längre in
 	       end if;
@@ -388,7 +354,7 @@ package body Space_Map is
 	 
 	 --- Går igenom högersidan 
 	 for J in reverse X_Led'Range loop
-	    if Map(I)(J) /= ' ' then
+	    if Map(I)(J) /= '0' then
 	       if J < Max then     -- Byter ut om den hittat en vägg
 		  Max := J;        -- som är längre in
 	       end if;
@@ -397,6 +363,105 @@ package body Space_Map is
 	 end loop;
       end loop;
    end Border_Min_Max;
+   
+   -------------------------------------------------------
+   --| Räknar fram avståndet mellan väggarna
+   -------------------------------------------------------
+   function Border_Difference(Map : in World) return Integer is
+      
+      Max : Integer;
+      Min : Integer;
+      
+   begin
+      Border_Min_Max(Map, Min, Max);
+      return Max-Min;
+   end Border_Difference;
+   
+   
+   --------------------------------------------------------
+   -- Räknar ut och skickar tillbaka vart vänster vägg är
+   --------------------------------------------------------
+   procedure Border_Left(Map : in Definitions.World;
+			 X   : out Integer;
+			 Y   : in Integer) is
+      
+   begin
+      X  := X_Led'First;
+      for J in X_Led'Range loop	    
+	 if Map(Y)(J) /= '0' then
+	    X := J;
+	    exit;
+	 end if;
+      end loop;
+   end Border_Left;
+   
+   
+   
+   --------------------------------------------------------
+   -- Räknar ut och skickar tillbaka vart höger vägg är
+   --------------------------------------------------------
+   procedure Border_Right(Map : in Definitions.World;
+			  X   : out Integer;
+			  Y   : in Integer) is
+      
+   begin
+      X := X_Led'Last;
+      for J in reverse X_Led'Range loop
+	 if Map(Y)(J) /= '0' then
+	    X := J;        
+	    exit;
+	 end if;
+      end loop;
+   end Border_Right;
+   
+   
+   --------------------------------------------------------
+   -- Räknar ut och skickar tillbaka vart vänster vägg är
+   --------------------------------------------------------
+   function Border_Left(Map : in Definitions.World;
+			Y   : in Integer) return Integer is
+      
+      The_Wall : Integer;
+      
+   begin
+      for J in X_Led'Range loop	    
+	 if Map(Y)(J) /= '0' then
+	    if Map(Y)(J) = '4' or Map(Y)(J) = '1' then
+	       The_Wall := J+1;
+	    else
+	       The_Wall := J;
+	    end if;
+	    exit;
+	 end if;
+      end loop;
+      
+      return The_Wall;
+   end Border_Left;
+   
+   
+   
+   --------------------------------------------------------
+   -- Räknar ut och skickar tillbaka vart höger vägg är
+   --------------------------------------------------------
+   function Border_Right(Map : in Definitions.World;
+			 Y   : in Integer) return Integer is
+      
+      The_Wall : Integer;
+      
+   begin
+      for J in reverse X_Led'Range loop
+	 if Map(Y)(J) /= '0' then
+	    if Map(Y)(J) = '2' or Map(Y)(J) = '5' then
+	       The_Wall := J-1;
+	    else
+	       The_Wall := J;
+	    end if;
+	    exit;
+	 end if;
+      end loop;
+      
+      return The_Wall;
+   end Border_Right;
    
    
    ---------------------------------------------------------------------
@@ -755,4 +820,4 @@ package body Space_Map is
 	 end if;
       end loop;
    end Put_Astroid;
-end Space_Map;
+end Map_Handling;
