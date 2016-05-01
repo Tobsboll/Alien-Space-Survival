@@ -137,4 +137,46 @@ package body Box_Hantering is
    end Put_Block_Box;
 
    
+   procedure Put_Space_Box(X           : in Integer;        -- X Koordinat där den ska börja boxen
+			   Y           : in Integer;        -- Y Koordinat där den ska börja boxen
+			   Width       : in Integer;        -- Hur bred boxen ska vara.
+			   Height      : in Integer;        -- Hur hög boxen ska vara.
+			   Background  : in Colour_Type     -- Bakgrundfärgen
+			  ) is
+      
+      Old_Background  : Colour_Type;
+      Old_Text_Colour : Colour_Type;
+      
+      
+   begin
+      Old_Text_Colour := Get_Foreground_Colour;           -- Sparar den tidigare textfärgen
+      Old_Background  := Get_Background_Colour;           -- Sparar den tidigare bakgrundsfärgen
+      
+      Set_Background_Colour(Background);               -- Ställer in dom inmatade färgerna.
+      
+      Goto_XY(X,Y);
+      Put(' ');
+      for I in 1 .. Width-2 loop
+	 Put(' ');
+      end loop;
+      Put(' ');
+      
+      for I in 1 .. Height-1 loop
+	 Goto_XY(X,Y+I);
+	 Put(' ');
+	 Goto_XY(X+Width-1,Y+I);
+	 Put(' ');
+      end loop;
+      
+      Goto_XY(X,Y+Height);
+      Put(' ');
+      for I in 1 .. Width-2 loop
+	 Put(' ');
+      end loop;
+      Put(' ' );      
+      
+      Set_Colours(Old_Text_Colour, Old_Background);       -- Ställer tillbaka till dom tidigare färgerna.
+      
+   end Put_Space_Box;
+   
 end Box_Hantering;
