@@ -95,7 +95,29 @@ package body Object_Handling is
    end Create_Object;
    --------------------------------------------------
    
+
+
+   --------------------------------------------------
+   --| Highest Y Position in a list |----------------- // Eric
+   --------------------------------------------------
+   function Highest_Y(List : in Object_List;
+		     Y    : in Integer := GameBorder_Y+World_Y_Length) return Integer is
+     
+   begin
+      if not Empty(List) then
+	 if List.XY_Pos(2) < Y then
+	    return Lowest_Y(List.Next, List.XY_Pos(2));
+	 else
+	    return Lowest_Y(List.Next, Y);
+	 end if;
+      else
+	 return Y;
+      end if;
+   end Highest_Y;
+   --------------------------------------------------
    
+
+
    --------------------------------------------------
    --| Lowest Y Position in a list |----------------- // Eric
    --------------------------------------------------
