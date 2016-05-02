@@ -91,7 +91,7 @@ package Definitions is
    ---------------------------------------------------
    --| X,Y Koordinater för alla fönster
    ---------------------------------------------------
-   Gameborder_X : constant Integer := 5; 
+   Gameborder_X : constant Integer := 4; 
    Gameborder_Y : constant Integer := 3;
    
    World_Box_X      : constant Integer := Gameborder_X-1;
@@ -99,7 +99,7 @@ package Definitions is
    World_Box_Length : constant Integer := World_X_Length;
    World_Box_Heigth : constant Integer := World_Y_Length;
    
-   Highscore_Window_X      : constant Integer := Gameborder_X+World_X_Length;
+   Highscore_Window_X      : constant Integer := Gameborder_X+World_X_Length+1;
    Highscore_Window_Y      : constant Integer := Gameborder_Y+1;
    Highscore_Window_Width  : constant Integer := 33;
    Highscore_Window_Height : constant Integer := 2;
