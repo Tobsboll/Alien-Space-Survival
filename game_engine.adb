@@ -8,8 +8,7 @@ package body Game_Engine is
    --------------------------------------------------
    procedure Set_Default_Values (Num_Players : in Integer;
 				 Game        : in out Game_Data
-				   --World_X_Length, World_Y_Length : in Integer   --GLOBALA VARIABLER
-				) is
+			        ) is
       Xpos : Integer;
       Interval : constant Integer := World_X_Length/(1+Num_Players);
    begin
@@ -20,8 +19,8 @@ package body Game_Engine is
       
       for K in 1..Num_Players loop
 	 --Spawning
-	 Game.Players(K).Ship.XY(2) := World_Y_Length - 1;  -- + border_Length
-	 Game.Players(K).Ship.XY(1) := Xpos + Interval; -- + border_Length;
+	 Game.Players(K).Ship.XY(2) := World_Y_Length + GameBorder_Y - 2;
+	 Game.Players(K).Ship.XY(1) := Xpos + Interval + GameBorder_X;
 	 Game.Players(K).Playing := True; 
 	 Xpos := Xpos + Interval;
 	 
@@ -107,10 +106,10 @@ package body Game_Engine is
 	       
 	       
 	       if Keyboard_Input = 'w' and then not Player_Collide(X,Y-1, Obstacle_List) then 
-		  Data.Players(I).Ship.XY(2) := Integer'Max(2 , Y-1);
+		  Data.Players(I).Ship.XY(2) := Integer'Max(GameBorder_Y + 1 , Y-1);
 		  
 	       elsif Keyboard_Input = 's' and then not Player_Collide(X,Y+1, Obstacle_List) then 
-		  Data.Players(I).Ship.XY(2) := Integer'Min(World_Y_Length-1 , Y+1);
+		  Data.Players(I).Ship.XY(2) := Integer'Min(World_Y_Length+GameBorder_Y-2 , Y+1);
 		  
 	       elsif Keyboard_Input = 'a' and then not Player_Collide(X-Move_Horisontal,Y, Obstacle_List) then
 		  Data.Players(I).Ship.XY(1) := Integer'Max(2 , X - Move_Horisontal);
