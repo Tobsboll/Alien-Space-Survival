@@ -51,7 +51,7 @@ package Object_Handling is
 			   Attr           : in Integer;
 			   L              : in out Object_List );
    function Highest_Y(List : in Object_List;	
-		     Y    : in Integer := GameBorder_Y+World_Y_Length) return Integer
+		     Y    : in Integer := GameBorder_Y+World_Y_Length) return Integer;
    function Lowest_Y(List : in Object_List;
 		     Y    : in Integer := 0) return Integer;
    --  function Length(L : in Shot_Fired) return Integer;
