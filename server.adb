@@ -371,22 +371,23 @@ begin
    --Testar att skapa olika typer av väggar
    --Create_Object(ObstacleType(1), 2, Obstacle_Y, Light, Obstacle_List);
    
-   --  Create_Object(ObstacleType(2), 10, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 15, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 20, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 25, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 30, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 35, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 40, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 45, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 50, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 55, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 60, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 65, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 70, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 75, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 80, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 85, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 10, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 15, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 20, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 25, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 30, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 35, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 40, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 45, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 50, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 55, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 60, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 65, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 70, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 75, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 80, 20, Obstacle_Y, Obstacle_List);
+   Create_Object(ObstacleType(2), 85, 20, Obstacle_Y, Obstacle_List);
+
    
     -- Create_Object(ObstacleType(3), 25, 20, Obstacle_Y, Obstacle_List);
     
