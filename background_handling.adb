@@ -4,7 +4,7 @@ with Box_Hantering;       use Box_Hantering;
 with TJa.Window.Text;     use TJa.Window.Text;
 with Definitions;         use Definitions;
 
-package body Background_Battle is
+package body Background_Handling is
    
    procedure Put_Spacebattle(Move           : in out Ship_Move_Type;
 			     Shot           : in out Ship_Shot_Type;
@@ -399,4 +399,4 @@ package body Background_Battle is
    end Put_Spacebattle;
    
    
-end Background_Battle;
+end Background_Handling;
