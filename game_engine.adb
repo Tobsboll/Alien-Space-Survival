@@ -141,6 +141,8 @@ package body Game_Engine is
 	       --Kollar om man kan plocka upp power-up nu när spelaren har flyttats:
 	       Player_Collide_In_Object(X,Y, Data.Players(I).Ship, Powerup_List);
 	    end if;
+	 else                                -- Fyller annars Socketbufferten & servern "rusar" // Eric
+	    Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
 	 end if;
       end loop;
       
