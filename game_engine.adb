@@ -89,7 +89,6 @@ package body Game_Engine is
    begin
       
       for I in 1..Num_Players loop
-	 if Data.Players(I).Playing then
 	    X          := Data.Players(I).Ship.XY(1);
 	    Y          := Data.Players(I).Ship.XY(2);
 	    Laser_Type := Data.Players(I).Ship.Laser_Type;
@@ -141,9 +140,6 @@ package body Game_Engine is
 	       --Kollar om man kan plocka upp power-up nu när spelaren har flyttats:
 	       Player_Collide_In_Object(X,Y, Data.Players(I).Ship, Powerup_List);
 	    end if;
-	 else                                -- Fyller annars Socketbufferten & servern "rusar" // Eric
-	    Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
-	 end if;
       end loop;
       
    end Get_Player_Input;
