@@ -363,7 +363,6 @@ package body Game_Engine is
 	    if Shot_Collide(Shot,Obj2) then
 	       Remove(Obj2);
 	       Remove(Shot);
-	       A_Shot_Collide_In_Object(Shot,Obj2);
 	    else
 	       A_Shot_Collide_In_Object(Shot, Obj2.Next);
 	    end if;
@@ -393,13 +392,13 @@ package body Game_Engine is
    --------------------------------------------------
    procedure Shots_Collide_In_Objects (Obj1, Obj2 : in out Object_List) is
       
-      O1 : Object_List := Obj1;
-      O2 : Object_List := Obj2;
-      
    begin
       if not Empty(Obj1) and not Empty(Obj2) then
 	 A_Shot_Collide_In_Object(Obj1, Obj2);
-	 Shots_Collide_In_Objects(O1.Next, O2);
+
+         if not Empty(Obj1) then
+            Shots_Collide_In_Objects(Obj1.Next, Obj2);
+         end if;
       end if;
       
       
