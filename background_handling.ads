@@ -1,4 +1,4 @@
-package Background_Battle is
+package Background_Handling is
    
    type Ship_Move_Type is array(1..4) of Integer;
    type Ship_Shot_Type is array(1..4) of Integer;
@@ -64,4 +64,4 @@ package Background_Battle is
 				   (' ', ' ', '/', '_', '_', '_', '_', '.', '.', '.', '.', '=', '=', '=', '-', '-', '-', '-', '-', '-', '-', '-', ''', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '));
    
    
-end Background_Battle;
+end Background_Handling;
