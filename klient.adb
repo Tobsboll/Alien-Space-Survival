@@ -722,6 +722,27 @@ begin
 	    -----------------------------------------------------------
 	    ---------------------------------------| Utskrift klara |--
 	    -----------------------------------------------------------
+
+
+	    ----------------------------------------
+	    --| Delay depending on |----------------    -- // Eric
+	    ----------------------------------------
+	    
+	    --| Number of Players |--
+	    if NumPlayers = 1 then    -- Just nu är det ingen skillnad
+	       delay(0.04);           -- Men det kanske kommer ändras 
+	    elsif NumPlayers = 2 then -- beroende på vad servern gör.
+	       delay(0.04);
+	    elsif NumPlayers = 3 then
+	       delay(0.04);
+	    elsif NumPlayers = 4 then
+	       delay(0.04);
+	    end if;
+	    
+	    ----------------------------------------
+	    ----------------------------------------
+	    ----------------------------------------
+
 	    
 	    Get_Input;
 	    
