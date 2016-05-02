@@ -96,6 +96,25 @@ package body Object_Handling is
    --------------------------------------------------
    
    
+   --------------------------------------------------
+   --| Lowest Y Position in a list |----------------- // Eric
+   --------------------------------------------------
+   function Lowest_Y(List : in Object_List;
+		     Y    : in Integer := 0) return Integer is
+     
+   begin
+      if not Empty(List) then
+	 if List.XY_Pos(2) > Y then
+	    return Lowest_Y(List.Next, List.XY_Pos(2));
+	 else
+	    return Lowest_Y(List.Next, Y);
+	 end if;
+      else
+	 return Y;
+      end if;
+   end Lowest_Y;
+   --------------------------------------------------
+   
 
 
    --------------------------------------------------
