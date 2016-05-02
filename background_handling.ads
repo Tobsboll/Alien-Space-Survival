@@ -3,6 +3,9 @@ package Background_Handling is
    type Ship_Move_Type is array(1..4) of Integer;
    type Ship_Shot_Type is array(1..4) of Integer;
    
+   type Small_Ship_X_Length is array (1..40) of Character;
+   type Small_Ship_Y_Length is array (1..6) of Small_Ship_X_Length;
+   
    Loop_Counter : Integer := 0;
    
    procedure Put_Spacebattle(Move           : in out Ship_Move_Type;
@@ -11,9 +14,9 @@ package Background_Handling is
 			     World_X_Length : in Integer;
 			     World_Y_Length : in Integer);
    
+   procedure Put_Background (NumPlayers : in Integer)
    
-   type Small_Ship_X_Length is array (1..40) of Character;
-   type Small_Ship_Y_Length is array (1..6) of Small_Ship_X_Length;
+   
    
    --   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32   33   34   35   36   37   38   39   40   41   42   43   44   45   46   47   48   49   50   51   52   53   54   55   56   57   58   59   60   61   62   63   64   65
    Small_Ship  : Small_Ship_Y_Length := ((' ', '_', '_', '_', '_', '/', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '),
