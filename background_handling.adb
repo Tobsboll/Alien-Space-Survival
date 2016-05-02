@@ -398,5 +398,140 @@ package body Background_Handling is
       
    end Put_Spacebattle;
    
+   procedure Put_Background (NumPlayers : in Integer) is
+      
+      Game_Length : constant Integer := World_X_Length + Gameborder_X + HighScore_Window_Width;
+      Game_Height : constant Integer := World_Y_Length + Gameborder_Y + 4;
+   begin
+
+      
+      if Auto_Background then
+	 -------------------------------------------------
+	 --| Border around everything
+	 -------------------------------------------------
+	 Put_Space_Box(1, 1, Game_Length, Game_Height, Dark_Grey);
+	 -------------------------------------------------
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Top
+	 -------------------------------------------------
+	 Goto_XY(2,2);
+	 Put_Space(Game_Length-2, Top_BG_Colour);
+	 Goto_XY(2,3);
+	 Put_Space(Game_Length-2, Top_BG_Colour);
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Side
+	 -------------------------------------------------
+	 if GameBorder_X > 2 then
+	    for I in 1 .. World_Y_Length-1 loop
+	       Goto_XY(2, GameBorder_Y+I);
+	       Put_Space(GameBorder_X-2, Game_Wall_Background);
+	    end loop;
+	    
+	    for I in (GameBorder_Y+HighScore_Window_Height+NumPlayers) .. World_Y_Length loop
+	       Goto_XY(GameBorder_X + World_X_Length, GameBorder_Y+I-1);
+	       Put_Space(HighScore_Window_Width, Game_Wall_Background);
+	    end loop;
+	 end if;
+	 
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Bottom
+	 -------------------------------------------------
+	 Goto_XY(2,GameBorder_Y+World_Y_Length);
+	 Put_Space(Game_Length-2, Bottom_BG_Colour);
+	 
+	 Goto_XY(2,GameBorder_Y+World_Y_Length+1);
+	 Put_Space(GameBorder_X-2, Bottom_BG_Colour);
+	 Goto_XY(2,GameBorder_Y+World_Y_Length+2);
+	 Put_Space(GameBorder_X-2, Bottom_BG_Colour);
+	 Goto_XY(2,GameBorder_Y+World_Y_Length+3);
+	 Put_Space(GameBorder_X-2, Bottom_BG_Colour);
+	 
+	 Goto_XY(GameBorder_X+World_X_Length,GameBorder_Y+World_Y_Length+1);
+	 Put_Space(HighScore_Window_Width, Bottom_BG_Colour);
+	 Goto_XY(GameBorder_X+World_X_Length,GameBorder_Y+World_Y_Length+2);
+	 Put_Space(HighScore_Window_Width, Bottom_BG_Colour);
+	 Goto_XY(GameBorder_X+World_X_Length,GameBorder_Y+World_Y_Length+3);
+	 Put_Space(HighScore_Window_Width, Bottom_BG_Colour);
+	 
+	 Goto_XY(2,GameBorder_Y+World_Y_Length+4);
+	 Put_Space(Game_Length-2, Bottom_BG_Colour);
+	 -------------------------------------------------
+      else
+	 -------------------------------------------------
+	 --| Border around everything
+	 -------------------------------------------------
+	 Set_Background_Colour(Dark_Grey);	 
+	 Goto_XY(1,1);
+	 Put("                                                                                                                                                    ");
+	 
+	 for I in 1 .. Game_Height-1 loop
+	    Goto_XY(1,1+I);
+	    Put(' ');
+	    Goto_XY(1+Game_Length,1+I);
+	    Put(' ');
+	 end loop;
+	 
+	 
+	 Goto_XY(1,Game_Height+1);
+	 Put("                                                                                                                                                    ");
+	 
+	 -------------------------------------------------
+	 --| Game Colour Top
+	 -------------------------------------------------
+	 Set_Background_Colour(Top_BG_Colour);
+	 Goto_XY(2,2); 
+	 Put("                                                                                                                                                  ");
+	 Goto_XY(2,3);
+	 Put("                                                                                                                                                  ");
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Side
+	 -------------------------------------------------
+	 Set_Background_Colour(Game_Wall_Background);
+	 for I in 1 .. World_Y_Length-1 loop
+	    Goto_XY(2,GameBorder_Y+I);
+	    Put("   ");
+	 end loop;
+	 
+	 for I in 1 .. GameBorder_Y+HighScore_Window_Height+NumPlayers-1 loop
+	    Goto_XY(Gameborder_X+World_X_Length, GameBorder_Y+I);
+	    Put(' ');
+	 end loop;
+	 
+	 for I in GameBorder_Y+HighScore_Window_Height+NumPlayers .. World_Y_Length loop
+	    Goto_XY(Gameborder_X+World_X_Length, GameBorder_Y+I-1);
+	    Put("                                  ");
+	 end loop;
+	 
+	 
+	 
+	 -------------------------------------------------
+	 --| Game Colour Bottom
+	 -------------------------------------------------
+	 Set_Background_Colour(Bottom_BG_Colour);
+	 Goto_XY(2,GameBorder_Y+World_Y_Length);
+	 Put("                                                                                                                                                  ");
+	 
+	 for I in 1 .. 3 loop
+	    Goto_XY(2,GameBorder_Y+World_Y_Length+I);
+	    Put("   ");
+	    Goto_XY(GameBorder_X+World_X_Length, GameBorder_Y+World_Y_Length+I);
+	    Put("                                  ");
+	 end loop;
+	 
+	 Goto_XY(2,GameBorder_Y+World_Y_Length+4);
+	 Put("                                                                                                                                                  ");
+	 
+      end if;
+   end Put_Background;
+
+   
    
 end Background_Handling;
