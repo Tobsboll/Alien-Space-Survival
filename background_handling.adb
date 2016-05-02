@@ -3,6 +3,7 @@ with Ada.Text_IO;         use Ada.Text_IO;
 with Box_Hantering;       use Box_Hantering;
 with TJa.Window.Text;     use TJa.Window.Text;
 with Definitions;         use Definitions;
+with Map_Handling;        use Map_Handling;
 
 package body Background_Handling is
    
