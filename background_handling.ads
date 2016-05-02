@@ -14,7 +14,7 @@ package Background_Handling is
 			     World_X_Length : in Integer;
 			     World_Y_Length : in Integer);
    
-   procedure Put_Background (NumPlayers : in Integer)
+   procedure Put_Background (NumPlayers : in Integer);
    
    
    
