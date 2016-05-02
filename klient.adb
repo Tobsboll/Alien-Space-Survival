@@ -15,8 +15,8 @@ with Definitions;             use Definitions;
 with Gnat.Sockets;
 
 with Input;                   use Input;
-with Background_Battle;       use Background_Battle;
-with Menu;                    use Menu;
+with Background_Handling;     use Background_Handling;
+with Menu_Handling;           use Menu_Handling;
 with Window_Handling;         use Window_Handling;
 with Box_Hantering;           use Box_Hantering;
 with Map_Handling;            use Map_Handling;
