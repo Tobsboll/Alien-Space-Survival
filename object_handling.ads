@@ -50,6 +50,8 @@ package Object_Handling is
 			   X,Y            : in Integer;
 			   Attr           : in Integer;
 			   L              : in out Object_List );
+   function Lowest_Y(List : in Object_List;
+		     Y    : in Integer := 0) return Integer;
    --  function Length(L : in Shot_Fired) return Integer;
    function Empty(L : in Object_List) return Boolean;
    --  --  procedure Insert(Data : in Shot_Data_Type;
