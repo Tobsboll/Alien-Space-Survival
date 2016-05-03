@@ -97,7 +97,7 @@ package Graphics is
    
    procedure Put_Player (X,Y : in Integer); -- XY_Type ger konflikt med andra program
    procedure Put_Objects ( L : in Object_List);
-   procedure Put_Enemies (L : in Enemy_List);
+   --procedure Put_Enemies (L : in Enemy_List);
    --
    --
    --  |*_*|
