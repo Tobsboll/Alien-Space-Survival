@@ -198,7 +198,7 @@ procedure Klient is
 
    ---
    Waves          : Enemy_List_array;
-   Enemies        : Object_List;
+   Enemies        : Enemy_List_Array_2;
    --
    
    Klient_Number        : Integer;               -- Servern skickar klientnumret
@@ -501,14 +501,28 @@ begin
 	    -- GET ENEMY WAVE
 	    -----------------------------------
 	    
-	    for I in waves'range loop
+	    --for I in waves'range loop
 
-	       Delete_enemy_list(Waves(I));
+	      -- Delete_enemy_list(Waves(I));
 
-	       Get_Enemy_Ships(Waves(I), Socket); -- Tobias
+	     --  Get_Enemy_Ships(Waves(I), Socket); -- Tobias
 						  --DeleteList(Enemies);
 						  --Get(Socket, Enemies);
+	   -- end loop;
+	    
+	    --Enemies tas emot som objekt
+	    for I in 1..4 loop
+	       Put("Enemy ");
+	       Put(I, Width=>0);
+	       New_Line;
+	       
+	       DeleteList(Enemies(I));
+	       Put_Line("delete klar");
+	       
+	       Get(Socket, Enemies(I));
+	       Put_Line("Get klar");
 	    end loop;
+	    Put("Fiender klara");
 	    
 	    -----------------------------------
 	    -- end GET ENEMY WAVE
@@ -563,8 +577,8 @@ begin
 	    Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
 	    
 	    for I in Waves'range loop					 
-	       Put_enemies(Waves(I));
-	       --Put(Enemies);
+	       --Put_enemies(Waves(I));
+	       Put_Objects(Enemies(I));
 	    end loop;
 	    
 	    Put_Objects(Shot_List);
