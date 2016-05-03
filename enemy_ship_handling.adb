@@ -7,20 +7,20 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    -- INSERT SHIP FIRST
    --------------------------------------------------
-   procedure Insert_Ship_first(Ship : in out Enemy_Ship_Type;
-			       Enemies : in out Enemy_List) is
+   procedure Insert_Ship_first(Ship : in out Object_Data_Type;
+			       Enemies : in out Object_List) is
       
       --en vanlig insert first
       
-      New_Ship : Enemy_List;
+      New_Ship : Object_List;
       
    begin
       
-      New_Ship := new Enemy_Ship_Type;
-      New_Ship.Enemy_Type := Ship.Enemy_Type;
-      New_Ship.XY := Ship.XY;
+      New_Ship := new Object_Data_Type;
+      New_Ship.Object_Type := Ship.Object_Type;
+      New_Ship.XY_Pos := Ship.XY_Pos;
       New_Ship.Difficulty := Ship.Difficulty;
-      New_Ship.Num_Lives := Ship.Num_Lives;
+      New_Ship.Attribute := Ship.Attribute;
       New_Ship.Direction := Ship.Direction;
       New_Ship.Movement_Type := Ship.Movement_Type;
       
@@ -36,17 +36,17 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    -- INSERT SHIP ORDERED
    --------------------------------------------------
-   procedure Insert_Ship_ordered(Ship    : in out Enemy_Ship_Type;
-			         Enemies : in out Enemy_list) is
+   procedure Insert_Ship_ordered(Ship    : in out Object_Data_Type;
+			         Enemies : in out Object_list) is
       
    
       --en vanlig insert sorted, högre koordinater hamnar längst ner i listan.
    begin
       
       
-      if Enemies /= null then -- listan inte tom
+      if not Empty(Enemies) then -- listan inte tom
 	 
-	 if Enemies.XY(2) >= Ship.XY(2) and Enemies.XY(1) >= Ship.XY(1) then
+	 if Enemies.XY_Pos(2) >= Ship.XY_Pos(2) and Enemies.XY_Pos(1) >= Ship.XY_Pos(1) then
 	    
 	    --sätt in element om koordinaterna framför är större eller lika.
 	    
@@ -72,25 +72,25 @@ package body Enemy_Ship_Handling is
    -- SPAWN SHIP
    --------------------------------------------------
    procedure Spawn_Ship(Enemy_Type, X, Y, Difficulty, Num_Lives, Direction, Movement_Type : in Integer;
-		       Enemies_List : in out Enemy_list) is
+		       Enemies_List : in out Object_list) is
             
       -- Types:
       -- 1) Ordinary ship
       -- 2) Interceptor ship
       -- 3) Destroyer ship
       
-      New_Ship : Enemy_Ship_type;
+      New_Ship : Object_Data_type;
       
    begin
       
     --  New_Ship := new Enemy_Ship_Type;
-      New_Ship.Enemy_Type    := Enemy_Type;
-      New_Ship.XY(1)         := X;
-      New_Ship.XY(2)         := Y;
-      New_Ship.Difficulty    := Difficulty;
-      New_Ship.Num_Lives     := Num_Lives;
-      New_Ship.Direction     := Direction;
-      New_Ship.Movement_Type := Movement_Type; 
+      New_Ship.Object_Type    := Enemy_Type;
+      New_Ship.XY_Pos(1)      := X;
+      New_Ship.XY_Pos(2)      := Y;
+      New_Ship.Difficulty     := Difficulty;
+      New_Ship.Attribute      := Num_Lives;
+      New_Ship.Direction      := Direction;
+      New_Ship.Movement_Type  := Movement_Type; 
       
       Insert_Ship_Ordered(New_Ship, Enemies_List);
 
@@ -106,22 +106,22 @@ package body Enemy_Ship_Handling is
    -- NEXT TO WALL
    --------------------------------------------------
    
-   function Next_To_Wall(Enemies : in Enemy_List) return Boolean is
+   function Next_To_Wall(Enemies : in Object_List) return Boolean is
       
    begin -- förrvirrad ordning här eftersom listan är sorterad baklänges (sist in - först ut).
       
       
-      if Enemies /= null then
+      if not Empty(Enemies) then
 
 	 if Enemies.Direction = 1 then -- höger 
 	    
-	    if Enemies.XY(1) >= World_X_Length + GameBorder_X -1 - 3 then return True;
+	    if Enemies.XY_Pos(1) >= World_X_Length + GameBorder_X -1 - 3 then return True;
 	    else return Next_To_Wall(Enemies.Next);
 	    end if;
 	    
 	 elsif Enemies.Direction = -1 then -- vänster 
 	    
-	    if Enemies.XY(1) <= GameBorder_X + 1 then return True;
+	    if Enemies.XY_Pos(1) <= GameBorder_X + 1 then return True;
 	    else return Next_To_Wall(Enemies.Next); --rekursion
 	    end if;
 	    
@@ -141,13 +141,13 @@ package body Enemy_Ship_Handling is
    -- MOVE TO SIDE
    --------------------------------------------------
    
-   procedure Move_To_Side(Enemies : in out Enemy_List) is
+   procedure Move_To_Side(Enemies : in out Object_List) is
       
    begin
       
-      if Enemies /= null then
+      if not Empty(Enemies) then
 	 
-	 Enemies.XY(1) := Enemies.XY(1) + Enemies.Direction;
+	 Enemies.XY_Pos(1) := Enemies.XY_Pos(1) + Enemies.Direction;
 	 
 	 Move_To_Side(Enemies.Next); 	 
 	 
@@ -163,12 +163,12 @@ package body Enemy_Ship_Handling is
    -- CHANGE MOVEMENT TYPE
    --------------------------------------------------
    
-   procedure Change_Movement_Type(Enemies  : in out Enemy_List;
+   procedure Change_Movement_Type(Enemies  : in out Object_List;
 				  New_Type : in Integer) is
       
    begin
       
-      if Enemies /= null then
+      if not Empty(Enemies) then
 	 
 	 Enemies.Movement_Type := 2;
 	 Change_Movement_Type(Enemies.Next, New_type);
@@ -186,18 +186,18 @@ package body Enemy_Ship_Handling is
    -- MOVE ONE DOWN
    --------------------------------------------------
    
-   procedure Move_One_Down(Enemies : in out Enemy_List;
+   procedure Move_One_Down(Enemies : in out Object_List;
 			   Obstacle_Y: in Integer) is
       
    begin
       
-      if Enemies /= null then 
+      if not Empty(Enemies) then 
 	 
-	 Enemies.XY(2) := Enemies.XY(2) + 1;
+	 Enemies.XY_Pos(2) := Enemies.XY_Pos(2) + 1;
 	 
 	 Move_One_Down(Enemies.Next, Obstacle_Y); -- rekursion
 	 
-	 if Enemies.XY(2) >= (Obstacle_Y - 2) then -- vågen sätts till att stå stilla i y
+	 if Enemies.XY_Pos(2) >= (Obstacle_Y - 2) then -- vågen sätts till att stå stilla i y
 						   -- Enemies.Movement_Type := 2;
 	    Change_Movement_Type(Enemies, 2);
 	 end if;
@@ -214,11 +214,11 @@ package body Enemy_Ship_Handling is
    -- CHANGE DIRECTION
    --------------------------------------------------
    
-   procedure Change_Direction(Enemies : in out Enemy_List) is
+   procedure Change_Direction(Enemies : in out Object_List) is
       
    begin
       
-      if Enemies /= null then
+      if not Empty(Enemies) then
 	 
 	 if Enemies.Direction = 1 then
 	    Enemies.Direction := -1;
@@ -243,7 +243,11 @@ package body Enemy_Ship_Handling is
 			       Shot_List : in out Object_List) is
       
       -- beroende på type kan vi skjuta olika sorter så småningom.
-      
+      -- Låt shotType bero på antingen difficulty eller något annat som är i
+      -- range 1..10 
+      -- Enemy_Shot : Integer := Difficoulty;
+      -- => ShotType(Enemy_Shot);
+      -- man kan se i graphics.ads vilka shots som finns
    begin -- courtesy of Andreas ^^
       
       Create_Object(ShotType(1), X+1, Y+1, Down, Shot_List); --nummer?
@@ -257,7 +261,7 @@ package body Enemy_Ship_Handling is
    -- SHOT GENERATOR
    --------------------------------------------------
    
-   procedure Shot_Generator(Enemies : in out Enemy_List;
+   procedure Shot_Generator(Enemies : in out Object_List;
 			    Waves   : in out Enemy_List_Array;
    			    Chance_For_Shot : in out Generator;
 			    Shot_List : in out Object_list) is
@@ -273,21 +277,21 @@ package body Enemy_Ship_Handling is
       --  Put(Alien_Shot_Probability);
       --  New_Line;
       
-      if Enemies /= null then
+      if not Empty(Enemies) then
 	 
    	 if Alien_Shot_Probability <= Enemies.Difficulty then
 	    
-	    if Enemies.Enemy_Type = EnemyType(4) then
+	    if Enemies.Object_Type = EnemyType(4) then
 	       
 	       for I in (-1)..1 loop
-	       Create_enemy_Shot(Enemies.Enemy_type, Enemies.XY(1)+(2*I), Enemies.XY(2), Shot_List);
+	       Create_enemy_Shot(Enemies.Object_type, Enemies.XY_Pos(1)+(2*I), Enemies.XY_Pos(2), Shot_List);
 	       end loop;
 	       
 	    else
 	       
 	    
-	    if Ok_To_Shoot(Enemies.XY(1), Enemies.XY(2), 3, Waves) then
-	    Create_enemy_Shot(Enemies.Enemy_type, Enemies.XY(1), Enemies.XY(2), Shot_List);
+	    if Ok_To_Shoot(Enemies.XY_Pos(1), Enemies.XY_Pos(2), 3, Waves) then
+	    Create_enemy_Shot(Enemies.Object_type, Enemies.XY_Pos(1), Enemies.XY_Pos(2), Shot_List);
 	    end if;
 	    end if;
 	    
@@ -307,7 +311,7 @@ package body Enemy_Ship_Handling is
    -- AT LOWER LIMIT
    --------------------------------------------------
    
-   function At_Lower_limit(Enemies : in Enemy_List) return Boolean is
+   function At_Lower_limit(Enemies : in Object_List) return Boolean is
       
    begin
       
@@ -332,7 +336,7 @@ package body Enemy_Ship_Handling is
       
       for I in All_Enemies'Range loop
 	 
-	 if All_Enemies(I) /= null then
+	 if not Empty(All_Enemies(I)) then
 	    Num_Lists := Num_Lists + 1;
 	 end if;
 
@@ -391,28 +395,28 @@ package body Enemy_Ship_Handling is
    -- CHASE
    --------------------------------------------------
    procedure Chase(Player_X : in Integer; 
-		   Enemies  : in out Enemy_List;
+		   Enemies  : in out Object_List;
 		   Waves    : in out Enemy_List_Array;
 		   Shot_List : in out Object_list) is
    begin
 
       
-      if Player_X - Enemies.XY(1) < 0 then
+      if Player_X - Enemies.XY_Pos(1) < 0 then
 
 	 Enemies.Direction := -1;
 	 Move_To_Side(Enemies);
 	 
-      elsif Player_X - Enemies.XY(1) > 0 then
+      elsif Player_X - Enemies.XY_Pos(1) > 0 then
 	 
 	 Enemies.Direction := 1;
 	 Move_To_Side(Enemies);
 	 
-      elsif Ok_To_Shoot(Enemies.XY(1), Enemies.XY(2), 10, Waves) then
+      elsif Ok_To_Shoot(Enemies.XY_Pos(1), Enemies.XY_Pos(2), 10, Waves) then
 	 
 
 	 --wait()
 
-	    Create_Enemy_shot(Enemies.Enemy_Type, Enemies.XY(1)+1, Enemies.XY(2)+2, Shot_list);
+	    Create_Enemy_shot(Enemies.Object_Type, Enemies.XY_Pos(1)+1, Enemies.XY_Pos(2)+2, Shot_list);
 
 	 
       end if;
@@ -445,7 +449,7 @@ package body Enemy_Ship_Handling is
       
       for I in Waves'Range loop -- loopar igenom alla fiendelistor.
 	 
-	 if Waves(I) /= null then
+	 if not Empty(Waves(I)) then
 	    
 	    -- if Wave.Movement_selector = 0 så står vi still = skippar koden.
 	    
@@ -486,7 +490,7 @@ package body Enemy_Ship_Handling is
 	       Shot_Generator(Waves(I), Waves, Chance_For_Shot, Shot_List);
 	       
 	       --------------------
-	       if Waves(I).Enemy_Type = EnemyType(3) then
+	       if Waves(I).Object_Type = EnemyType(3) then
 		  Waves(I).Movement_type := 3;
 	       end if;
 	       -- ser till så att en interceptor som väntar på lucka
@@ -505,11 +509,11 @@ package body Enemy_Ship_Handling is
 	       --fiendelistor om interceptor ska undvika att skjuta på
 	       --vågen...
 	       
-	       if Ok_To_Shoot(Waves(I).XY(1), Waves(I).XY(2), 4, Waves) then
-		 Closest_Player := Get_Closest_Player(Waves(I).XY(1), Players);
+	       if Ok_To_Shoot(Waves(I).XY_Pos(1), Waves(I).XY_Pos(2), 4, Waves) then
+		 Closest_Player := Get_Closest_Player(Waves(I).XY_Pos(1), Players);
 		 Chase(Players(Closest_player).Ship.XY(1), Waves(I), Waves, Shot_List);
 		 
-		 if Waves(I).XY(2) < 3 then
+		 if Waves(I).XY_Pos(2) < 3 then
 		    Move_One_Down(Waves(I), 5); -- får ej gå lägre än våg.
 		 end if;
 		 
@@ -529,9 +533,9 @@ package body Enemy_Ship_Handling is
 	       
 	    elsif Waves(I).Movement_Type = 4 then
 	       
-	       if Waves(I).XY(2) = World_Y_Length  then
-		  Delete_Enemy_List(Waves(I));
-		  
+	       if Waves(I).XY_Pos(2) = World_Y_Length  then
+		  --Delete_Enemy_List(Waves(I));
+		  DeleteList(Waves(I));
 	       else
 		  
 		  
@@ -564,7 +568,7 @@ package body Enemy_Ship_Handling is
 			Enemy_Type    : in Integer;
 			Movement_Type : in Integer;
 			Direction     : in Integer;
-			Enemies_List  : in out Enemy_List) is
+			Enemies_List  : in out Object_List) is
       
       Min_X_Interval : constant Integer := 4;
       Y_Interval     : constant Integer := 3;
@@ -643,74 +647,25 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
 
 
-   --------------------------------------------------
-   -- REMOVE SHIP
-   --------------------------------------------------
-   procedure Remove_Ship(Enemies : in out Enemy_List) is
-      
-      Temporary : Enemy_List; 
-      
-   begin
-      
-      Temporary := Enemies;
-      Enemies   := Enemies.Next;
-      Free(Temporary);
-      
-   end Remove_Ship;
-   --------------------------------------------------
-   -- end REMOVE SHIP
-   --------------------------------------------------
-
-   --------------------------------------------------
-   -- DESTROY SHIP
-   --------------------------------------------------
-   
-   procedure Destroy_Ship(Enemies   : in out Enemy_List;
-			  Hit_Coord : in XY_Type) is
-      
-      
-   begin
-      
-      if Enemies/=null then
-	 
-	 if Hit_Coord = Enemies.XY then
-	    
-	    Remove_ship(Enemies);
-	    --Enemy_Explosion(Enemies.Enemy_Type, Hit_Coord);
-	    
-	 else
-	    
-	    Destroy_Ship(Enemies.Next, Hit_Coord);
-	    
-	 end if;
-	 
-      end if;
-      
-      
-   end Destroy_Ship;
-   
-   --------------------------------------------------
-   -- end DESTROY SHIP
-   --------------------------------------------------
    
    --------------------------------------------------
    -- PUT_ENEMY_SHIPS
    --------------------------------------------------
    
-   procedure Put_Enemy_Ships(Enemies : in Enemy_List;
+   procedure Put_Enemy_Ships(Enemies : in Object_List;
 			     Socket  : in Socket_Type) is
       
    begin
       
       -- Skicka över koordinater, liv, typ, mer behövs ej?
 
-      if Enemies /= null then
+      if not Empty(Enemies) then
       --if not Empty(Enemies) then
 	 
-	 Put_line(Socket, Enemies.Enemy_Type); -- skickar fiendens typ
-	 Put_line(Socket, Enemies.XY(1)); --skickar fiendens koordinater.
-	 Put_line(Socket, Enemies.XY(2));	 
-	 Put_line(Socket, Enemies.Num_Lives); -- skickar över antal liv för ev print eller 
+	 Put_line(Socket, Enemies.Object_Type); -- skickar fiendens typ
+	 Put_line(Socket, Enemies.XY_Pos(1)); --skickar fiendens koordinater.
+	 Put_line(Socket, Enemies.XY_Pos(2));	 
+	 Put_line(Socket, Enemies.Attribute); -- skickar över antal liv för ev print eller 
 					      -- olika print beroende på skada	 
 					      ------------------------------ TEST
 					      -- New_Line;
@@ -733,78 +688,7 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    --end PUT_ENEMY_SHIPS
    --------------------------------------------------
-   
-   --------------------------------------------------
-   -- GET_ENEMY_SHIPS
-   --------------------------------------------------
-   
-   procedure Get_Enemy_Ships(Enemies : in out Enemy_List;
-   			     Socket  : in Socket_Type) is
-      
-      Input : Integer;
-      Enemy_Type : Integer;
-      X : Integer;
-      Y: Integer;
-      Num_Lives : Integer;
-      
-   begin
 
-      Get(Socket, Input);
-      
-      if Input /= 0 then -- listan inte null.
-	 
-   	 Enemy_Type := Input;
-   	 Get(Socket, X);
-   	 Get(Socket, Y);
-   	 Get(Socket, Num_Lives);
-	 
-   	 Spawn_Ship(Enemy_Type, X, Y, 10, Num_Lives, 1, 1, Enemies);
-   	 --Create_Object(Enemy_Type, X, Y, 0, Enemies);
-	 
-   	 Get_Enemy_Ships(Enemies.Next, Socket); --rekursion
-	 
-      end if;
-      
-   end Get_Enemy_Ships;
-   
-   --------------------------------------------------
-   --end GET_ENEMY_SHIPS 
-   --------------------------------------------------
-   
-   --------------------------------------------------
-   -- DELETE_ENEMY_LIST
-   --------------------------------------------------
-   
-   procedure Delete_Enemy_list(Enemies : in out Enemy_List) is
-      
-   begin
-      
-      if Enemies /= null then
-	 
-	 Remove_Ship(Enemies);
-	 Delete_Enemy_List(Enemies);
-	 
-      end if;
-      
-   end Delete_Enemy_List;
-   --------------------------------------------------
-   -- end DELETE_ENEMY_LIST
-   --------------------------------------------------
-   
-   --------------------------------------------------
-   -- EMPTY
-   --------------------------------------------------OK
-   
-   function Empty(L : in Enemy_List) return Boolean is
-      
-   begin
-      return L = null;	
-      
-   end Empty;
-   
-   --------------------------------------------------
-   -- end EMPTY
-   --------------------------------------------------
    
    --------------------------------------------------
    -- OK TO SHOOT
@@ -838,7 +722,7 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    
    function Ok_To_Shoot_Single_list(X, Y, Delta_X : in Integer;
-			Enemies : in Enemy_List) return Boolean is
+			Enemies : in Object_List) return Boolean is
       -- funktion som kollar om ett skepp i fiendelistan 
       -- har samma x-koordinat (inom ett intervall delta_X) och 
       -- större y-koordinat än inparameterar X och Y.
@@ -846,15 +730,15 @@ package body Enemy_Ship_Handling is
    begin
       
       
-	 if Enemies /= null then -- om listan inte tom
+	 if not Empty(Enemies) then -- om listan inte tom
 
 	    
-	    if Enemies.XY(2) > Y then 
+	    if Enemies.XY_Pos(2) > Y then 
 	       -- om på rad nedanför
 	       
 	       for J in (-Delta_X)..Delta_X loop
 		  
-		  if Enemies.XY(1) = (X + J) then -- om x-koordinat inom intervall.
+		  if Enemies.XY_Pos(1) = (X + J) then -- om x-koordinat inom intervall.
 		     return False; -- får inte skjuta
 		  end if;
 		  
@@ -882,7 +766,7 @@ package body Enemy_Ship_Handling is
    -- GREATEST_Y_VALUE
    --------------------------------------------------
    function Greatest_Y_Value(Y : in Integer;
-			     Enemies : in Enemy_List) return Boolean is
+			     Enemies : in Object_List) return Boolean is
       
    --funktion som returnerar sant om skeppet har största 
    --y-värdet, alltså är längst ner. Kan ev användas som en 
@@ -891,9 +775,9 @@ package body Enemy_Ship_Handling is
       
    begin
       
-      if Enemies /= null then -- om listan är tom
+      if not Empty(Enemies) then -- om listan är tom
 	 
-	 if Enemies.XY(2) > Y then 
+	 if Enemies.XY_Pos(2) > Y then 
 	 --om skeppets
 	 -- y-värde är större än inparameter.
 	    return False;
