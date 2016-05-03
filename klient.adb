@@ -194,11 +194,11 @@ procedure Klient is
    Obstacle_List  : Object_List;
    Powerup_List   : Object_List;
    
-   Enemies1, Enemies2, Enemies3, Enemies4 : Enemy_List;
+   --Enemies1, Enemies2, Enemies3, Enemies4 : Enemy_List;
 
    ---
    Waves          : Enemy_List_array;
-   Enemies        : Enemy_List_Array_2;
+   --Enemies        : Enemy_List_Array_2;
    --
    
    Klient_Number        : Integer;               -- Servern skickar klientnumret
@@ -265,7 +265,7 @@ begin
       --  end if;
       
       begin
-         Waves := (Enemies1, Enemies2, Enemies3, Enemies4);
+     --    Waves := (Enemies1, Enemies2, Enemies3, Enemies4);
 	 --  	 -------------------------------------------------------------
 	 --  	 --| Player setup before the game ----------------------------     -- NYA
 	 --  	 -------------------------------------------------------------
@@ -516,10 +516,10 @@ begin
 	       Put(I, Width=>0);
 	       New_Line;
 	       
-	       DeleteList(Enemies(I));
+	       DeleteList(Waves(I));
 	       Put_Line("delete klar");
 	       
-	       Get(Socket, Enemies(I));
+	       Get(Socket, Waves(I));
 	       Put_Line("Get klar");
 	    end loop;
 	    Put("Fiender klara");
@@ -578,7 +578,7 @@ begin
 	    
 	    for I in Waves'range loop					 
 	       --Put_enemies(Waves(I));
-	       Put_Objects(Enemies(I));
+	       Put_Objects(Waves(I));
 	    end loop;
 	    
 	    Put_Objects(Shot_List);
