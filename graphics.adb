@@ -63,13 +63,17 @@ package body Graphics is
 	    Put(PowerUp(L.Object_Type));
 	    
 	    --Om det är en fiende:
-	 --  elsif L.Object_Type in Enemy'Range then
-	 --  Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
-	 --  Put("ENE");
-	 --  Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
-	 --  Put("MY!");
+	 elsif L.Object_Type in Enemy'Range then
+	    
+	    --Enemy type 1 only:
+	    Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
+	    Put( Enemy_1(1) );
+	    Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+	    Put( Enemy_1(2) );
+	 
+	 
 	 end if;
-	   Put_Objects(L.Next);
+	 Put_Objects(L.Next);
       end if;
 
       
@@ -80,21 +84,21 @@ package body Graphics is
    --|
    --| Allmän procedur som ritar ut fiender beroende på vilken typ det är 
    --------------------------------------------------
-   procedure Put_Enemies (L : in Enemy_List) is
+   --  procedure Put_Enemies (L : in Enemy_List) is
       
-   begin
-      if not Empty(L) then
-         if L.XY(1) > 1 then        -- Hindrar koden från att gå utanför vänstra kanten på terminalen
-	 Goto_XY(L.XY(1), L.XY(2)); --Här blir det CONSTRAINT_ERROR lite då och då av någon anledning...
-	 Put( Enemy_1(1) );
-	 Goto_XY(L.XY(1), L.XY(2)+1);
-	 Put( Enemy_1(2) );
+   --  begin
+   --     if not Empty(L) then
+   --        if L.XY(1) > 1 then        -- Hindrar koden från att gå utanför vänstra kanten på terminalen
+   --  	 Goto_XY(L.XY(1), L.XY(2)); --Här blir det CONSTRAINT_ERROR lite då och då av någon anledning...
+   --  	 Put( Enemy_1(1) );
+   --  	 Goto_XY(L.XY(1), L.XY(2)+1);
+   --  	 Put( Enemy_1(2) );
 	 
-	 Put_Enemies(L.Next);
-	 end if;
-      end if;
+   --  	 Put_Enemies(L.Next);
+   --  	 end if;
+   --     end if;
       
-   end Put_Enemies;
+   --  end Put_Enemies;
    
    
 end Graphics;
