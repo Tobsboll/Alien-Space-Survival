@@ -176,9 +176,9 @@ procedure Server is
    Game                   : Game_Data;
    Loop_Counter           : Integer;
    
-   Enemies1, Enemies2, Enemies3, Enemies4 : Enemy_List;
+   --Enemies1, Enemies2, Enemies3, Enemies4 : Enemy_List;
    Waves                  : Enemy_List_Array;
-   Waves2                 : Enemy_List_Array_2;
+   --Waves2                 : Enemy_List_Array_2;
    
    Shot_List              : Object_List; --shot_handling.ads
    Obstacle_List          : Object_List;
@@ -377,7 +377,7 @@ begin
    --|
    ----------------------------------------------------------------------------------------------------
    Set_Default_Values(Num_Players, Game);
-   Waves := (Enemies1, Enemies2, Enemies3, Enemies4);
+   --Waves := (Enemies1, Enemies2, Enemies3, Enemies4);
    Loop_Counter := 1;
    
    
@@ -487,7 +487,7 @@ begin
       
 
       if Loop_Counter > 225 then
-      	 Loop_Counter := 0;
+      	 Loop_Counter := 1;
       end if;
       
 
@@ -498,7 +498,7 @@ begin
       
       
       for I in 1..Num_Players loop
-	 if Game.Players(I).Ship.Health = 0 then
+	 if Game.Players(I).Ship.Health <= 0 then
 	    Game.Players(I).Playing := False;
 	 end if;
 	 
@@ -509,7 +509,15 @@ begin
 				      Game.Players(I).Ship.XY(2),
 				      Game.Players(I).Ship, --Uppdaterar ship_spec
 				      Shot_List);           --Om spelare träffas
-	 end if;                                         --Av skott.
+				                            --Av skott.
+				                            
+		for K in 1..4 loop
+	       		Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
+						 Game.Players(I).Ship.XY(2),
+						 Game.Players(I).Ship, --Uppdaterar ship_spec
+						 Waves(K));        -- Om spelare krashar i fiende
+	    end loop;
+	 end if;                                         
 
 	 
 	 Put(Sockets(I), Shot_List);
@@ -527,15 +535,6 @@ begin
      
 	Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players);
   
-      -----------------------------------
-      -- end Update enemy ships
-      -----------------------------------
-      	for J in Waves'Range loop
-	   
-	   DeleteList(Waves2(J));
-	   Convert_List(Waves2(J),Waves(J));
-	end loop;
-      -----------------------------------     
       -----------------------------------
       -- PUT ENEMY SHIPS
       -----------------------------------
@@ -563,6 +562,9 @@ begin
       --Uppdatera skottens position
       Shot_Movement(Shot_List);
       Shots_Collide_In_Objects(Shot_List, Obstacle_List);
+      for B in Waves'Range loop
+	 Shots_Collide_In_Objects(Shot_List, Waves(B));
+      end loop;
       
       Loop_Counter := Loop_Counter + 1;
       
