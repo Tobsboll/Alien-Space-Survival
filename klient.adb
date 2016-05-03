@@ -669,11 +669,11 @@ begin
 	    DeleteList(Obstacle_List);
 	    DeleteList(Powerup_List);
 	    
-	    for I in waves'range loop
+	    --for I in waves'range loop
 	       
-	       Delete_enemy_list(Waves(I));
+	      -- Delete_enemy_list(Waves(I));
 	       
-	    end loop;
+	    --end loop;
 	    -- Close(Socket);
 	    Cursor_visible;
 	    New_Line;
