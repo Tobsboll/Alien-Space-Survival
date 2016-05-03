@@ -5,21 +5,85 @@
 package body Enemy_Ship_Handling is
    
    --------------------------------------------------
-   -- SPAWN SHIP
+   -- INSERT SHIP FIRST
    --------------------------------------------------
-   procedure Spawn_ship(Enemy_Type, X, Y, Difficulty, Num_Lives, Direction, Movement_Type : in Integer;
-		        Enemies_List : in out Enemy_List) is
+   procedure Insert_Ship_first(Ship : in out Enemy_Ship_Type;
+			       Enemies : in out Enemy_List) is
       
-      -- Types:
-      -- 1) Ordinary ship
-      -- 2) Interceptor ship
-      -- 3) Destroyer ship
+      --en vanlig insert first
       
       New_Ship : Enemy_List;
       
    begin
       
       New_Ship := new Enemy_Ship_Type;
+      New_Ship.Enemy_Type := Ship.Enemy_Type;
+      New_Ship.XY := Ship.XY;
+      New_Ship.Difficulty := Ship.Difficulty;
+      New_Ship.Num_Lives := Ship.Num_Lives;
+      New_Ship.Direction := Ship.Direction;
+      New_Ship.Movement_Type := Ship.Movement_Type;
+      
+      
+      New_Ship.Next      := Enemies;
+      Enemies            := New_Ship;
+      
+   end Insert_Ship_first;
+   --------------------------------------------------
+   --end INSERT SHIP FIRST
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   -- INSERT SHIP ORDERED
+   --------------------------------------------------
+   procedure Insert_Ship_ordered(Ship    : in out Enemy_Ship_Type;
+			         Enemies : in out Enemy_list) is
+      
+   
+      --en vanlig insert sorted, högre koordinater hamnar längst ner i listan.
+   begin
+      
+      
+      if Enemies /= null then -- listan inte tom
+	 
+	 if Enemies.XY(2) >= Ship.XY(2) and Enemies.XY(1) >= Ship.XY(1) then
+	    
+	    --sätt in element om koordinaterna framför är större eller lika.
+	    
+	    Insert_Ship_First(Ship, Enemies);
+	    
+	 else Insert_Ship_Ordered(Ship, Enemies.Next); -- rekursion
+	 
+	 end if;
+
+	 
+      else -- listan är tom
+	 
+	 Insert_Ship_First(Ship, Enemies);
+	 
+      end if;
+      
+   end Insert_Ship_ordered;
+   --------------------------------------------------
+   -- end INSERT SHIP ORDERED
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   -- SPAWN SHIP
+   --------------------------------------------------
+   procedure Spawn_Ship(Enemy_Type, X, Y, Difficulty, Num_Lives, Direction, Movement_Type : in Integer;
+		       Enemies_List : in out Enemy_list) is
+            
+      -- Types:
+      -- 1) Ordinary ship
+      -- 2) Interceptor ship
+      -- 3) Destroyer ship
+      
+      New_Ship : Enemy_Ship_type;
+      
+   begin
+      
+    --  New_Ship := new Enemy_Ship_Type;
       New_Ship.Enemy_Type    := Enemy_Type;
       New_Ship.XY(1)         := X;
       New_Ship.XY(2)         := Y;
@@ -27,13 +91,16 @@ package body Enemy_Ship_Handling is
       New_Ship.Num_Lives     := Num_Lives;
       New_Ship.Direction     := Direction;
       New_Ship.Movement_Type := Movement_Type; 
-      New_Ship.Next          := Enemies_List;
-      Enemies_List           := New_Ship;
+      
+      Insert_Ship_Ordered(New_Ship, Enemies_List);
+
+      
       
    end Spawn_Ship;
    --------------------------------------------------
-   --end SPAWN SHIP
+   -- end SPAWN SHIP
    --------------------------------------------------
+   
    
    --------------------------------------------------
    -- NEXT TO WALL
@@ -191,6 +258,7 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    
    procedure Shot_Generator(Enemies : in out Enemy_List;
+			    Waves   : in out Enemy_List_Array;
    			    Chance_For_Shot : in out Generator;
 			    Shot_List : in out Object_list) is
       
@@ -198,24 +266,34 @@ package body Enemy_Ship_Handling is
       
    begin
       
-      Alien_Shot_Probability := Random(Chance_For_shot); -- 1-20
-							 --  Alien_Shot_Probability := 20;
-      New_Line;
-      Put("Shot prob:  ");
-      Put(Alien_Shot_Probability);
-      New_Line;
+      Alien_Shot_Probability := Random(Chance_For_shot); -- 1-100
+						        
+      --  New_Line;
+      --  Put("Shot prob:  ");
+      --  Put(Alien_Shot_Probability);
+      --  New_Line;
       
       if Enemies /= null then
 	 
    	 if Alien_Shot_Probability <= Enemies.Difficulty then
+	    
+	    if Enemies.Enemy_Type = EnemyType(4) then
+	       
+	       for I in (-1)..1 loop
+	       Create_enemy_Shot(Enemies.Enemy_type, Enemies.XY(1)+(2*I), Enemies.XY(2), Shot_List);
+	       end loop;
+	       
+	    else
+	       
+	    
+	    if Ok_To_Shoot(Enemies.XY(1), Enemies.XY(2), 3, Waves) then
 	    Create_enemy_Shot(Enemies.Enemy_type, Enemies.XY(1), Enemies.XY(2), Shot_List);
-	    --  Put("SKOTTJÄVEL!   ");
-	    -- Put(Enemies.XY(1), 0);
-	    -- Put(Enemies.XY(2), 5);
+	    end if;
+	    end if;
 	    
    	 end if;
 	 
-   	 Shot_Generator(Enemies.Next, Chance_For_Shot, Shot_list); -- rekursion
+   	 Shot_Generator(Enemies.Next, Waves, Chance_For_Shot, Shot_list); -- rekursion
 	 
       end if;
       
@@ -269,71 +347,209 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    
    --------------------------------------------------
+   -- GET_CLOSEST_PLAYER
+   --------------------------------------------------
+   function Get_Closest_Player(Enemy_X : in Integer;
+			       Players : in Player_Array) return Integer is
+      -- funktion som räknar ut vilken spelare som är närmast.
+      Distance : Integer;
+      Next_Distance : Integer;
+      Player_Num : Integer;
+      
+   begin
+      
+      Player_Num := 1; 
+      -- vi antar tills vidare att spelare 1 är närmast
+      Distance := abs(Players(1).Ship.XY(1) - Enemy_X);
+      -- räknar ut hur långt bort första spelarskeppet är
+      
+      for I in 2..Players'Last loop
+	 
+	 if Players(I).Playing then
+	    
+	    Next_Distance := abs(Players(1).Ship.XY(1) - Enemy_X);
+	    -- räkna samma för nästa skepp
+	    
+	    if Next_Distance < Distance then
+	       --om närmare, så byt till det, och den spelaren, istället
+	       Distance := Next_Distance;
+	       Player_Num := I;
+	    end if;
+	    
+	 end if;
+
+      end loop;
+      
+      return Player_Num;
+      
+   end Get_Closest_Player;
+   --------------------------------------------------
+   -- end GET_CLOSEST_PLAYER
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   -- CHASE
+   --------------------------------------------------
+   procedure Chase(Player_X : in Integer; 
+		   Enemies  : in out Enemy_List;
+		   Waves    : in out Enemy_List_Array;
+		   Shot_List : in out Object_list) is
+   begin
+
+      
+      if Player_X - Enemies.XY(1) < 0 then
+
+	 Enemies.Direction := -1;
+	 Move_To_Side(Enemies);
+	 
+      elsif Player_X - Enemies.XY(1) > 0 then
+	 
+	 Enemies.Direction := 1;
+	 Move_To_Side(Enemies);
+	 
+      elsif Ok_To_Shoot(Enemies.XY(1), Enemies.XY(2), 10, Waves) then
+	 
+
+	 --wait()
+
+	    Create_Enemy_shot(Enemies.Enemy_Type, Enemies.XY(1)+1, Enemies.XY(2)+2, Shot_list);
+
+	 
+      end if;
+   
+   end Chase;
+   --------------------------------------------------
+   -- end CHASE
+   --------------------------------------------------
+   
+   --------------------------------------------------
    --UPDATE ENEMY POSITION
    --------------------------------------------------
    
-   procedure Update_Enemy_Position(Enemies : in out Enemy_List;
+   procedure Update_Enemy_Position(Waves : in out Enemy_List_array;
 				   Shot_List : in out Object_List;
-				   Obstacle_Y: in Integer) is
+				   Obstacle_Y: in Integer;
+				   Players : in Player_array) is
       
       -- Movement_selector:
       -- 0) stand still
       -- 1) move zigzag, classic space invaders
       -- 2) move only zigzag, don't go downwards
-      -- 3) Interceptor movement
+      -- 3) Interceptor movement (chase and shoot) 
+      -- 4) Destroyer movement
       
+      Closest_Player  : Integer;
       Chance_For_Shot : Generator;
       
    begin 
       
-      if Enemies /= null then
+      for I in Waves'Range loop -- loopar igenom alla fiendelistor.
 	 
-	 -- if Wave.Movement_selector = 0 så står vi still = skippar koden.
-	 
-	 ----------------------------------
-	 -- Classic space invaders movement
-	 ----------------------------------
-	 
-	 if Enemies.Movement_Type = 1 then -- alla till en pekare har samma movement selector.
+	 if Waves(I) /= null then
 	    
-	    if not Next_To_Wall(Enemies) then
-	       Move_To_Side(Enemies); 
-	    elsif not At_Lower_Limit(Enemies) then
-	       Move_One_Down(Enemies, Obstacle_Y);
-	       Change_Direction(Enemies);
-	    else
-	       Change_Direction(Enemies);
+	    -- if Wave.Movement_selector = 0 så står vi still = skippar koden.
+	    
+	    ----------------------------------
+	    -- Classic space invaders movement
+	    ----------------------------------
+	    
+	    if Waves(I).Movement_Type = 1 then -- alla till en pekare har samma movement selector.
+	       
+	       if not Next_To_Wall(Waves(I)) then
+		  Move_To_Side(Waves(I)); 
+	       elsif not At_Lower_Limit(Waves(I)) then
+		  Move_One_Down(Waves(I), Obstacle_Y);
+		  Change_Direction(Waves(I));
+	       else
+		  Change_Direction(Waves(I));
+	       end if;
+	       
+	       -- if Ok_To_Shoot() then
+	       Reset(Chance_For_shot);
+	       Shot_Generator(Waves(I), Waves, Chance_For_Shot, Shot_List);
+	       
+	       ---------------------------------
+	       -- Only zig-zag
+	       ---------------------------------
+	       
+	    elsif Waves(I).Movement_Type = 2 then
+	       
+	       if not Next_To_Wall(Waves(I)) then
+		  Move_To_Side(Waves(I)); 
+	       else
+		  Change_Direction(Waves(I));
+	       end if;
+	       
+	       -- skriv in så att de går ner om gränsen neråt sjunker!
+	       
+	       Reset(Chance_For_shot);
+	       Shot_Generator(Waves(I), Waves, Chance_For_Shot, Shot_List);
+	       
+	       --------------------
+	       if Waves(I).Enemy_Type = EnemyType(3) then
+		  Waves(I).Movement_type := 3;
+	       end if;
+	       -- ser till så att en interceptor som väntar på lucka
+	       -- ställs tillbaka till att kolla efter spelare
+	       --------------------
+	       
+	       
+	       
+	       ---------------------------------
+	       -- Interceptor movement
+	       ---------------------------------
+
+	    elsif Waves(I).Movement_Type = 3 then
+	       
+	       --här blir det så att jag måste skicka in alla
+	       --fiendelistor om interceptor ska undvika att skjuta på
+	       --vågen...
+	       
+	       if Ok_To_Shoot(Waves(I).XY(1), Waves(I).XY(2), 4, Waves) then
+		 Closest_Player := Get_Closest_Player(Waves(I).XY(1), Players);
+		 Chase(Players(Closest_player).Ship.XY(1), Waves(I), Waves, Shot_List);
+		 
+		 if Waves(I).XY(2) < 3 then
+		    Move_One_Down(Waves(I), 5); -- får ej gå lägre än våg.
+		 end if;
+		 
+		 
+	       else
+		  Waves(I).Movement_Type := 2;
+		  -- ställer interceptorn på att zickzacka tills tills vidare.
+		  
+	       end if;
+	       
+	       --------------------------------
+	       -- Destroyer movement
+	       --------------------------------
+	       
+	       -- här behövs wait(), så se till att skicka in
+	       -- loop_counter så småningom.
+	       
+	    elsif Waves(I).Movement_Type = 4 then
+	       
+	       if Waves(I).XY(2) = World_Y_Length  then
+		  Delete_Enemy_List(Waves(I));
+		  
+	       else
+		  
+		  
+		  Move_One_Down(Waves(I), 60);
+	       for I in 1..4 loop
+		  
+		  Shot_Generator(Waves(I), Waves, Chance_For_Shot, Shot_List);
+		  
+	       end loop;
+	    end if;
+	       
 	    end if;
 	    
-	    Reset(Chance_For_shot);
-	    Shot_Generator(Enemies, Chance_For_Shot, Shot_List);
-	    
-	    ---------------------------------
-	    -- Only zig-zag
-	    ---------------------------------
-	    
-	 elsif Enemies.Movement_Type = 2 then
-	    
-	    if not Next_To_Wall(Enemies) then
-	       Move_To_Side(Enemies); 
-	    else
-	       Change_Direction(Enemies);
-	    end if;
-	    
-	    Reset(Chance_For_shot);
-	    Shot_Generator(Enemies, Chance_For_Shot, Shot_List);
-	    
-	    ---------------------------------
-	    -- Interceptor movement
-	    ---------------------------------
-	    
-	 elsif Enemies.Movement_Type = 3 then
-	    null;
 	 end if;
 	 
-      end if;
-      
-      
+	    
+      end loop;
+     
    end Update_Enemy_position;
 
    
@@ -343,26 +559,31 @@ package body Enemy_Ship_Handling is
    
    --------------------------------------------------
    -- SPAWN WAVE
-   --------------------------------------------------
+   -------------------------------------------------- Ä
    procedure Spawn_Wave(Num_To_Spawn  : in Integer;
 			Enemy_Type    : in Integer;
 			Movement_Type : in Integer;
 			Direction     : in Integer;
 			Enemies_List  : in out Enemy_List) is
       
-      Num_Ships : Integer;
-      Min_X_Interval : constant Integer := 6;
+      Min_X_Interval : constant Integer := 4;
       Y_Interval     : constant Integer := 3;
       X, X_Interval, Y : Integer; 
       Difficulty : Integer;
-      Num_Lives  : Integer;
-      Counter    : Integer;  
+      Num_Lives  : Integer;  
+      Num_Rows   : Integer;
+      Ships_Per_Row : Integer;
+      Spaces_Per_Row : Integer;
       
    begin
       
-      Num_Ships := Num_To_Spawn;
       X := GameBorder_X + 1;
-      Y := GameBorder_Y + 1; -- ingen aning.
+      Y := GameBorder_Y + 2; -- ingen aning.
+      
+      -----------------------------------
+      -- Egenskaper för fiendetyper
+      -----------------------------------
+      --Behövs kanske ej
       
       if Enemy_Type = EnemyType(1) then
 	 Difficulty := 1;
@@ -373,37 +594,46 @@ package body Enemy_Ship_Handling is
       elsif Enemy_Type = EnemyType(3) then
 	 Difficulty := 15;
 	 Num_Lives := 5;
+      elsif Enemy_Type = EnemyType(4) then
+	 Difficulty := 15;
+	 Num_Lives := 5;
       end if;
       
-      Counter := 0;
       
-      --  --  for I in 1..8 loop 
-      while Num_Ships > 8 loop
+      -----------------------------------
+      -- end egenskaper för fiendetyper
+      -----------------------------------
+      
+      Num_Rows := 1; -- vi tänker oss först en rad.
+      Ships_Per_Row := Num_To_Spawn;
+   
+      X_Interval := World_X_Length/(Num_To_Spawn + 1);
+      -- räkna ut spacing primärt.
+      
+      
+      while X_Interval <  Min_X_Interval loop -- om det blir för tight
+	 Num_Rows := Num_Rows + 1; --lägg till en rad
+	 Ships_Per_Row := Num_To_Spawn/Num_Rows; -- räkna ut antal skepp/rad
+	 Spaces_Per_Row := Ships_Per_Row + 1; -- mellanrum/rad
 	 
-	 for I in 1..8 loop
-	    
-	    Spawn_Ship(Enemy_Type, X+Min_X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
-	    
-	    X := X + Min_X_Interval;
-	    Num_Ships := Num_Ships - 1;
-	    Counter := Counter + 1;
-
-	 end loop;
-	 
-	 Y := Y + Y_Interval;
-	 X := GameBorder_X + 1;
+	 X_Interval := World_X_Length/Spaces_Per_Row;
 	 
       end loop;
-
-
-      X_Interval := World_X_Length/(Num_Ships + 1);
-      X := GameBorder_X + 1;
       
-      for I in 1..Num_Ships loop
+      for I in 1..Num_Rows loop
 	 
-	 Spawn_Ship(Enemy_Type, (X + X_Interval), Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
+	 for J in 1..Ships_Per_Row loop
+	    
+	    Spawn_Ship(Enemy_Type, X+X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
+	    
+	    X := X + X_Interval; -- stega upp X
+	    
+	 end loop;
 	 
-	 X := X + X_Interval;
+	 X := Gameborder_X + 1; -- ställ tillbaka x
+	 Y := Y+Y_Interval; -- stega upp y för ny rad
+	 
+
 	 
       end loop;
       
@@ -571,5 +801,117 @@ package body Enemy_Ship_Handling is
       return L = null;	
       
    end Empty;
+   
+   --------------------------------------------------
+   -- end EMPTY
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   -- OK TO SHOOT
+   --------------------------------------------------
+   function Ok_To_Shoot(X, Y, Delta_X : in Integer;
+				  Waves : in Enemy_List_Array) return Boolean is
+      
+      -- funktion som kollar igenom ALLA LISTOR med fiender,
+      -- kollar så att ingen är under, se ok_to_shoot_single_list.
+      -- Krånglet är till för att rekursionen ska fungera i den.
+      
+   begin
+      
+      for I in Waves'Range loop
+	 
+	 if not Ok_To_Shoot_Single_List(X, Y, Delta_X, Waves(I)) then
+	    return False;
+	 end if;
+	 
+      end loop;
+      
+      return True;
+      
+   end Ok_To_Shoot;
+   --------------------------------------------------
+   -- end OK TO SHOOT
+   -------------------------------------------------- 
+   
+   --------------------------------------------------
+   -- OK_TO_SHOOT_single_list
+   --------------------------------------------------
+   
+   function Ok_To_Shoot_Single_list(X, Y, Delta_X : in Integer;
+			Enemies : in Enemy_List) return Boolean is
+      -- funktion som kollar om ett skepp i fiendelistan 
+      -- har samma x-koordinat (inom ett intervall delta_X) och 
+      -- större y-koordinat än inparameterar X och Y.
+     
+   begin
+      
+      
+	 if Enemies /= null then -- om listan inte tom
+
+	    
+	    if Enemies.XY(2) > Y then 
+	       -- om på rad nedanför
+	       
+	       for J in (-Delta_X)..Delta_X loop
+		  
+		  if Enemies.XY(1) = (X + J) then -- om x-koordinat inom intervall.
+		     return False; -- får inte skjuta
+		  end if;
+		  
+	       end loop;
+
+	    end if;
+	    
+	    return Ok_To_Shoot_Single_list(X, Y, Delta_X, Enemies.Next); -- rekursion
+
+	 end if;
+	 
+--	 return Ok_To_Shoot(X, Y, Delta_X, Waves(Counter+1), Counter+1); -- rekursion för ny lista.
+	 -- end loop;
+--	 end if;
+      
+      return True; -- har vi kommit hit finns inga fiender ivägen.
+
+      
+   end Ok_To_Shoot_Single_list;
+   --------------------------------------------------
+   -- end OK_TO_SHOOT_single_list
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   -- GREATEST_Y_VALUE
+   --------------------------------------------------
+   function Greatest_Y_Value(Y : in Integer;
+			     Enemies : in Enemy_List) return Boolean is
+      
+   --funktion som returnerar sant om skeppet har största 
+   --y-värdet, alltså är längst ner. Kan ev användas som en 
+   -- mer beräkningsekonomisk version av ok_to_shoot
+   --för wave-skepp.
+      
+   begin
+      
+      if Enemies /= null then -- om listan är tom
+	 
+	 if Enemies.XY(2) > Y then 
+	 --om skeppets
+	 -- y-värde är större än inparameter.
+	    return False;
+	 else
+	    return Greatest_Y_Value(Y, Enemies.Next);--rekursion
+	 end if;
+	 
+	 
+      end if;
+      
+      return True;
+      
+   end Greatest_Y_Value;   
+   --------------------------------------------------
+   -- end GREATEST_Y_VALUE
+   --------------------------------------------------
+   
+   
+
    
 end Enemy_Ship_Handling;
