@@ -133,32 +133,7 @@ procedure Server is
    --------------------------------------------------
 
    --------------------------------------------------
-   --------------------------------------------------
-   -- Convert list
-   --------------------------------------------------
-   procedure Convert_List ( New_Object_List : in out Object_List;
-			    E : in Enemy_List) is
-      
-      ObjectType, X, Y, Attr : Integer;
-   begin
-      
-      if not Empty(E) then
-	 ObjectType := E.Enemy_Type;
-	 X          := E.XY(1);
-	 Y          := E.XY(2);
-	 Attr       := E.Num_Lives;
-	 
-	 Create_Object(ObjectType, X, Y, Attr, New_Object_List);
-	 
-	 Convert_List(New_Object_List, E.Next);
 
-      end if;
-
-   end Convert_List;
-
-
-
-   
 
    
    
