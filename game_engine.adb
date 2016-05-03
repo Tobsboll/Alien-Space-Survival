@@ -143,7 +143,7 @@ package body Game_Engine is
       
    end Get_Player_Input;
    
-   --------------------------------------------------
+     --------------------------------------------------
    --| PLAYER COLLIDE
    --------------------------------------------------
    function Player_Collide (X,Y : in Integer;
@@ -235,6 +235,38 @@ package body Game_Engine is
 	    end loop;
 	    --return Player_Collide(X,Y,L.Next);
 	    
+	    --------------------------------------------------
+	    --Med Fiendeskepp:
+	    --------------------------------------------------
+	 elsif  L.Object_Type in 31..40 then
+	    
+	    --Jämför Hindrets koord. med hela ship top:
+	    --------------------------------------------------
+	    for A in 1..2 loop      --Obstacle height
+	       for I in 1..3 loop      --Ship top
+		  for K in 1..3 loop   --Obstacle width
+		     
+		     if X+I = Object_X+K-1 and Y = Object_Y+A-1 then
+			return True;
+		     end if;
+		  end loop;
+	       end loop;
+	    end loop;
+	    
+	    --Jämför Hindrets koord. med hela ship bottom:
+	    --------------------------------------------------
+	    for A in 1..2 loop      --Obstacle height
+	       for I in 1..5 loop      --Ship bottom
+		  for K in 1..3 loop   --Obstacle width
+		     
+		     if X+I-1 = Object_X+K-1 and Y+1 = Object_Y+A-1 then
+			return True;
+		     end if;
+		  end loop;
+	       end loop;
+	    end loop;
+	    
+	    
 	 end if;
 	 
       end if;
@@ -287,14 +319,20 @@ package body Game_Engine is
 	       elsif L.Object_Type = PowerUpType(3) then
 		  Player_Ship.Laser_Type := ShotType(2);
 		  
-		  --else
-		  --Rekursion:
-		  -- Player_Collide_In_Object(X,Y,Player_Ship,L.Next);
+		  
 	       end if;
 	       Remove(L);
 	       
+	       -------------------------------------------------
+	       --Fiendeskepp?
+	       --------------------------------------------------
+	    elsif L.Object_Type in 31..40 then
 	       
+	       Player_Ship.Health := Player_Ship.Health - 5;
+	       Remove(L);
 	    end if;
+	    
+	    --Remove(L); --ersätter alla remove ovan
 	 else
 	    Player_Collide_In_Object(X,Y,Player_Ship, L.Next);
 	 end if;
@@ -320,7 +358,7 @@ package body Game_Engine is
 	 --------------------------------------------------
 	 --Med hinder:
 	 --------------------------------------------------
-	 if Obj.Object_Type in 11..20 then
+	 if Obj.Object_Type in 11..20 or Obj.Object_Type in 31..40 then
 	    
 	    --Jämför Hindrets koord.
 	    --------------------------------------------------
@@ -340,6 +378,8 @@ package body Game_Engine is
 		  Diff := Diff +1;
 	   end loop;
 	   --Shot_Collide(Shot, Obj.Next);
+	   
+	
 	 end if;
 	
        end if;
@@ -360,27 +400,23 @@ package body Game_Engine is
 	 if not Empty(Obj2) then
 	    
 	    if Shot_Collide(Shot,Obj2) then
-	       Remove(Obj2);
-	       Remove(Shot);
+	       
+	       --Avgörandet:
+	       if Obj2.Object_Type in 11..20 then --skott träffar hinder
+		  Remove(Obj2);
+	       elsif Obj2.Object_Type in 31..40 then --skott träffar fiende
+		  Remove(Obj2);
+		  --alternativt fiende förlorar liv
+	       end if;
+	       
+	       Remove(Shot); --skottet ska alltid dö
 	    else
 	       A_Shot_Collide_In_Object(Shot, Obj2.Next);
 	    end if;
 	    
 	 end if;
-	 --A_Shot_Collide_In_Object(Shot.Next, Obj2);
+	 
       end if;
-      
-      --  if not Empty(Obj2) then
-      --  	 if Shot_Collide(Shot, Obj2) then
-      --  	    Remove(Obj2);
-      --  	    Remove(Shot);
-      --  	    A_Shot_Collide_In_Object(Shot, Obj2);
-      --  	 else
-      --  	    A_Shot_Collide_In_Object(Shot , Obj2.Next);
-      --  	 end if;
-      --  elsif not Empty(Shot) then
-      --  	 A_Shot_Collide_In_Object(Shot.Next , Obj2);
-      --  end if;
       
    end A_Shot_Collide_In_Object;
    
@@ -403,7 +439,6 @@ package body Game_Engine is
       
       
    end Shots_Collide_In_Objects;
-
    
    
    --------------------------------------------------
