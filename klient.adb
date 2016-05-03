@@ -556,15 +556,7 @@ begin
 	    Goto_XY(Gameborder_X+1,Gameborder_Y+World_Y_Length+2);
 	    Put("Här skriver man.");
 	    -------------------------------------------------
-	    
-	    --------------------------------
-	    --| Skriver ut banan
-	    --------------------------------
-	    Put_World(Data.Map, Gameborder_X, Gameborder_Y, Game_Wall_Background, Game_Wall_Line);     -- put world // Eric
-	    Set_Colours(White, Black);
-	    
-	    --------------------------------
-	    
+
 	    Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
 	    
 	    for I in Waves'range loop					 
@@ -580,6 +572,14 @@ begin
 	    --Put X Y koordinater för alla skott [TEST] [OK]
 	    --Put(Shot_List);
 	    
+
+	    --------------------------------
+	    --| Skriver ut banan
+	    --------------------------------
+	    Put_World(Data.Map, Gameborder_X, Gameborder_Y, Game_Wall_Background, Game_Wall_Line);     -- put world // Eric
+	    Set_Colours(White, Black);
+	    
+	    --------------------------------
 	    
 	    
 	    Set_Colours(White, Black);
