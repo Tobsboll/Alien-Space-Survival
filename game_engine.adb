@@ -57,7 +57,7 @@ package body Game_Engine is
       if not Empty(L) then
 	 Direction := L.Attribute;
 	 L.XY_Pos(2) := L.XY_Pos(2) + Ydiff*Direction;
-	 if L.XY_Pos(2) = 0 or L.XY_Pos(2) = World_Y_Length+1 then
+	 if L.XY_Pos(2) = GameBorder_Y or L.XY_Pos(2) = World_Y_Length+GameBorder_Y then
 	    Remove(L);
 	    Shot_Movement(L);
 	 else
