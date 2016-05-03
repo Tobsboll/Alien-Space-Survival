@@ -37,6 +37,8 @@ package Enemy_Ship_Handling is
    type Enemy_List_Array is
      array (1..4) of Enemy_List;
    
+      type Enemy_List_Array_2 is	
+     array (1..4) of Object_List;	
    
    
    --------------------------------------------------
