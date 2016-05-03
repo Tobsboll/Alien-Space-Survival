@@ -439,5 +439,44 @@ package body Game_Engine is
       end loop;
    end Create_Wall;
    
+   --------------------------------------------------
+   -- SET WAITING TIME
+   --------------------------------------------------
+   function Set_Waiting_Time(Loop_Counter, Rounds_To_Wait : in Integer) return Integer is
+      
+      -- funktion som bestämmer vid vilken looprunda 
+      -- proceduren wait() ska bli klar
+      
+      When_Done : Integer;
+      
+   begin
+      
+      When_Done := Loop_Counter + Rounds_To_Wait;
+      
+      return When_Done;
+      
+   end Set_Waiting_Time;
+   --------------------------------------------------
+   -- end SET WATING TIME
+   --------------------------------------------------
+   
+   --------------------------------------------------
+   -- WAITING
+   --------------------------------------------------
+   function Waiting(Loop_Counter, When_Done : in Integer) return Boolean is
+      
+      -- Funktion Som returnerar sant om loop_counter
+      -- är lika med det tal vi satte att vi skulle vänta till
+      -- i set_waiting_time, och falskt annars.
+      
+   begin
+      
+      return Loop_Counter /= When_Done;
+      
+   end Waiting;
+   --------------------------------------------------
+   -- end WAITING
+   --------------------------------------------------
+   
 
 end Game_Engine;
