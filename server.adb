@@ -404,11 +404,24 @@ begin
    -- SPAWN FIRST WAVE
    -----------------------------------
    
-   Spawn_Wave(8, --Antal
+   Spawn_Wave(30, --Antal
    	      EnemyType(1), --Typ
    	      1,
    	      1,
    	      waves(1));
+   
+   Spawn_Wave(1, --Antal
+   	      EnemyType(3), --Typ
+   	      3,
+   	      1,
+	      waves(2));
+   
+   
+   --  Spawn_Wave(2, --Antal
+   --  	      EnemyType(1), --Typ
+   --  	      4,
+   --  	      1,
+   --  	      waves(3));
    
    -----------------------------------
    -- end SPAWN FIRST WAVE
@@ -484,8 +497,18 @@ begin
 
       end loop;
       
-      Update_Enemy_Position(Waves(1), Shot_List, Obstacle_Y);
-           
+
+      -----------------------------------
+      -- Update Enemy ships
+      -----------------------------------
+     
+	Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players);
+  
+      -----------------------------------
+      -- end Update enemy ships
+      -----------------------------------
+      
+      -----------------------------------     
       -----------------------------------
       -- PUT ENEMY SHIPS
       -----------------------------------
