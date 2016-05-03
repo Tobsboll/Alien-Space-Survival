@@ -98,8 +98,11 @@ procedure Klient is
 	    
 	    Set_Foreground_Colour(Data.Players(I).Colour);               -- Ställer in spelarens färg.
 	    
+	    Set_Text_Modes(Off,Off,On);  -- Fet stil på utskriften
 	    --Goto_XY(Data.Players(I).Ship.XY(1), Data.Players(I).Ship.XY(2));
 	    Put_Player(Data.Players(I).Ship.XY(1), Data.Players(I).Ship.XY(2));                         -- Uppgraderas till en Put_Ship senare
+	    
+	    Set_Text_Modes(Off,Off,Off);  -- Reset utskriften
 	 end if;
 	 
       end loop;
