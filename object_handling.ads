@@ -18,6 +18,7 @@ package Object_Handling is
    --| -shots
    --| -walls
    --| -obstacles
+   --| -enemies
    --------------------------------------------------
    
 
@@ -34,7 +35,14 @@ package Object_Handling is
 	 Attribute      : Integer; --Kan vara:
 	                           --Skott: Direction Up/Down
 	                           --Obstacle: Hårdhet Light/Hard/Unbreakable
-	                           --
+		                   --Enemy:    Num_Lives "Health"
+				   --
+	 
+	 --För fiendeskepp exklusivt:
+	 Direction      : Integer;
+	 Movement_Type  : Integer;
+	 Difficulty     : Integer;
+	 
 	 Next           : Object_List;
 	 
       end record;
