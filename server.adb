@@ -133,6 +133,28 @@ procedure Server is
    --------------------------------------------------
 
    --------------------------------------------------
+   --------------------------------------------------
+   -- Convert list
+   --------------------------------------------------
+   procedure Convert_List ( New_Object_List : in out Object_List;
+			    E : in Enemy_List) is
+      
+      ObjectType, X, Y, Attr : Integer;
+   begin
+      
+      if not Empty(E) then
+	 ObjectType := E.Enemy_Type;
+	 X          := E.XY(1);
+	 Y          := E.XY(2);
+	 Attr       := E.Num_Lives;
+	 
+	 Create_Object(ObjectType, X, Y, Attr, New_Object_List);
+	 
+	 Convert_List(New_Object_List, E.Next);
+
+      end if;
+
+   end Convert_List;
 
 
 
@@ -156,6 +178,7 @@ procedure Server is
    
    Enemies1, Enemies2, Enemies3, Enemies4 : Enemy_List;
    Waves                  : Enemy_List_Array;
+   Waves2                 : Enemy_List_Array_2;
    
    Shot_List              : Object_List; --shot_handling.ads
    Obstacle_List          : Object_List;
@@ -507,7 +530,11 @@ begin
       -----------------------------------
       -- end Update enemy ships
       -----------------------------------
-      
+      	for J in Waves'Range loop
+	   
+	   DeleteList(Waves2(J));
+	   Convert_List(Waves2(J),Waves(J));
+	end loop;
       -----------------------------------     
       -----------------------------------
       -- PUT ENEMY SHIPS
@@ -519,6 +546,14 @@ begin
 	 end loop;
       end loop;
       
+      --  for I in 1..Num_Players loop
+      --  	 for J in 1..4 loop
+      --  	   --Waves2'Range loop
+      --  	    Put(Sockets(I), Waves2(J));
+      --  	    Put('1');
+      --  	 end loop;
+      --  end loop;
+      --Put('!');
       -----------------------------------
       -- end PUT ENEMY SHIPS
       -----------------------------------   
