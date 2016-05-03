@@ -86,5 +86,15 @@ package Game_Engine is
    --
    procedure Create_Wall ( L : in out Object_List;
 			     Ypos : in Integer);
+			     
+   --------------------------------------------------
+   -- TILLÄGG FRÅN TOBIAS:
+   -- två funktioner som hanterar väntetid mellan händelser
+   -- set_waiting_time räknar ut et slutligt värde på loop_counter,
+   -- Waiting kollar om loop_counter har det värdet.
+   
+   function Set_Waiting_Time(Loop_Counter, Rounds_To_Wait : in Integer) return Integer;
+   function Waiting(Loop_Counter, When_Done : in Integer) return Boolean;
+   --------------------------------------------------
    
 end Game_Engine;
