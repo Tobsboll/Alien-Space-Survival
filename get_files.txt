@@ -16,8 +16,8 @@ wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/box_
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/key_codes
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/background_handling.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/background_handling.ads
-wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/input.adb
-wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/input.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/player_handling.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/player_handling.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu_handling.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/menu_handling.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/game_engine.adb
