@@ -3,7 +3,7 @@ with TJa.Keyboard;      use TJa.Keyboard;
 with TJa.Keyboard.Keys; use TJa.Keyboard.Keys;
 with TJa.Window.Text;   use TJa.Window.Text;
 with Definitions;       use Definitions;
-with Input;             use Input;
+with Player_Handling;   use Player_Handling;
 with Window_Handling;   use Window_Handling;
 
 
