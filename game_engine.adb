@@ -1,5 +1,3 @@
-
-
 package body Game_Engine is
 
    --------------------------------------------------
@@ -22,6 +20,7 @@ package body Game_Engine is
 	 Game.Players(K).Ship.XY(2) := World_Y_Length + GameBorder_Y - 2;
 	 Game.Players(K).Ship.XY(1) := Xpos + Interval + GameBorder_X;
 	 Game.Players(K).Playing := True; 
+	 Game.Players(K).Score := 0;
 	 Xpos := Xpos + Interval;
 	 
 	 --Equipment
@@ -123,14 +122,16 @@ package body Game_Engine is
 				X+2,
 				Y,
 				Up,
-				Shot_List                );
+				Shot_List,
+				I                           );
 	       elsif Keyboard_input = 'm' and then Ammo > 0 then
 		  
 		  Create_Object(ShotType(4), -- 4 = Missile
 				X+2,
 				Y,
 				Up,
-				Shot_List                );
+				Shot_List,
+				I                           );
 		  Data.Players(I).Ship.Missile_Ammo := Ammo - 1;
 		  
 	       elsif Keyboard_Input = 'e' then exit; -- betyder "ingen input" för servern.
@@ -392,7 +393,8 @@ package body Game_Engine is
    --| (SINGLE) SHOT COLLIDE IN ANY OBJECT
    --| kommer att användas till skott främst tror jag
    --------------------------------------------------
-   procedure A_Shot_Collide_In_Object (Shot, Obj2 : in out Object_List) is
+   procedure A_Shot_Collide_In_Object (Shot, Obj2 : in out Object_List;
+				      Game        : in out Game_Data) is
 
 
    begin
@@ -405,13 +407,18 @@ package body Game_Engine is
 	       if Obj2.Object_Type in 11..20 then --skott träffar hinder
 		  Remove(Obj2);
 	       elsif Obj2.Object_Type in 31..40 then --skott träffar fiende
+		  
+		  if Shot.Player > 0 then
+		     Game.Players(Shot.Player).Score := Game.Players(Shot.Player).Score + 1;
+		  end if;
+		  
 		  Remove(Obj2);
 		  --alternativt fiende förlorar liv
 	       end if;
 	       
 	       Remove(Shot); --skottet ska alltid dö
 	    else
-	       A_Shot_Collide_In_Object(Shot, Obj2.Next);
+	       A_Shot_Collide_In_Object(Shot, Obj2.Next, Game);
 	    end if;
 	    
 	 end if;
@@ -425,14 +432,15 @@ package body Game_Engine is
    --| (MULTIPLE) SHOTS COLLIDE IN ANY OBJECT
    --| kommer att användas till skott främst tror jag
    --------------------------------------------------
-   procedure Shots_Collide_In_Objects (Obj1, Obj2 : in out Object_List) is
+   procedure Shots_Collide_In_Objects (Obj1, Obj2 : in out Object_List;
+				      Game        : in out Game_Data) is
       
    begin
       if not Empty(Obj1) and not Empty(Obj2) then
-	 A_Shot_Collide_In_Object(Obj1, Obj2);
+	 A_Shot_Collide_In_Object(Obj1, Obj2, Game);
 
          if not Empty(Obj1) then
-            Shots_Collide_In_Objects(Obj1.Next, Obj2);
+            Shots_Collide_In_Objects(Obj1.Next, Obj2, Game);
          end if;
       end if;
       
