@@ -41,8 +41,8 @@ procedure Klient is
    Powerup_List   : Object_List;
    Waves          : Enemy_List_array;
    Choice         : Character := '0';    -- Player choice in the menu 0 = Start
-   Ship.Move      : Ship_Move_Type := (others => 0);    -- position av skepp i startanimeringen
-   Ship.Shot      : Ship_Shot_Type := (others => 0);    -- Position av skott
+   Ship_Move      : Ship_Move_Type := (others => 0);    -- position av skepp i startanimeringen
+   Ship_Shot      : Ship_Shot_Type := (others => 0);    -- Position av skott
    Ipadress       : String(1..9) := "localhost"; -- Tänkt att kunna skriva adress
    Portadress     : Integer      := 3400;        -- i menyn
    
@@ -71,7 +71,7 @@ begin
       -------------------------------------------------------------
       loop
       	 delay(0.1);
-      	 Put_Spacebattle(Move, Shot, Gameborder_X, GameBorder_Y, 
+      	 Put_Spacebattle(Ship_Move, Ship_Shot, Gameborder_X, GameBorder_Y, 
       			 World_X_Length, World_Y_Length);
 	 
       	 Put_Menu(Choice, NumPlayers, Portadress, Ipadress, 
