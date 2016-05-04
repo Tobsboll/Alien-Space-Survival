@@ -75,8 +75,10 @@ package Game_Engine is
 					L           : in out Object_List);
    
    function Shot_Collide (Shot, obj : in Object_List) return boolean;
-   procedure A_Shot_Collide_In_Object (Shot, Obj2 : in out Object_List);
-   procedure Shots_Collide_In_Objects (Obj1, Obj2 : in out Object_List);
+   procedure A_Shot_Collide_In_Object (Shot, Obj2 : in out Object_List;
+				       Game        : in out Game_Data);
+   procedure Shots_Collide_In_Objects (Obj1, Obj2 : in out Object_List;
+				       Game        : in out Game_Data);
    
    --BETA:
    --Players_Are_Dead ska returnera true om ALLA spelare är döda
