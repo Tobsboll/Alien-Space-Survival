@@ -78,7 +78,8 @@ package body Object_Handling is
    procedure Create_Object(Type_Of_Object : in Integer ;
 			   X, Y           : in Integer ;
 			   Attr           : in Integer ;
-			   L              : in out Object_List) is
+			   L              : in out Object_List;
+			   Player         : in Integer := 0) is
       
       Temp : Object_List;
       
@@ -89,6 +90,7 @@ package body Object_Handling is
       Temp.XY_Pos(1)   := X;
       Temp.XY_Pos(2)   := Y;
       Temp.Attribute   := Attr;
+      Temp.Player      := Player;
       Temp.Next        := L; 
       L := Temp; 
       
@@ -183,4 +185,3 @@ package body Object_Handling is
 
 
 end Object_Handling;
-
