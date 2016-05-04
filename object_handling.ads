@@ -36,7 +36,9 @@ package Object_Handling is
 	                           --Skott: Direction Up/Down
 	                           --Obstacle: Hårdhet Light/Hard/Unbreakable
 		                   --Enemy:    Num_Lives "Health"
-				   --
+	 
+	 -- För Spelarskotten
+	 Player         : Integer;
 	 
 	 --För fiendeskepp exklusivt:
 	 Direction      : Integer;
@@ -57,7 +59,8 @@ package Object_Handling is
    procedure Create_Object(Type_Of_Object : in Integer;
 			   X,Y            : in Integer;
 			   Attr           : in Integer;
-			   L              : in out Object_List );
+			   L              : in out Object_List;
+			   Player         : in Integer := 0);
    function Highest_Y(List : in Object_List;	
 		     Y    : in Integer := GameBorder_Y+World_Y_Length) return Integer;
    function Lowest_Y(List : in Object_List;
