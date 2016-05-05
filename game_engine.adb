@@ -56,7 +56,7 @@ package body Game_Engine is
       if not Empty(L) then
 	 Direction := L.Attribute;
 	 L.XY_Pos(2) := L.XY_Pos(2) + Ydiff*Direction;
-	 if L.XY_Pos(2) = GameBorder_Y or L.XY_Pos(2) = World_Y_Length+GameBorder_Y then
+	 if L.XY_Pos(2) <= GameBorder_Y or L.XY_Pos(2) >= World_Y_Length+GameBorder_Y then
 	    Remove(L);
 	    Shot_Movement(L);
 	 else
@@ -303,6 +303,13 @@ package body Game_Engine is
 		  
 	       elsif L.Object_Type = ShotType(2) then
 		  Player_Ship.Health := Player_Ship.Health-1;
+	       elsif L.Object_Type = ShotType(9) then
+		  Player_Ship.Health := Player_Ship.Health-3;
+		  Player_Ship.XY(1) := Player_Ship.XY(1)+1;
+	       elsif L.Object_Type = ShotType(10) then
+		  Player_Ship.Health := Player_Ship.Health-3;
+		  Player_Ship.XY(1) := Player_Ship.XY(1)-1;
+		  
 	       end if;
 	       Remove(L);
 	       
