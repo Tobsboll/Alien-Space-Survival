@@ -329,12 +329,15 @@ package body Player_Handling is
 	 Get(Socket,Data.Players(I).Ship.Health);
 	 if Data.Players(I).Ship.Health > 0 then
 	    
+	    Data.Players(I).Playing := True;
+	    
 	    --Tar emot spelarens skeppdata
 	    Get_Ship_Data(Socket,Data.Players(I).Ship);
 	    
 	    -- Tar emot spelarens poäng
 	    Get(Socket,Data.Players(I).Score);
-	    
+	 else
+	    Data.Players(I).Playing := False;   
 	 end if;
       end loop;
       
