@@ -54,7 +54,10 @@ package Enemy_Ship_Handling is
 		        Enemies_List  : in out Object_List);
    function Get_Closest_Player(Enemy_X : in Integer;
 			       Players : in Player_Array) return Integer;
-   procedure Chase(Player_X : in Integer; 
+   function Above_Wave(Player_Y : in Integer;
+		       Enemies  : in Object_list) return Boolean;
+   
+   procedure Chase(Player_XY : in XY_Type; 
 		   Enemies  : in out Object_List;
 		   Waves    : in out Enemy_List_Array;
 		   Shot_List : in out Object_list);
