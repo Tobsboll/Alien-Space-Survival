@@ -21,8 +21,8 @@ package Graphics is
 					       ' ',
 					       ' ',
 					       ' ',
-					       ' ', 
-					       ' ');
+					       ' ',  -- Vänster vägg
+					       ' '); -- Höger vägg
    
    --  Player ship-prototypes
    --
