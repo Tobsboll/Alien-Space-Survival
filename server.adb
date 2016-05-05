@@ -238,8 +238,8 @@ begin
       -----------------------------------
       -- Update Enemy ships
       -----------------------------------
-     
-	Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players);
+     Obstacle_y := Highest_Y(Obstacle_List);
+     Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players);
   
       -----------------------------------
       -- PUT ENEMY SHIPS
