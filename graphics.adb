@@ -32,6 +32,7 @@ package body Graphics is
 	 
 	 --Om det är ett skott:
 	 if L.Object_Type in ShotGraphics'Range then
+	    if L.Object_Type not in 9..10 then -- Wall Shot
 	    Goto_XY(L.XY_Pos(1) , L.XY_Pos(2));
 	    
 	    if L.Object_Type = 4 then --Speciallösning för String
@@ -48,7 +49,7 @@ package body Graphics is
 	    Put(ShotGraphics(L.Object_Type));
 	    Set_Foreground_Colour(Old_Text_Colour);
 	    end if;
-	    
+	    end if;
 	    --Om det är ett hinder:
 	 elsif L.Object_Type in Obstacle'Range then
 	    
