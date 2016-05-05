@@ -186,8 +186,9 @@ package body Enemy_Ship_Handling is
    -- MOVE ONE DOWN
    --------------------------------------------------
    
-   procedure Move_One_Down(Enemies : in out Object_List;
-			   Obstacle_Y: in Integer) is
+   procedure Move_One_Down(Enemies : in out Object_List)
+			   -- Obstacle_Y: in Integer)
+   is
       
    begin
       
@@ -195,17 +196,16 @@ package body Enemy_Ship_Handling is
 	 
 	 Enemies.XY_Pos(2) := Enemies.XY_Pos(2) + 1;
 	 
-	 Move_One_Down(Enemies.Next, Obstacle_Y); -- rekursion
+	 Move_One_Down(Enemies.Next); -- rekursion
 	 
-	 if Enemies.XY_Pos(2) >= (Obstacle_Y - 2) then -- vågen sätts till att stå stilla i y
-						   -- Enemies.Movement_Type := 2;
-	    Change_Movement_Type(Enemies, 2);
-	 end if;
+	 --  if Enemies.XY_Pos(2) >= (Obstacle_Y - 2) then -- vågen sätts till att stå stilla i y
+	 --  					   -- Enemies.Movement_Type := 2;
+	 --     Change_Movement_Type(Enemies, 2);
+	 --  end if;
 	 
       end if;
       
    end Move_One_Down;
-   
    --------------------------------------------------
    -- end MOVE ONE DOWN
    --------------------------------------------------
@@ -311,11 +311,27 @@ package body Enemy_Ship_Handling is
    -- AT LOWER LIMIT
    --------------------------------------------------
    
-   function At_Lower_limit(Enemies : in Object_List) return Boolean is
+   function At_Lower_limit(Enemies : in Object_List; 
+			   Obstacle_Y : in Integer) return Boolean is
+      
+      -- funktion som kollar om något skepp i listan
+      -- har en y-koord nära obstacle_y, vilket är en gräns
+      -- som ändras i takt med att barriärer skjuts
+      -- sönder.
       
    begin
       
-      return Enemies.Movement_Type = 2;
+      
+      if Enemies /= null then
+	 if Enemies.XY_Pos(2) >= Obstacle_Y-8 then
+	    return True;
+	 end if;
+	 
+	return At_Lower_Limit(Enemies.Next, Obstacle_Y); --rekursion
+	 
+      else
+	 return False;
+      end if;
       
    end At_Lower_Limit;
    --------------------------------------------------
@@ -416,7 +432,7 @@ package body Enemy_Ship_Handling is
 
 	 --wait()
 
-	    Create_Enemy_shot(Enemies.Object_Type, Enemies.XY_Pos(1)+1, Enemies.XY_Pos(2)+2, Shot_list);
+	    Create_Enemy_shot(Enemies.Object_Type, Enemies.XY_Pos(1), Enemies.XY_Pos(2)+1, Shot_list);
 
 	 
       end if;
@@ -461,8 +477,8 @@ package body Enemy_Ship_Handling is
 	       
 	       if not Next_To_Wall(Waves(I)) then
 		  Move_To_Side(Waves(I)); 
-	       elsif not At_Lower_Limit(Waves(I)) then
-		  Move_One_Down(Waves(I), Obstacle_Y);
+	       elsif not At_Lower_Limit(Waves(I), Obstacle_Y) then
+		  Move_One_Down(Waves(I));
 		  Change_Direction(Waves(I));
 	       else
 		  Change_Direction(Waves(I));
@@ -471,6 +487,7 @@ package body Enemy_Ship_Handling is
 	       -- if Ok_To_Shoot() then
 	       Reset(Chance_For_shot);
 	       Shot_Generator(Waves(I), Waves, Chance_For_Shot, Shot_List);
+	       
 	       
 	       ---------------------------------
 	       -- Only zig-zag
@@ -513,8 +530,8 @@ package body Enemy_Ship_Handling is
 		 Closest_Player := Get_Closest_Player(Waves(I).XY_Pos(1), Players);
 		 Chase(Players(Closest_player).Ship.XY(1), Waves(I), Waves, Shot_List);
 		 
-		 if Waves(I).XY_Pos(2) < 3 then
-		    Move_One_Down(Waves(I), 5); -- får ej gå lägre än våg.
+		 if Waves(I).XY_Pos(2) < Waves(1).XY_Pos(2)-5 then
+		    Move_One_Down(Waves(I)); -- får ej gå lägre än våg.
 		 end if;
 		 
 		 
@@ -528,7 +545,7 @@ package body Enemy_Ship_Handling is
 	       -- Destroyer movement
 	       --------------------------------
 	       
-	       -- här behövs wait(), så se till att skicka in
+	       -- Här behövs wait(), så se till att skicka in
 	       -- loop_counter så småningom.
 	       
 	    elsif Waves(I).Movement_Type = 4 then
@@ -539,7 +556,7 @@ package body Enemy_Ship_Handling is
 	       else
 		  
 		  
-		  Move_One_Down(Waves(I), 60);
+		  Move_One_Down(Waves(I));
 	       for I in 1..4 loop
 		  
 		  Shot_Generator(Waves(I), Waves, Chance_For_Shot, Shot_List);
