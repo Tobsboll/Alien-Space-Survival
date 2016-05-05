@@ -64,11 +64,14 @@ package Enemy_Ship_Handling is
 				   Obstacle_Y: in Integer;
 				   Players : in Player_array);
    function Last_List(All_Enemies : in Enemy_List_Array) return Integer;
-   function At_Lower_limit(Enemies : in Object_List) return Boolean;
+   function At_Lower_limit(Enemies : in Object_List;
+			   Obstacle_Y : in Integer) return Boolean;
    function Next_To_Wall(Enemies : in Object_List) return Boolean;
    procedure Move_To_Side(Enemies : in out Object_List);
    procedure Change_Movement_Type(Enemies  : in out Object_List;
 				  New_Type : in Integer);
+   procedure Move_One_Down(Enemies : in out Object_List);
+   
    procedure Change_Direction(Enemies : in out Object_List);
 
    procedure Put_Enemy_Ships(Enemies : in Object_List;
