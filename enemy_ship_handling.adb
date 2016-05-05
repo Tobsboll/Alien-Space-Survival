@@ -323,7 +323,7 @@ package body Enemy_Ship_Handling is
       
       
       if Enemies /= null then
-	 if Enemies.XY_Pos(2) >= Obstacle_Y-8 then
+	 if Enemies.XY_Pos(2) >= Obstacle_Y-4 then
 	    return True;
 	 end if;
 	 
@@ -408,26 +408,59 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    
    --------------------------------------------------
+   -- ABOVE_WAVE
+   --------------------------------------------------
+   function Above_Wave(Player_Y : in Integer;
+		       Enemies  : in Object_list) return Boolean is
+      -- funktion som kollar om spelaren är ovanför vågen
+      -- dvs så att exv interceptorn borde skjuta/jaga den.
+      -- Har valt att lägga rekursion för att det ska trigga
+      --redan när man passerar första fienden, dvs om man hittar 
+      --någon lucka så kan interceptorn ändå se dig.
+      
+      -- en minussida med denna kod är att vi måste bestämma en fix lista
+      --för vågen, nu satt till Waves(1).
+      
+   begin
+      
+      if Enemies /= null then
+	 
+	 if Player_Y <= Enemies.XY_Pos(2) then
+	    return True;
+	 else return Above_Wave(Player_Y, Enemies.Next);
+	 end if;
+	 
+      else
+	 return False;
+      end if;
+
+   end Above_Wave;
+   --------------------------------------------------
+   -- end ABOVE_WAVE
+   --------------------------------------------------
+   
+   
+   --------------------------------------------------
    -- CHASE
    --------------------------------------------------
-   procedure Chase(Player_X : in Integer; 
+   procedure Chase(Player_XY : in XY_Type; 
 		   Enemies  : in out Object_List;
 		   Waves    : in out Enemy_List_Array;
 		   Shot_List : in out Object_list) is
    begin
 
       
-      if Player_X - Enemies.XY_Pos(1) < 0 then
+      if Player_XY(1) - Enemies.XY_Pos(1) < 0 then
 
 	 Enemies.Direction := -1;
 	 Move_To_Side(Enemies);
 	 
-      elsif Player_X - Enemies.XY_Pos(1) > 0 then
+      elsif Player_XY(1) - Enemies.XY_Pos(1) > 0 then
 	 
 	 Enemies.Direction := 1;
 	 Move_To_Side(Enemies);
 	 
-      elsif Ok_To_Shoot(Enemies.XY_Pos(1), Enemies.XY_Pos(2), 10, Waves) then
+      elsif Ok_To_Shoot(Enemies.XY_Pos(1), Enemies.XY_Pos(2), 10, Waves) or Above_Wave(Player_XY(2), Waves(1)) then
 	 
 
 	 --wait()
@@ -521,23 +554,26 @@ package body Enemy_Ship_Handling is
 	       ---------------------------------
 
 	    elsif Waves(I).Movement_Type = 3 then
+	      
+	       Closest_Player := Get_Closest_Player(Waves(I).XY_Pos(1), Players);
+	       -- räknar ut vilken spelare som är närmast 
 	       
-	       --här blir det så att jag måste skicka in alla
-	       --fiendelistor om interceptor ska undvika att skjuta på
-	       --vågen...
-	       
-	       if Ok_To_Shoot(Waves(I).XY_Pos(1), Waves(I).XY_Pos(2), 4, Waves) then
-		 Closest_Player := Get_Closest_Player(Waves(I).XY_Pos(1), Players);
-		 Chase(Players(Closest_player).Ship.XY(1), Waves(I), Waves, Shot_List);
+	       if Ok_To_Shoot(Waves(I).XY_Pos(1), Waves(I).XY_Pos(2), 4, Waves)  or Above_Wave(Players(Closest_player).Ship.XY(2), Waves(1)) then
+		  -- om skeppet har fri sikt eller om spelaren är 
+		  -- ovanför vågen så jagar interceptorn spelaren, 
+		  -- i chase-koden ingår skjutande.
+		
+		 Chase(Players(Closest_player).Ship.XY, Waves(I), Waves, Shot_List);
 		 
-		 if Waves(I).XY_Pos(2) < Waves(1).XY_Pos(2)-5 then
+		 if Waves(I).XY_Pos(2) < Waves(1).XY_Pos(2)-8 then
 		    Move_One_Down(Waves(I)); -- får ej gå lägre än våg.
 		 end if;
-		 
+		 -- flyttar sig neråt men håller sig ovanför vågen.
 		 
 	       else
 		  Waves(I).Movement_Type := 2;
-		  -- ställer interceptorn på att zickzacka tills tills vidare.
+		  --om den inte kan skjuta eller jaga så
+		  --ställs interceptorn på att zickzacka tills tills vidare.
 		  
 	       end if;
 	       
