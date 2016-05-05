@@ -163,7 +163,6 @@ begin
       --| "Level 2" => därför ej nödvändig än
       --------------------------------------------------
       if Game.Settings.Generate_Map then       -- Bestämmer under spelet om banan ska börja genereras eller inte.
-      	 if Loop_Counter mod 4 = 0 then
       	    if Loop_Counter > 50 and Loop_Counter < 100 then
 
       	       New_Top_Row(Game.Map, Close => True);  -- Banan blir mindre
@@ -178,7 +177,6 @@ begin
 	       
       	    end if;   
       	    Move_Rows_Down(Game.Map);       -- Flyttar ner hela banan ett steg.
-      	 end if;
       end if;
       
       -- Resetar så att banangenereringen börjar igen
