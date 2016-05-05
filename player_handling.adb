@@ -403,7 +403,7 @@ package body Player_Handling is
 	 Set_Foreground_Colour(Red);                             -- Ställer in färgen på hjärtan.
 	 Goto_XY(X+13,Y+I);
 	 
-	 if Data.Players( Data.Ranking(I) ).Ship.Health = 0 then            -- Om död.
+	 if Data.Players( Data.Ranking(I) ).Ship.Health < 1 then            -- Om död.
 	    Put("R.I.P.");
 	    
 	 elsif Data.Players( Data.Ranking(I) ).Ship.Health > 0 then         -- annars lever
