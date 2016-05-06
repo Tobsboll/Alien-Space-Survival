@@ -102,20 +102,20 @@ package body Object_Handling is
    --------------------------------------------------
    --| Highest Y Position in a list |----------------- // Eric
    --------------------------------------------------
-   function Highest_Y(List : in Object_List;
-		     Y    : in Integer := GameBorder_Y+World_Y_Length) return Integer is
+   function Highest_Y_Position(List : in Object_List;
+			     Y    : in Integer := GameBorder_Y+World_Y_Length-2) return Integer is
      
    begin
       if not Empty(List) then
 	 if List.XY_Pos(2) < Y then
-	    return Lowest_Y(List.Next, List.XY_Pos(2));
+	    return Highest_Y_Position(List.Next, List.XY_Pos(2));
 	 else
-	    return Lowest_Y(List.Next, Y);
+	    return Highest_Y_Position(List.Next, Y);
 	 end if;
       else
 	 return Y;
       end if;
-   end Highest_Y;
+   end Highest_Y_Position;
    --------------------------------------------------
    
 
@@ -123,22 +123,65 @@ package body Object_Handling is
    --------------------------------------------------
    --| Lowest Y Position in a list |----------------- // Eric
    --------------------------------------------------
-   function Lowest_Y(List : in Object_List;
-		     Y    : in Integer := 0) return Integer is
+   function Lowest_Y_Position(List : in Object_List;
+			      Y    : in Integer := 0) return Integer is
      
    begin
       if not Empty(List) then
 	 if List.XY_Pos(2) > Y then
-	    return Lowest_Y(List.Next, List.XY_Pos(2));
+	    return Lowest_Y_Position(List.Next, List.XY_Pos(2));
 	 else
-	    return Lowest_Y(List.Next, Y);
+	    return Lowest_Y_Position(List.Next, Y);
 	 end if;
       else
 	 return Y;
       end if;
-   end Lowest_Y;
+   end Lowest_Y_Position;
    --------------------------------------------------
    
+   
+   
+   
+   --------------------------------------------------
+   --| Highest X Position in a list |----------------- // Eric
+   --------------------------------------------------
+   function Lowest_X_Position(List : in Object_List;
+			      X    : in Integer := GameBorder_X+World_X_Length) return Integer is
+     
+   begin
+      if not Empty(List) then
+	 if List.XY_Pos(1) < X then
+	    return Lowest_X_Position(List.Next, List.XY_Pos(1));
+	 else
+	    return Lowest_X_Position(List.Next, X);
+	 end if;
+      else
+	 return X;
+      end if;
+   end Lowest_X_Position;
+   --------------------------------------------------
+   
+
+
+   --------------------------------------------------
+   --| Lowest X Position in a list |----------------- // Eric
+   --------------------------------------------------
+   function Highest_X_Position(List : in Object_List;
+			       X    : in Integer := 0) return Integer is
+      
+   begin
+      if not Empty(List) then
+	 if List.XY_Pos(1) > X then
+	    return Highest_X_Position(List.Next, List.XY_Pos(1));
+	 else
+	    return Highest_X_Position(List.Next, X);
+	 end if;
+      else
+	 return X;
+      end if;
+   end Highest_X_Position;
+   --------------------------------------------------
+
 
 
    --------------------------------------------------
