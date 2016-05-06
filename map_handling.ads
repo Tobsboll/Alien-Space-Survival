@@ -59,10 +59,12 @@ package Map_Handling is
    --------------------------------------------------------------------
    --| Genererar en ny rad längst upp.
    --------------------------------------------------------------------
-   procedure New_Top_Row(Map     : in out World;
-			 Straigt : in Boolean := False;
-			 Open    : in Boolean := False;
-			 Close   : in Boolean := False);
+   procedure New_Top_Row(Map      : in out World;
+			 Straight : in Boolean := False;
+			 Open     : in Boolean := False;
+			 Close    : in Boolean := False;
+			 Left     : in Boolean := False;
+			 Right    : in Boolean := False);
    
    
    --------------------------------------------------------------------
@@ -113,62 +115,19 @@ package Map_Handling is
    function Border_Right(Map : in Definitions.World;
 			 Y   : in Integer) return Integer;
       
+      
+   --| ASTROID |--
    
-   -------------------------------------------------------------------
-   --| Genererar astroider
-   --------------------------------------------------------------------
-   procedure Gen_Astroid(Map      : in Definitions.World;
-			 Astroid  : in out Astroid_Type;  
-			 Chance   : in Integer;          -- 1 = 10% .. 10 = 100% (Typ)
-			 form     : in Integer);
-   
-   
-   ---------------------------------------------------------------------
-   --| Flyttar ner alla "fallande" astroider en Y-rad
-   ---------------------------------------------------------------------
-   procedure Move_Astroid(Astroid : in out Astroid_Type);
-   
-   
-   --------------------------------------------------------------------
-   --| Returerar Boolean om någon astroid finns vid X,Y koordinaterna.
-   ---------------------------------------------------------------------
-   function Is_Astroid_There(Astroid : in Astroid_Type;
-			     X       : in Integer;
-			     Y       : in Integer) return Boolean;
-   
-   
-   -----------------------------------------------------------------------
-   --| Returerar astroidens nummret i Astroid arrayen som finns på X,Y koordinaterna.
-   -----------------------------------------------------------------------
-   procedure Get_Astroid_Nr(Astroid : in Astroid_Type;
-			    X       : in Integer;
-			    Y       : in Integer;
-			    Nr      : out Integer);
-   
-   
-   
-   
-   ---------------------------------------------------------------------
-   --| Tar bort och återställer en fallande Astroid med Astroid nummer
-   ---------------------------------------------------------------------
-   procedure Remove_Astroid(Astroid : in out Astroid_Type;
-			    Nr      : in Integer);
-   
-   
-   ---------------------------------------------------------------------
-   --| Tar bort och återställer en fallande Astroid med X,Y koordinater.
-   ---------------------------------------------------------------------
-   procedure Remove_Astroid(Astroid : in out Astroid_Type;
-			    X       : in Integer;
-			    Y       : in Integer);
-   
-   
-   ---------------------------------------------------------------------
-   --| Skriver ut alla fallande (aktiva) astroider)
-   ----------------------------------------------------------------------   
-   procedure Put_Astroid(Astroid : in Astroid_Type;
-			 X   : in Integer;
-			 Y   : in Integer);
-   
+   procedure Create_Astroid (X, Y         : in Integer;
+			     Astroid_List : in out Object_List);
+   procedure Astroid_Generator(Spawn_X         : in Integer;
+			       Astroid         : in Setting_Type;
+			       Astroid_List    : in out Object_list);
+   function Too_Close_Astroid(Spawn : in Integer;
+			      L     : in Object_List) return Boolean;
+   procedure Spawn_Astroid(Astroid_List : in out Object_List;
+			   Astroid      : in Setting_Type;
+			   Map          : in World);
+   procedure Update_Astroid_Position(Astroid_List : in out Object_List);
 
 end Map_Handling;
