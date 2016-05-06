@@ -3,6 +3,7 @@ with TJa.Sockets;               use TJa.Sockets;
 with Ada.Text_IO;               use Ada.Text_IO;
 with Ada.Integer_Text_IO;       use Ada.Integer_Text_IO;
 with Object_Handling;           use Object_Handling;
+with Map_Handling;              use Map_Handling;
 with Ada.Numerics.Discrete_Random;
 with Ada.Unchecked_Deallocation;
 
@@ -68,11 +69,13 @@ package Enemy_Ship_Handling is
    procedure Update_Enemy_Position(Waves : in out Enemy_List_Array;
 				   Shot_List : in out Object_List;
 				   Obstacle_Y: in Integer;
-				   Players : in Player_array);
+				   Players : in Player_array;
+				   Map     : in World);
    function Last_List(All_Enemies : in Enemy_List_Array) return Integer;
    function At_Lower_limit(Enemies : in Object_List;
 			   Obstacle_Y : in Integer) return Boolean;
-   function Next_To_Wall(Enemies : in Object_List) return Boolean;
+   function Next_To_Wall(Enemies : in Object_List;
+			 Map     : in World) return Boolean;
    procedure Move_To_Side(Enemies : in out Object_List);
    procedure Change_Movement_Type(Enemies  : in out Object_List;
 				  New_Type : in Integer);
