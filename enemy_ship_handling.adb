@@ -649,7 +649,7 @@ package body Enemy_Ship_Handling is
 		  -- ovanför vågen så jagar interceptorn spelaren, 
 		  -- i chase-koden ingår skjutande.
 		  
-		  if Players(Closest_player).Health /= 0 then
+		  if Players(Closest_player).Ship.Health /= 0 then
 		     Chase(Players(Closest_player).Ship.XY, Waves(I), Waves, Shot_List);
 		  end if;
 		     
