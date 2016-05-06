@@ -106,7 +106,8 @@ package body Enemy_Ship_Handling is
    -- NEXT TO WALL
    --------------------------------------------------
    
-   function Next_To_Wall(Enemies : in Object_List) return Boolean is
+   function Next_To_Wall(Enemies : in Object_List;
+			 Map     : in World) return Boolean is
       
    begin -- förrvirrad ordning här eftersom listan är sorterad baklänges (sist in - först ut).
       
@@ -115,14 +116,18 @@ package body Enemy_Ship_Handling is
 
 	 if Enemies.Direction = 1 then -- höger 
 	    
-	    if Enemies.XY_Pos(1) >= World_X_Length + GameBorder_X -1 - 3 then return True;
-	    else return Next_To_Wall(Enemies.Next);
+	    if Enemies.XY_Pos(1) >= Border_Right(Map, Enemies.XY_Pos(2)) + GameBorder_X - 4 or
+	      (Enemies.XY_Pos(2) > 1 and then Enemies.XY_Pos(1) >= GameBorder_X+Border_Right(Map, Enemies.XY_Pos(2)-1) -7) then 
+	       return True;
+	    else return Next_To_Wall(Enemies.Next, Map);
 	    end if;
 	    
 	 elsif Enemies.Direction = -1 then -- vänster 
 	    
-	    if Enemies.XY_Pos(1) <= GameBorder_X + 1 then return True;
-	    else return Next_To_Wall(Enemies.Next); --rekursion
+	    if Enemies.XY_Pos(1) <= GameBorder_X + Border_Left(Map, Enemies.XY_Pos(2)) or
+	      (Enemies.XY_Pos(2) > 1 and then Enemies.XY_Pos(1) <= GameBorder_X+Border_Left(Map, Enemies.XY_Pos(2)-1)+3) then 
+	       return True;
+	    else return Next_To_Wall(Enemies.Next, Map); --rekursion
 	    end if;
 	    
 	 end if;
@@ -565,7 +570,8 @@ package body Enemy_Ship_Handling is
    procedure Update_Enemy_Position(Waves : in out Enemy_List_array;
 				   Shot_List : in out Object_List;
 				   Obstacle_Y: in Integer;
-				   Players : in Player_array) is
+				   Players : in Player_Array;
+				   Map     : in World) is
       
       -- Movement_selector:
       -- 0) stand still
@@ -591,7 +597,7 @@ package body Enemy_Ship_Handling is
 	    
 	    if Waves(I).Movement_Type = 1 then -- alla till en pekare har samma movement selector.
 	       
-	       if not Next_To_Wall(Waves(I)) then
+	       if not Next_To_Wall(Waves(I), Map) then
 		  Move_To_Side(Waves(I)); 
 	       elsif not At_Lower_Limit(Waves(I), Obstacle_Y) then
 		  Move_One_Down(Waves(I));
@@ -611,7 +617,7 @@ package body Enemy_Ship_Handling is
 	       
 	    elsif Waves(I).Movement_Type = 2 then
 	       
-	       if not Next_To_Wall(Waves(I)) then
+	       if not Next_To_Wall(Waves(I), Map) then
 		  Move_To_Side(Waves(I)); 
 	       else
 		  Change_Direction(Waves(I));
