@@ -12,20 +12,19 @@ package body Map_Handling is
       new Ada.Numerics.Discrete_Random(Result_Subtype => MinusTwo_To_Two);
    
    
-   
-   -- Används till att generera en x-position som Astroiden kan börja på
+   -- Sannolikheten att en astroid börjar falla
    ---------------------------------------------------------------------------
-   subtype Left_To_Right is Integer range Left_Border+1 .. Right_Border-1;
-   package SpawnCoordinate is
+   subtype One_To_10 is Integer range 1..10;
+   package One_To_10_Random is
+      new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_10);
+   
+   
+   -- Generera en X-position som Astroiden kan börja på
+   ---------------------------------------------------------------------------
+   subtype Left_To_Right is Integer range Left_Border .. Right_Border-1;
+   package Spawn_Range is
       new Ada.Numerics.Discrete_Random(Result_Subtype => Left_To_Right);
    
-   
-   
-   -- Används till att sammanställa sannolikheten att en astroid börjar falla
-   ---------------------------------------------------------------------------
-   subtype One_To_Ten is Integer range 1 .. 10;
-   package Chance_To_Spawn is
-      new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_Ten);
    
    
    ----------------------------------------------------------
@@ -182,13 +181,13 @@ package body Map_Handling is
    --------------------------------------------------------------
    --| Gör en rak vägg.
    --------------------------------------------------------------
-   procedure Make_Straigt_Wall(Map          : in out World;
-			      Border_Number : in Integer) is
+   procedure Make_Straight_Wall(Map          : in out World;
+				Border_Number : in Integer) is
      
      
    begin
       Map(1)(Border_Number) := ('3');
-   end Make_Straigt_Wall;
+   end Make_Straight_Wall;
 
    --------------------------------------------------------------
    --| Gör en vägg åt vänster
@@ -217,10 +216,12 @@ package body Map_Handling is
    --------------------------------------------------------------
    --| Genererar en ny vägg kant på var sida.
    --------------------------------------------------------------
-   procedure New_Top_Row(Map     : in out Definitions.World;
-			 Straigt : in Boolean := False;
-			 Open    : in Boolean := False;
-			 Close   : in Boolean := False) is
+   procedure New_Top_Row(Map      : in out Definitions.World;
+			 Straight : in Boolean := False;
+			 Open     : in Boolean := False;
+			 Close    : in Boolean := False;
+			 Left     : in Boolean := False;
+			 Right    : in Boolean := False) is
       
       G,M : Wall_Generation.Generator;
       Wall_Left_Randomize : Integer;
@@ -232,31 +233,50 @@ package body Map_Handling is
       Wall_Generation.Reset(G);
       Map(1) := (others => '0');
       Border_Min_Max(Map, Wall_Left_Max, Wall_Right_Max);
-      
-      if Border_Difference(Map) < 30 and Left_Border > 1 and
-	   Right_Border < World_X_Length then 
-	                                      
-	 Make_Right_Wall(Map, Right_Border);  -- ┗┓   ┏┛
-	 Make_Left_Wall(Map, Left_Border);    --  ┗┓ ┏┛
+                        
 	 
-      else                      
-	 
-	 if Straigt then                         --┃       ┃
-	    Make_Straigt_Wall(Map, Left_Border); --┃       ┃
-	    Make_Straigt_Wall(Map, Right_Border);--┃       ┃
+	 if Straight then                          --┃       ┃
+	    Make_Straight_Wall(Map, Left_Border);  --┃       ┃
+	    Make_Straight_Wall(Map, Right_Border); --┃       ┃
 	    
 	 elsif Open then
 	    
-	    if Left_Border > 1 then                --┗┓     ┏┛
-	       Make_Right_Wall(Map, Right_Border); -- ┗┓   ┏┛
-	    else                                   --  ┗┓ ┏┛
-	       Make_Straigt_Wall(Map, Right_Border);
+	    if Left_Border > 1 then               --┗┓     ┏┛
+	       Make_Left_Wall(Map, Left_Border);  -- ┗┓   ┏┛
+	    else                                  --  ┗┓ ┏┛
+	       Make_Straight_Wall(Map, Left_Border);
 	    end if;
 	    
 	    if Right_Border < World_X_Length then
-	       Make_Left_Wall(Map, Left_Border);
+	       Make_Right_Wall(Map, Right_Border);
 	    else
-	       Make_Straigt_Wall(Map, Left_Border);
+	       Make_Straight_Wall(Map, Right_Border);
+	    end if;  	 
+	 elsif Left then
+	    
+	    if Left_Border > 1 then               --┗┓     ┗┓
+	       Make_Left_Wall(Map, Left_Border);  -- ┗┓     ┗┓
+	    else                                  --  ┗┓     ┗┓
+	       Make_Straight_Wall(Map, Left_Border);
+	    end if;
+	    
+	    if Border_Difference(Map) > 30 then
+	       Make_Left_Wall(Map, Right_Border);
+	    else
+	       Make_Straight_Wall(Map, Right_Border);
+	    end if;  	 
+	 elsif Right then
+	    
+	    if Border_Difference(Map) > 30 then   --  ┏┛    ┏┛
+	       Make_Right_Wall(Map, Left_Border); -- ┏┛    ┏┛
+	    else                                  --┏┛    ┏┛
+	       Make_Straight_Wall(Map, Left_Border);
+	    end if;
+	    
+	    if Right_Border < World_X_Length then
+	       Make_Right_Wall(Map, Right_Border);
+	    else
+	       Make_Straight_Wall(Map, Right_Border);
 	    end if;  
 	    
 	 elsif Close then                        --  ┏┛ ┗┓
@@ -275,7 +295,7 @@ package body Map_Handling is
 	       if Wall_Left_Randomize = 1 then
 		  Make_Right_Wall(Map, Left_Border);   -- ┏┛
 	       else
-		  Make_Straigt_Wall(Map, Left_Border); -- ┃
+		  Make_Straight_Wall(Map, Left_Border);-- ┃
 	       end if;
 	       
 	    elsif Wall_Left_Randomize = -1 then        -- Moves to the Left
@@ -285,7 +305,7 @@ package body Map_Handling is
 	       Make_Right_Wall(Map, Left_Border);      -- ┏┛
 	       
 	    else
-	       Make_Straigt_Wall(Map, Left_Border);    -- ┃
+	       Make_Straight_Wall(Map, Left_Border);   -- ┃
 	    end if;
 	    
 	    -------------
@@ -297,7 +317,7 @@ package body Map_Handling is
 	       if Wall_Right_Randomize = 1 then
 		  Make_Left_Wall(Map, Right_Border);       -- ┗┓
 	       else
-		  Make_Straigt_Wall(Map, Right_Border);    -- ┃
+		  Make_Straight_Wall(Map, Right_Border);   -- ┃
 	       end if;
 	       
 	    elsif Wall_Right_Randomize = 1 then            -- Moves to the Right 
@@ -307,10 +327,9 @@ package body Map_Handling is
 	       Make_Left_Wall(Map, Right_Border);          -- ┗┓
 	       
 	    else
-	       Make_Straigt_Wall(Map, Right_Border);       -- ┃
+	       Make_Straight_Wall(Map, Right_Border);      -- ┃
 	    end if;
 	 end if;
-      end if;
    end New_Top_Row;
    
    
@@ -336,11 +355,11 @@ package body Map_Handling is
       
    begin
       -- Startvärdern
-      Max := X_Led'last;
-      Min := X_Led'First;
+      Max := World_X_Length;
+      Min := 1;
       
       -- Går igeom alla rader (Y-led)
-      for I in World'Range loop
+      for I in World'First+1 .. World'last loop
 	 
 	 --- Går igenom vänsersidan
 	 for J in X_Led'Range loop	    
@@ -362,6 +381,7 @@ package body Map_Handling is
 	    end if;
 	 end loop;
       end loop;
+      
    end Border_Min_Max;
    
    -------------------------------------------------------
@@ -462,362 +482,142 @@ package body Map_Handling is
       
       return The_Wall;
    end Border_Right;
+
+   ------------------------------------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------------------------------------
    
    
-   ---------------------------------------------------------------------
-   --- Kollar om astroiden är ledig
-   ---------------------------------------------------------------------
-   function Free_Astroid(Astroid : in Astroid_spec) return Boolean is
+   -----------------------------------------------------------
+                                        --| CREATE ASTROID |--
+   -----------------------------------------------------------
+   procedure Create_Astroid (X, Y         : in Integer;
+			     Astroid_List : in out Object_List) is
       
    begin
-      if Astroid.Y = 0 then
-	 return True;
+      
+      Create_Object(ShotType(8), X, Y, Down, Astroid_List);
+      
+   end Create_Astroid;   
+   -----------------------------------------------------------
+   --| END CREATE ASTROID |--
+   -----------------------------------------------------------
+   
+   
+   
+   
+   -----------------------------------------------------------
+                                     --| ASTROID GENERATOR |--
+   -----------------------------------------------------------
+   procedure Astroid_Generator(Spawn_X         : in Integer;
+			       Astroid         : in Setting_Type;
+			       Astroid_List    : in out Object_list) is
+      
+      Astroid_Probability : Integer;
+      Chance_To_Spawn :  One_To_10_Random.Generator;
+      
+   begin
+      
+      One_To_10_Random.Reset(Chance_To_Spawn);
+      Astroid_Probability := One_To_10_Random.Random(Chance_To_Spawn);
+      
+      if Astroid_Probability <= Astroid.Difficulty then
+	 Create_Astroid(Spawn_X, Spawn_Y, Astroid_List);
+      end if;
+      
+   end Astroid_Generator;
+   -----------------------------------------------------------
+   --| END ASTROID GENERATOR |--
+   -----------------------------------------------------------
+   
+   
+   
+   -----------------------------------------------------------
+                                    --| CHECK NEAR ASTROID |--
+   -----------------------------------------------------------
+   function Too_Close_Astroid(Spawn : in Integer;
+			      L     : in Object_List) return Boolean is
+      Margin : Integer := 2;
+      
+   begin
+      
+      if not Empty(L) then  
+	 
+	 if L.XY_Pos(2) in Spawn_Y..Spawn_Y+Margin then --| koller om någon astroid
+						  --| har samma Y position
+	    
+	    
+	    --| Om samma Y position, koller så att 
+	    --| astroiden inte har samma X position.
+	    if L.XY_Pos(1) not in (Spawn - 1)..(Spawn + 1) then 
+	       return Too_Close_Astroid(Spawn, L.Next);  --| Rekursion
+	    else
+	       return True;
+	    end if;
+	    
+	 else
+	    return Too_Close_Astroid(Spawn, L.Next);  --| Rekursion
+	 end if;
+	 
       else
 	 return False;
       end if;
-   end Free_Astroid;
+   end Too_Close_Astroid;
+   -----------------------------------------------------------
+   --| END CHECK NEAR ASTROID |--
+   -----------------------------------------------------------
    
    
-   ----------------------------------------------------------------------
-   --- Skickar tillbaka den första astroiden som är ledig.
-   ----------------------------------------------------------------------
-   procedure Find_Free_Astroid(Astroid : in Astroid_Type;
-			       FreeAstroid : out Integer) is
+   
+   
+   -----------------------------------------------------------
+                                        --| SPAWN ASTROID  |--
+   -----------------------------------------------------------
+   procedure Spawn_Astroid(Astroid_List : in out Object_List;
+			   Astroid      : in Setting_Type;
+			   Map          : in World) is
+      
+      X_Coord  : Spawn_Range.Generator;
+      Spawn_X  : Integer;
       
    begin
-      -- Går igenom alla astroider.
-      -------------------------------
-      for I in Astroid_Type'Range loop
-	 
-	 -- Kollar om astroiden är ledig
-	 ---------------------------------
-	 if Free_Astroid(Astroid(I)) then
-	    FreeAstroid := I;              -- Hittat en ledig astroid och
-	    exit;                          -- avslutar proceduren.
-	 end if;
-      end loop;
-   end Find_Free_Astroid;
-   
-   
-   -----------------------------------------------------------------
-   --- Kontrollerar så att inga andra Astroider ligger i närheten
-   -----------------------------------------------------------------
-   procedure Spawn_Point(Astroid     : in Astroid_Type;
-			 SpawnPoint  : out Integer) is
+      Spawn_Range.Reset(X_Coord);
+      Spawn_X := Spawn_Range.Random(X_Coord)+GameBorder_X;
       
-      type Spawn_Array is array (1 .. Astroid_Type'Last) of Integer; 
-      
-      -------------------------------------------------------------
-      -- Kollar om någon annan astorid har samma X värde.
-      -------------------------------------------------------------
-      function Is_X_Spawn_OK(Astroid : in Astroid_Type;
-			   Spawn   : in Integer) return Boolean is
-	 Check : Boolean := True;
-      begin
-	 
-	 -- Går igenom alla Astroider
-	 --------------------------------
-	 for I in Astroid_Type'Range loop
-	    if Astroid(I).X /= Spawn then
-	       Check := True;
-	    else
-	       Check := False;
-	       exit;
-	    end if;
-	 end loop;
-	 
-	 --- skickar tillbaka resultatet
-	 -------------------------------
-	 if Check then
-	    return True;
-	 else
-	    return False;
-	 end if;
-	 
-      end Is_X_Spawn_OK;
-      -------------------------------------------------------------
-      
-      -------------------------------------------------------------
-      -- Kollar om någon annan astroid har flyttats 3 rutor.
-      -------------------------------------------------------------
-      function Is_Y_Spawn_OK(Astroid : in Astroid_Type) return Boolean is
-	 
-	 Check : Boolean := True;
-	 
-      begin
-	 
-	 -- Går igenom alla Astroider
-	 --------------------------------
-	 for I in Astroid_Type'Range loop
-	    if Astroid(I).Y > 6 or Astroid(I).Y = 0 then
-	       Check := True;
-	    else
-	       Check := False;
-	       exit;
-	    end if;
-	 end loop;
-	 
-	 -- Skickar tillbaka resultatet.
-	 ---------------------------------
-	 if Check then
-	    return True;
-	 else
-	    return False;
-	 end if;
-	 
-      end Is_Y_Spawn_OK;
-      -------------------------------------------------------------
-      
-      
-      Spawn : Spawn_Array;
-      K     : SpawnCoordinate.Generator;
-      
-   begin
-      SpawnCoordinate.Reset(K);
-      for I in Spawn_Array'range loop
-	 --- Generate random values where it can spawn
-	 ------------------------------------------------
-	 Spawn(I) := SpawnCoordinate.Random(K);
-	 
-	 -- Check if same X Value
-	 ---------------------------------------------------
-	 if Is_X_Spawn_Ok(Astroid,Spawn(I)) then
+      if not Empty(Astroid_List) then
+	 if Spawn_X-GameBorder_X in Border_Left(Map, 1)+2..Border_Right(Map, 1)-5 then
 	    
-	    -- Check if last Astroid have travled __
-	    -----------------------------------------------
-	    if Is_Y_Spawn_Ok(Astroid) then
-	       SpawnPoint := Spawn(I);
-	       exit;
+	    if not Too_Close_Astroid(Spawn_X, Astroid_List) then
+	       Astroid_Generator(Spawn_X, Astroid, Astroid_List);
 	    end if;
-	 end if;
-      end loop;
-      
-   end Spawn_Point;
-   
-   
-   -----------------------------------------------------------
-   --- Genererar Astroider om möjlig!
-   -----------------------------------------------------------
-   procedure Gen_Astroid(Map     : in World;
-			 Astroid : in out Astroid_Type;  
-			 Chance  : in Integer;
-			 form    : in Integer) is
-      
-      X            : Chance_To_Spawn.Generator;
-      X_Min, X_Max : Integer;
-      Spawn        : Integer;
-      FreeAstroid  : Integer;
-      
-   begin
-      -- Sannolikheten att den spawnar en astroid.
-      -- 1 = 10% .. 10 = 100% (Det är inte helt 100% då andra variablar under påverkar)
-      --------------------------------------------
-      Chance_To_Spawn.Reset(X);
-      if Chance_To_Spawn.Random(X) in 1 .. Chance then
-      
-	 --- Räknar hur långt in väggen är maximalt från varje sida.
-	 ----------------------------------------------------------------
-	 Border_Min_Max(Map, X_Min, X_Max);
-	 
-	 
-	 --- Kontrollerar så att inga andra Astroider har samma spawn point.
-	 --- Och skickar tillbaka en ledig Astroid.
-	 -----------------------------------------------------------------
-	 Spawn_Point(Astroid, Spawn);
-	 
-	 
-	 --- Letar upp en ledig astroid
-	 --------------------------------------
-	 Find_Free_Astroid(Astroid, FreeAstroid);
-	 
-	 
-	 --- Kontrollerar om spawn positionen är innanför väggarna
-	 --- Med lite marginal & säkerhetskontrollerar FreeAstroid
-	 -----------------------------------------------------------------
-	 if (X_Min + form) < Spawn and (X_Max - 1 - Form) > Spawn and 
-	   FreeAstroid in Astroid_Type'Range then -- FreeAstroid kan annars få 
-	                                          -- sjukt höga värden och ställa
-	                                          -- till det i koden under.
-	    Astroid(FreeAstroid).X := Spawn;
-	    Astroid(FreeAstroid).Y := 1;
-	    Astroid(FreeAstroid).Form := Form;
 	    
 	 end if;
-	 
-      end if;	 
-   end Gen_Astroid;
-   
-   
-   --- Flyttar ner alla aktiva astroider 
+      else
+	 Astroid_Generator(Spawn_X, Astroid, Astroid_List);
+      end if;
+   end Spawn_Astroid;
    -----------------------------------------------------------
-   procedure Move_Astroid(Astroid : in out Astroid_Type) is
-      
+   --| END SPAWN ASTROID  |--
+   -----------------------------------------------------------
+   
+   
+   
+   -----------------------------------------------------------
+                               --| UPDATE ASTROID POSITION |--
+   -----------------------------------------------------------
+   procedure Update_Astroid_Position(Astroid_List : in out Object_List) is 
+     
    begin
-      for I in Astroid_Type'Range loop
-	 if Astroid(I).Y /= 0 then
-	    if Astroid(I).Y > World_Y_Length then
-	       Astroid(I).Y := 0;
-	    else
-	       Astroid(I).Y := Astroid(I).Y +1;
-	    end if;
-	 end if;
-      end loop;
-   end Move_Astroid;
+     
+      null;
+      
+   end Update_Astroid_Position;
    
-   
-   --------------------------------------------------------------------
-   -- Returerar Boolean om någon astroid finns vid X,Y koordinaterna.
-   ---------------------------------------------------------------------
-   function Is_Astroid_There(Astroid : in Astroid_Spec;
-			     X       : in Integer;
-			     Y       : in Integer) return Boolean is
       
-      Check : Boolean := False;
-      
-   begin
-      
-      if Astroid.Form = 1 then
-	 if (Astroid.Y = Y or Astroid.Y = Y-1) and
-	   (Astroid.X = X or Astroid.X = X-1) then
-	    Check := True;
-	 else
-	    Check := False;
-	 end if;
-	 
-      elsif Astroid.Form = 2 then
-	 if Astroid.Y = Y and Astroid.X = X-1 then
-	    Check := True;
-	 elsif (Astroid.Y = Y-1 or Astroid.Y = Y-2) and
-	   (Astroid.X = X or Astroid.X = X-1 or Astroid.X = X-2) then
-	    Check := True;
-	 else
-	    Check := False;
-	 end if;
-      end if;
-      
-      if Check then
-	 return True;
-      else
-	 return False;
-      end if;
-   end Is_Astroid_There;
-   
-   
-   
-   --------------------------------------------------------------------
-   -- Returerar Boolean om någon astroid finns vid X,Y koordinaterna.
-   ---------------------------------------------------------------------
-   function Is_Astroid_There(Astroid : in Astroid_Type;
-			     X       : in Integer;
-			     Y       : in Integer) return Boolean is
-      
-      Check : Boolean := False;
-      
-   begin
-      for I in Astroid_Type'Range loop
-	 if Is_Astroid_There(Astroid(I),X,Y) then
-	    Check := True;
-	    exit;
-	 else
-	    Check := False;
-	 end if;
-      end loop;
-      
-      if Check then
-	 return True;
-      else
-	 return False;
-      end if;
-      
-   end Is_Astroid_There;
-   
-   
-   -----------------------------------------------------------------------
-   -- Returerar astroidens nummret i Astroid arrayen som finns på X,Y koordinaterna.
-   -----------------------------------------------------------------------
-   procedure Get_Astroid_Nr(Astroid : in Astroid_Type;
-			    X       : in Integer;
-			    Y       : in Integer;
-			    Nr      : out Integer) is
-      
-   begin
-      for I in Astroid_Type'Range loop
-	 if Is_Astroid_There(Astroid(I),X,Y) then
-	    Nr := I;
-	    exit;
-	 else Nr := 0;
-	 end if;
-      end loop;
-   end Get_Astroid_Nr;
-   
-   
-   
-   ---------------------------------------------------------------------
-   -- Tar bort och återställer en fallande Astroid med Astroid nummer
-   ---------------------------------------------------------------------
-   procedure Remove_Astroid(Astroid : in out Astroid_Type;
-			    Nr      : in Integer) is
-      
-   begin
-      Astroid(Nr).Y := 0;
-   end Remove_Astroid;
-      
-   
-   ---------------------------------------------------------------------
-   -- Tar bort och återställer en fallande Astroid med X,Y koordinater.
-   ---------------------------------------------------------------------
-   procedure Remove_Astroid(Astroid : in out Astroid_Type;
-			    X       : in Integer;
-			    Y       : in Integer) is
-      
-   begin
-      for I in Astroid_Type'Range loop
-	 if Is_Astroid_There(Astroid(I),X,Y) then
-	    Astroid(I).Y := 0;
-	 end if;
-      end loop;
-   end Remove_Astroid;
-   
-   
-   --- Skriver ut alla astroider.
-   ------------------------------------------------------------
-   procedure Put_Astroid(Astroid : in Astroid_Type;
-			 X   : in Integer;
-			 Y   : in Integer) is
-      
-      procedure Put_Form(Item : in Astroid_spec;
-			 X   : in Integer;
-			 Y   : in Integer) is
-	 
-      begin
-	 if Item.Form = 1 then
-	    Goto_XY(Item.X+X-1,Item.Y+Y-1);
-	    Put('/');
-	    Put('\');
-	    Goto_XY(Item.X+X-1,Item.Y+Y);
-	    Put('\');
-	    Put('/');
-	 elsif Item.Form = 2 then
-	    Goto_XY(Item.X+X,Item.Y+Y-1);
-	    Put('_');
-	    Goto_XY(Item.X+X-1,Item.Y+Y);
-	    Put('/');
-	    Put(' ');
-	    Put('\');
-	    Goto_XY(Item.X+X-1,Item.Y+Y+1);
-	    Put('\');
-	    Put('_');
-	    Put('/');
-	 end if;
-      end Put_Form;
-      
-   begin
-      -- Går igenom och kollar vilka astroider som faller
-      -------------------------------------------------------
-      for I in Astroid_Type'Range loop
-	 if Astroid(I).Y /= 0 then
-	    Put_Form(Astroid(I),X,Y);
-	 end if;
-      end loop;
-   end Put_Astroid;
+   -----------------------------------------------------------
+   --| END UPDATE ASTROID POSITION |--
+   -----------------------------------------------------------
+
 end Map_Handling;
