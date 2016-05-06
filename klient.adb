@@ -37,6 +37,7 @@ procedure Klient is
    Esc            : constant Key_Code_Type := 27;
    Data           : Game_Data;    -- Spelinformation som tas emot från servern.
    Shot_List      : Object_List;
+   Astroid_List   : Object_List;
    Obstacle_List  : Object_List;
    Powerup_List   : Object_List;
    Waves          : Enemy_List_array;
@@ -145,6 +146,8 @@ begin
             -- Get(Socket,Loop_Counter);    -- tar emot serverns loop_counter
 	    
 	    --Här får vi info om alla skottens koordinater
+	    DeleteList(Astroid_List);
+	    Get(Socket,Astroid_List);
 	    DeleteList(Shot_List);
 	    Get(Socket, Shot_List);
 	    DeleteList(Obstacle_List);
@@ -164,6 +167,19 @@ begin
             -- SKRIV UT DATA
             ---------------------------------------------------------------------
 	    Clear_Window;
+	    
+	    Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
+	    
+	    for I in Waves'range loop	
+	       Put_Objects(Waves(I));
+	    end loop;
+	    
+	    Put_Objects(Astroid_List);
+	    Put_Objects(Shot_List);
+	    Put_Objects(Obstacle_List);
+	    Put_Objects(Powerup_List);
+	    Goto_XY(World_X_Length , World_Y_Length);
+	    
 	    if Background then
 	       Put_Background(NumPlayers);
 	    end if;
@@ -192,17 +208,6 @@ begin
 	    Put("Här skriver man.");
 	    -------------------------------------------------
 
-	    Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
-	    
-	    for I in Waves'range loop	
-	       Put_Objects(Waves(I));
-	    end loop;
-	    
-	    Put_Objects(Shot_List);
-	    Put_Objects(Obstacle_List);
-	    Put_Objects(Powerup_List);
-	    Goto_XY(World_X_Length , World_Y_Length);
-	    
 	    Put_World(Data.Map, Gameborder_X, Gameborder_Y, Game_Wall_Background, Game_Wall_Line);
 	    Set_Colours(White, Black);
 	    
@@ -236,7 +241,7 @@ begin
 	    
 	    --| Number of Players |--
 	    if NumPlayers = 1 then    -- Just nu är det ingen skillnad
-	       delay(0.04);           -- Men det kanske kommer ändras 
+	       delay(0.05);           -- Men det kanske kommer ändras 
 	    elsif NumPlayers = 2 then -- beroende på vad servern gör.
 	       delay(0.04);
 	    elsif NumPlayers = 3 then
