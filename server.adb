@@ -35,6 +35,7 @@ procedure Server is
    Loop_Counter           : Integer;
    Waves                  : Enemy_List_Array;
    Shot_List              : Object_List; --shot_handling.ads
+   Astroid_List           : Object_List;
    Obstacle_List          : Object_List;
    Powerup_List           : Object_List;
    Obstacle_Y             : Integer;
@@ -99,22 +100,22 @@ begin
    --Testar att skapa olika typer av väggar
    --Create_Object(ObstacleType(1), 2, Obstacle_Y, Light, Obstacle_List);
    
-   Create_Object(ObstacleType(2), 10, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 15, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 20, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 25, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 30, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 35, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 40, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 45, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 50, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 55, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 60, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 65, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 70, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 75, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 80, 20, Obstacle_Y, Obstacle_List);
-   Create_Object(ObstacleType(2), 85, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 10, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 15, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 20, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 25, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 30, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 35, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 40, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 45, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 50, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 55, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 60, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 65, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 70, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 75, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 80, 20, Obstacle_Y, Obstacle_List);
+   --  Create_Object(ObstacleType(2), 85, 20, Obstacle_Y, Obstacle_List);
 
    
     -- Create_Object(ObstacleType(3), 25, 20, Obstacle_Y, Obstacle_List);
@@ -124,8 +125,8 @@ begin
    -- end loop;
    --Create_Wall(Obstacle_List, Obstacle_Y);
    
-   Create_Object(PowerUpType(2), 40, Obstacle_Y_Pos+3, 0, Powerup_List);
-   Create_Object(PowerUpType(3), 50, Obstacle_Y_Pos+5, 0, Powerup_List);
+   --  Create_Object(PowerUpType(2), 40, Obstacle_Y_Pos+3, 0, Powerup_List);
+   --  Create_Object(PowerUpType(3), 50, Obstacle_Y_Pos+5, 0, Powerup_List);
    
    
    -----------------------------------
@@ -142,7 +143,7 @@ begin
    	      EnemyType(3), --Typ
    	      3,
    	      1,
-	      waves(2));
+   	      waves(2));
    
    
    --  Spawn_Wave(2, --Antal
@@ -155,6 +156,8 @@ begin
    -- end SPAWN FIRST WAVE
    -----------------------------------
    
+   Game.Settings.Difficulty := 2;
+   
    loop 
       
       
@@ -163,27 +166,57 @@ begin
       --| "Level 2" => därför ej nödvändig än
       --------------------------------------------------
       if Game.Settings.Generate_Map then       -- Bestämmer under spelet om banan ska börja genereras eller inte.
-      	    if Loop_Counter > 50 and Loop_Counter < 100 then
-
-      	       New_Top_Row(Game.Map, Close => True);  -- Banan blir mindre
-	       
-
-      	    elsif Loop_Counter > 150 and Loop_Counter < 225 then
-	       
-      	       New_Top_Row(Game.Map);                 -- Vanlig randomisering
-      	    else
-
-      	       New_Top_Row(Game.Map, Straigt => True);-- Raka väggar
-	       
-      	    end if;   
-      	    Move_Rows_Down(Game.Map);       -- Flyttar ner hela banan ett steg.
+	 if Highest_X_Position(Waves(1))-Lowest_X_Position(Waves(1))+20 <= Border_Difference(Game.Map) then
+	    New_Top_Row(Game.Map, Close => True);                 -- Vanlig randomisering
+	 else
+	    if Loop_Counter mod 5 = 1 then
+	       New_Top_Row(Game.Map, Open => True);
+	    else
+	       New_Top_Row(Game.Map);
+	    end if;   
+	 end if;
+	 
+	 --  if Loop_Counter > 1 and Loop_Counter < 100 then
+	 --     New_Top_Row(Game.Map, Right => True);
+	 --  elsif Loop_Counter > 100 and Loop_Counter < 150 then
+	 --     New_Top_Row(Game.Map, Left => True);
+	 --  elsif Loop_Counter > 150 and Loop_Counter < 200 then
+	 --     New_Top_Row(Game.Map, Right => True);
+	 --  elsif Loop_Counter > 200 and Loop_Counter < 250 then
+	 --     New_Top_Row(Game.Map, Left => True);
+	 --  end if;
+	    
+	 
+	 
+	 Move_Rows_Down(Game.Map);       -- Flyttar ner hela banan ett steg.
       end if;
       
       -- Resetar så att banangenereringen börjar igen
       -- kan nog ersättas med mod.
       if Loop_Counter > 225 then
+	 Create_Object(PowerUpType(2), 50, Obstacle_Y_Pos+5, 0, Powerup_List);
+	 
+	 Game.Settings.Difficulty := Game.Settings.Difficulty + 1;
       	 Loop_Counter := 1;
       end if;
+      
+      
+      --| Spawnar Astroider
+      if Loop_Counter > 200 then
+      Spawn_Astroid(Astroid_List, Game.Settings, Game.Map);
+      Spawn_Astroid(Astroid_List, Game.Settings, Game.Map);
+      Spawn_Astroid(Astroid_List, Game.Settings, Game.Map);
+      end if;
+      
+      Shot_Movement(Astroid_List);
+      
+      -----------------------------------
+      -- Update Enemy ships
+      -----------------------------------
+     Obstacle_y := Highest_Y_Position(Obstacle_List);
+     Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players, Game.Map);
+  
+      
       
       
       -- Sorterar Scoreboard.
@@ -192,6 +225,7 @@ begin
       --Uppdatera skottens position
       Shot_Movement(Shot_List);
       Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game);
+      Shots_Collide_In_Objects(Shot_List, Astroid_List, Game);
       for B in Waves'Range loop
 	 Shots_Collide_In_Objects(Shot_List, Waves(B), Game);
       end loop;
@@ -216,6 +250,11 @@ begin
 				      Game.Players(I).Ship, --Uppdaterar ship_spec
 				      Shot_List);           --Om spelare träffas
 				                            --Av skott.
+	    Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
+				      Game.Players(I).Ship.XY(2),
+				      Game.Players(I).Ship, --Uppdaterar ship_spec
+				      Astroid_List);        --Om spelare träffas
+				                            --Av skott.
 	    
 	    for K in 1..4 loop
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
@@ -225,7 +264,7 @@ begin
 	    end loop;
 	 end if;                                         
 
-	 
+	 Put(Sockets(I), Astroid_List);
 	 Put(Sockets(I), Shot_List);
 	 Put(Sockets(I), Obstacle_List);
 	 Put(Sockets(I), Powerup_List);
@@ -233,17 +272,6 @@ begin
       	 Put_Game_Data(Sockets(I),Game);
 
       end loop;
-      
-      
-      -----------------------------------
-      -- Update Enemy ships
-      -----------------------------------
-     Obstacle_y := Highest_Y(Obstacle_List);
-     Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players);
-  
-      -----------------------------------
-      -- PUT ENEMY SHIPS
-      -----------------------------------
       
       for I in 1..Num_Players loop
 	 for J in Waves'Range loop
@@ -256,6 +284,25 @@ begin
       -----------------------------------   
       
       Get_Player_Input(Sockets, Num_Players, Game, Shot_List, Obstacle_List, Powerup_List);
+      
+      ----------------------------------------
+      --| Delay depending on |----------------    -- // Eric
+      ----------------------------------------
+      
+      --| Number of Players |--
+      if Num_Players = 1 then    -- Just nu är det ingen skillnad
+	 delay(0.05);           -- Men det kanske kommer ändras 
+      elsif Num_Players = 2 then -- beroende på vad servern gör.
+	 delay(0.04);
+      elsif Num_Players = 3 then
+	 delay(0.04);
+      elsif Num_Players = 4 then
+	 delay(0.08);
+      end if;
+      
+      ----------------------------------------
+      ----------------------------------------
+      ----------------------------------------
       
       Loop_Counter := Loop_Counter + 1;
       
