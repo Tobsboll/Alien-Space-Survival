@@ -181,6 +181,32 @@ package body Enemy_Ship_Handling is
    -- end CHANGE MOVEMENT TYPE
    --------------------------------------------------
    
+   --------------------------------------------------
+   -- MOVE ONE UP
+   --------------------------------------------------
+   
+   procedure Move_One_Up(Enemies : in out Object_list) is
+      
+   begin
+      
+      if not Empty(Enemies) then 
+	 
+	 if Enemies.XY_Pos(2) > Gameborder_Y+1 then -- så de inte backar utanför banan.
+	 
+	 Enemies.XY_Pos(2) := Enemies.XY_Pos(2) - 1;
+	 
+	 Move_One_Up(Enemies.Next); -- rekursion
+	 
+	 end if;
+	 
+      end if;
+      
+      
+   end Move_One_Up;
+   --------------------------------------------------
+   -- end MOVE ONE UP
+   --------------------------------------------------
+   
    
    --------------------------------------------------
    -- MOVE ONE DOWN
@@ -197,11 +223,6 @@ package body Enemy_Ship_Handling is
 	 Enemies.XY_Pos(2) := Enemies.XY_Pos(2) + 1;
 	 
 	 Move_One_Down(Enemies.Next); -- rekursion
-	 
-	 --  if Enemies.XY_Pos(2) >= (Obstacle_Y - 2) then -- vågen sätts till att stå stilla i y
-	 --  					   -- Enemies.Movement_Type := 2;
-	 --     Change_Movement_Type(Enemies, 2);
-	 --  end if;
 	 
       end if;
       
@@ -367,38 +388,85 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    
    --------------------------------------------------
+   -- HIGHEST PLAYER
+   --------------------------------------------------
+   function Highest_Player(Players : in Player_array) return Integer is
+      
+      Highest_Player : Integer;
+      Y_Value        : Integer;
+      New_Y_Value    : Integer;
+      
+   begin
+      
+      Highest_Player := 1;
+      Y_Value        := Players(1).Ship.XY(2);
+      
+      for I in 2..Players'Last loop
+	 if Players(I).Playing then
+	    
+	    New_Y_Value := Players(I).Ship.XY(2);
+	    
+	    if New_Y_Value > Y_Value then
+	       Y_Value := New_Y_Value;
+	       Highest_Player := I;
+	    end if;
+	    
+	 end if;
+      end loop;
+      
+      return Highest_Player;
+      
+   end Highest_Player;
+   --------------------------------------------------
+   -- end HIGHEST PLAYER
+   --------------------------------------------------
+   
+   --------------------------------------------------
    -- GET_CLOSEST_PLAYER
    --------------------------------------------------
    function Get_Closest_Player(Enemy_X : in Integer;
-			       Players : in Player_Array) return Integer is
+			       Players : in Player_Array;
+			       Waves   : in Enemy_List_array) return Integer is
       -- funktion som räknar ut vilken spelare som är närmast.
       Distance : Integer;
       Next_Distance : Integer;
       Player_Num : Integer;
+      High_Player : Integer;
       
    begin
       
-      Player_Num := 1; 
-      -- vi antar tills vidare att spelare 1 är närmast
-      Distance := abs(Players(1).Ship.XY(1) - Enemy_X);
-      -- räknar ut hur långt bort första spelarskeppet är
-      
-      for I in 2..Players'Last loop
-	 
-	 if Players(I).Playing then
-	    
-	    Next_Distance := abs(Players(1).Ship.XY(1) - Enemy_X);
-	    -- räkna samma för nästa skepp
-	    
-	    if Next_Distance < Distance then
-	       --om närmare, så byt till det, och den spelaren, istället
-	       Distance := Next_Distance;
-	       Player_Num := I;
-	    end if;
-	    
-	 end if;
 
-      end loop;
+      
+      High_Player := Highest_Player(Players);
+      
+      if Waves(1) /= null and Above_Wave(Players(High_Player).Ship.XY(2), Waves(1)) then
+	 return High_Player;
+
+      else 
+	 
+	 Player_Num := 1; 
+	 -- vi antar tills vidare att spelare 1 är närmast
+	 Distance := abs(Players(1).Ship.XY(1) - Enemy_X);
+	 -- räknar ut hur långt bort första spelarskeppet är
+	 
+	 for I in 2..Players'Last loop
+	    
+	    if Players(I).Playing then
+	       
+	       Next_Distance := abs(Players(1).Ship.XY(1) - Enemy_X);
+	       -- räkna samma för nästa skepp
+	       
+	       if Next_Distance < Distance then
+		  --om närmare, så byt till det, och den spelaren, istället
+		  Distance := Next_Distance;
+		  Player_Num := I;
+	       end if;
+	       
+	    end if;
+
+	 end loop;
+      end if;
+      
       
       return Player_Num;
       
@@ -448,7 +516,26 @@ package body Enemy_Ship_Handling is
 		   Waves    : in out Enemy_List_Array;
 		   Shot_List : in out Object_list) is
    begin
-
+      
+      -------------- Y-LED
+      
+	 
+	 if Above_Wave(Player_XY(2), Waves(1)) and then Player_XY(2) < Enemies.XY_Pos(2)+5 then
+	    -- om spelaren är över vågen och för nära så backa
+	    Move_One_Up(Enemies);
+	 elsif Waves(1) /= null and then Enemies.XY_Pos(2) < Waves(1).XY_Pos(2)-8 and then (Player_XY(2) > Enemies.XY_Pos(2)+6) then
+	    -- annars, om vågen inte för nära, gå neråt
+	    Move_One_Down(Enemies);
+	    --  else
+	    --  	 --sätt interceptorn på att zickzacka tills vidare
+	    --  	 --om den inta kan gå uppåt eller neråt.
+	    --  	 Enemies.Movement_Type := 2;
+	 end if;
+ 
+      
+      
+      
+      -------------- X-LED
       
       if Player_XY(1) - Enemies.XY_Pos(1) < 0 then
 
@@ -460,14 +547,10 @@ package body Enemy_Ship_Handling is
 	 Enemies.Direction := 1;
 	 Move_To_Side(Enemies);
 	 
-      elsif Ok_To_Shoot(Enemies.XY_Pos(1), Enemies.XY_Pos(2), 10, Waves) or Above_Wave(Player_XY(2), Waves(1)) then
-	 
-
-	 --wait()
+      elsif Ok_To_Shoot(Enemies.XY_Pos(1), Enemies.XY_Pos(2), 10, Waves) or(Waves(1) /= null and  Above_Wave(Player_XY(2), Waves(1))) then
 
 	    Create_Enemy_shot(Enemies.Object_Type, Enemies.XY_Pos(1), Enemies.XY_Pos(2)+1, Shot_list);
 
-	 
       end if;
    
    end Chase;
@@ -536,8 +619,11 @@ package body Enemy_Ship_Handling is
 	       
 	       -- skriv in så att de går ner om gränsen neråt sjunker!
 	       
+	       
+	       if Waves(I).Object_Type /= EnemyType(3) then
 	       Reset(Chance_For_shot);
 	       Shot_Generator(Waves(I), Waves, Chance_For_Shot, Shot_List);
+	       end if;
 	       
 	       --------------------
 	       if Waves(I).Object_Type = EnemyType(3) then
@@ -554,20 +640,24 @@ package body Enemy_Ship_Handling is
 	       ---------------------------------
 
 	    elsif Waves(I).Movement_Type = 3 then
-	      
-	       Closest_Player := Get_Closest_Player(Waves(I).XY_Pos(1), Players);
+	       
+	       Closest_Player := Get_Closest_Player(Waves(I).XY_Pos(1), Players, Waves);
 	       -- räknar ut vilken spelare som är närmast 
 	       
-	       if Ok_To_Shoot(Waves(I).XY_Pos(1), Waves(I).XY_Pos(2), 4, Waves)  or Above_Wave(Players(Closest_player).Ship.XY(2), Waves(1)) then
+	       if Ok_To_Shoot(Waves(I).XY_Pos(1), Waves(I).XY_Pos(2), 4, Waves)  or ((Waves(1) /= null and then Above_Wave(Players(Closest_player).Ship.XY(2), Waves(1)))) then
 		  -- om skeppet har fri sikt eller om spelaren är 
 		  -- ovanför vågen så jagar interceptorn spelaren, 
 		  -- i chase-koden ingår skjutande.
-		
-		 Chase(Players(Closest_player).Ship.XY, Waves(I), Waves, Shot_List);
+		  
+		  if Players(Closest_player).Playing then
+		     Chase(Players(Closest_player).Ship.XY, Waves(I), Waves, Shot_List);
+		  end if;
+		     
 		 
-		 if Waves(I).XY_Pos(2) < Waves(1).XY_Pos(2)-8 then
-		    Move_One_Down(Waves(I)); -- får ej gå lägre än våg.
-		 end if;
+		 
+		 --  if Waves(I).XY_Pos(2) < Waves(1).XY_Pos(2)-8 then
+		 --     Move_One_Down(Waves(I)); -- får ej gå lägre än våg.
+		 --  end if;
 		 -- flyttar sig neråt men håller sig ovanför vågen.
 		 
 	       else
