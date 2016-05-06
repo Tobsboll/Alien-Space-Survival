@@ -53,7 +53,7 @@ package Definitions is
    ------------------------------------------------
    type Player_Type is
       record
-  	 Playing    : Boolean;
+  	 Playing    : Boolean := false;
   	 Name       : String(1..10);
   	 NameLength : Integer;
   	 Ship       : Ship_Spec;
