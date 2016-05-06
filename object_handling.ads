@@ -61,10 +61,14 @@ package Object_Handling is
 			   Attr           : in Integer;
 			   L              : in out Object_List;
 			   Player         : in Integer := 0);
-   function Highest_Y(List : in Object_List;	
-		     Y    : in Integer := GameBorder_Y+World_Y_Length) return Integer;
-   function Lowest_Y(List : in Object_List;
-		     Y    : in Integer := 0) return Integer;
+   function Highest_Y_Position(List : in Object_List;	
+			       Y    : in Integer := GameBorder_Y+World_Y_Length-2) return Integer;
+   function Lowest_Y_Position(List : in Object_List;
+			      Y    : in Integer := 0) return Integer;
+     function Lowest_X_Position(List : in Object_List;
+				X    : in Integer := GameBorder_X+World_X_Length) return Integer;
+   function Highest_X_Position(List : in Object_List;
+			       X    : in Integer := 0) return Integer;
    --  function Length(L : in Shot_Fired) return Integer;
    function Empty(L : in Object_List) return Boolean;
    --  --  procedure Insert(Data : in Shot_Data_Type;
