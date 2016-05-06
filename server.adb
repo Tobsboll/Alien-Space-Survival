@@ -39,6 +39,8 @@ procedure Server is
    Obstacle_List          : Object_List;
    Powerup_List           : Object_List;
    Obstacle_Y             : Integer;
+   Level_Integer          : Integer := 1;
+   Level_Cleared          : Boolean := False;
    
 begin
    Set_Window_Title("Server");
@@ -50,7 +52,7 @@ begin
    Initiate(Listener, Integer'Value(Argument(1)), Localhost => true);
    
    Put_Line("Servern är igång, väntar på connection");
- 
+   
    -------------------------------------------------------------
    --| Player setup before the game ----------------------------
    -------------------------------------------------------------
@@ -118,8 +120,8 @@ begin
    --  Create_Object(ObstacleType(2), 85, 20, Obstacle_Y, Obstacle_List);
 
    
-    -- Create_Object(ObstacleType(3), 25, 20, Obstacle_Y, Obstacle_List);
-    
+   -- Create_Object(ObstacleType(3), 25, 20, Obstacle_Y, Obstacle_List);
+   
    --for I in 1..6 loop
    --Create_Wall(Obstacle_List, Obstacle_Y-(I*2));
    -- end loop;
@@ -133,7 +135,7 @@ begin
    -- SPAWN FIRST WAVE
    -----------------------------------
    
-   Spawn_Wave(30, --Antal
+   Spawn_Wave(15, --Antal
    	      EnemyType(1), --Typ
    	      1,
    	      1,
@@ -156,69 +158,84 @@ begin
    -- end SPAWN FIRST WAVE
    -----------------------------------
    
-   Game.Settings.Difficulty := 2;
+   Game.Settings.Difficulty := 1;
    
    loop 
-      
+      if Empty(Waves(1)) and 
+	Empty(Waves(2)) and 
+	Empty(Waves(3)) and 
+	Empty(Waves(4)) then
+	 if not Level_Cleared then
+	    Loop_Counter := 1;
+	 end if;
+	 Level_Cleared := True;    	    
+      end if;
       
       --------------------------------------------------
       --| SCROLLING MAP 
       --| "Level 2" => därför ej nödvändig än
       --------------------------------------------------
-      if Game.Settings.Generate_Map then       -- Bestämmer under spelet om banan ska börja genereras eller inte.
-	 if Highest_X_Position(Waves(1))-Lowest_X_Position(Waves(1))+20 <= Border_Difference(Game.Map) then
-	    New_Top_Row(Game.Map, Close => True);                 -- Vanlig randomisering
+      if Level_Cleared then
+	 
+	 if Loop_Counter mod 1000 > 1 and Loop_Counter mod 1000  < 20 then
+	    New_Top_Row(Game.Map, Close => True);
+	 elsif Loop_Counter mod 1000 > 50 and Loop_Counter mod 1000  < 75 then
+	    New_Top_Row(Game.Map, Left => True);
+	 elsif Loop_Counter mod 1000 > 100 and Loop_Counter mod 1000 < 150 then
+	    New_Top_Row(Game.Map, Right => True);
+	 elsif Loop_Counter mod 1000 > 200 and Loop_Counter mod 1000 < 225 then
+	    New_Top_Row(Game.Map, Left => True);
+	 elsif Loop_Counter mod 1000 > 250 then
+	    New_Top_Row(Game.Map, Open => True);	    
 	 else
-	    if Loop_Counter mod 5 = 1 then
+	    New_Top_Row(Game.Map);
+	 end if;
+	 
+	 Spawn_Astroid(Astroid_List, Game.Settings, Game.Map);
+	 
+	 -- Resetar så att banangenereringen börjar igen
+	 -- kan nog ersättas med mod.
+	 if Loop_Counter = 300 then	    
+	    Game.Settings.Difficulty := Game.Settings.Difficulty + 1;
+	    Level_Integer := Level_Integer + 1;
+	    Level_Cleared := False;
+	    
+	    Spawn_Wave(10*Game.Settings.Difficulty, --Antal
+		       EnemyType(1), --Typ
+		       1,
+		       1,
+		       waves(1));
+	    
+	    Spawn_Wave(Integer(0.5*Float(Game.Settings.Difficulty)), --Antal
+		       EnemyType(3), --Typ
+		       3,
+		       1,
+		       waves(2));
+	 end if;
+	 
+      else
+	 if Highest_X_Position(Waves(1))-Lowest_X_Position(Waves(1))+20 <= Border_Difference(Game.Map) then
+	    New_Top_Row(Game.Map);                 -- Vanlig randomisering
+	 else
+	    if Loop_Counter mod 3 = 1 then
 	       New_Top_Row(Game.Map, Open => True);
 	    else
 	       New_Top_Row(Game.Map);
 	    end if;   
 	 end if;
-	 
-	 --  if Loop_Counter > 1 and Loop_Counter < 100 then
-	 --     New_Top_Row(Game.Map, Right => True);
-	 --  elsif Loop_Counter > 100 and Loop_Counter < 150 then
-	 --     New_Top_Row(Game.Map, Left => True);
-	 --  elsif Loop_Counter > 150 and Loop_Counter < 200 then
-	 --     New_Top_Row(Game.Map, Right => True);
-	 --  elsif Loop_Counter > 200 and Loop_Counter < 250 then
-	 --     New_Top_Row(Game.Map, Left => True);
-	 --  end if;
-	    
-	 
-	 
-	 Move_Rows_Down(Game.Map);       -- Flyttar ner hela banan ett steg.
-      end if;
-      
-      -- Resetar så att banangenereringen börjar igen
-      -- kan nog ersättas med mod.
-      if Loop_Counter > 225 then
-	 Create_Object(PowerUpType(2), 50, Obstacle_Y_Pos+5, 0, Powerup_List);
-	 
-	 Game.Settings.Difficulty := Game.Settings.Difficulty + 1;
-      	 Loop_Counter := 1;
-      end if;
-      
-      
-      --| Spawnar Astroider
-      if Loop_Counter > 200 then
-      Spawn_Astroid(Astroid_List, Game.Settings, Game.Map);
-      Spawn_Astroid(Astroid_List, Game.Settings, Game.Map);
-      Spawn_Astroid(Astroid_List, Game.Settings, Game.Map);
-      end if;
-      
-      Shot_Movement(Astroid_List);
+      end if;   
       
       -----------------------------------
       -- Update Enemy ships
       -----------------------------------
-     Obstacle_y := Highest_Y_Position(Obstacle_List);
-     Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players, Game.Map);
-  
+      Obstacle_y := Highest_Y_Position(Obstacle_List);
+      Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players, Game.Map);
       
-      
-      
+      Move_Rows_Down(Game.Map);       -- Flyttar ner hela banan ett steg.
+	 
+      -- Uppdaterar astroidernas position.
+      Shot_Movement(Astroid_List);
+	 
       -- Sorterar Scoreboard.
       Sort_Scoreboard(Game, Num_Players);
       
@@ -242,19 +259,19 @@ begin
 	    Game.Players(I).Playing := False;
 	 end if;
 	 
-	--exit when Players_Are_Dead(Game.Players);  --detta ballar ur.
+	 --exit when Players_Are_Dead(Game.Players);  --detta ballar ur.
 	 
 	 if Game.Players(I).Playing then
 	    Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				      Game.Players(I).Ship.XY(2),
 				      Game.Players(I).Ship, --Uppdaterar ship_spec
 				      Shot_List);           --Om spelare träffas
-				                            --Av skott.
+							    --Av skott.
 	    Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				      Game.Players(I).Ship.XY(2),
 				      Game.Players(I).Ship, --Uppdaterar ship_spec
 				      Astroid_List);        --Om spelare träffas
-				                            --Av skott.
+							    --Av skott.
 	    
 	    for K in 1..4 loop
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
@@ -269,7 +286,7 @@ begin
 	 Put(Sockets(I), Obstacle_List);
 	 Put(Sockets(I), Powerup_List);
 	 Send_Map(Sockets(I), Game);      -- Map_Handling
-      	 Put_Game_Data(Sockets(I),Game);
+	 Put_Game_Data(Sockets(I),Game);
 
       end loop;
       
