@@ -69,8 +69,9 @@ package Definitions is
    ---------------------------------------------------
    type Setting_Type is
       record
-	 Generate_Map   : Boolean;     -- Generering av banan Activ/Inaktiv
-	 Astroid_Active : Boolean;     -- Generering av astroider Activ/Inaktiv
+	 Generate_Map    : Boolean;     -- Generering av banan Activ/Inaktiv
+	 Astroid_Active  : Boolean;     -- Generering av astroider Activ/Inaktiv
+	 Difficulty      : Integer;
       end record;
    ---------------------------------------------------
    
