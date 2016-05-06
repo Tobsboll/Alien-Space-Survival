@@ -66,13 +66,6 @@ package Map_Handling is
    procedure Move_Rows_Down(Map : in out Definitions.World);
    
    
-   --------------------------------------------------------------
-   --| Räknar hur långt in väggen är maximalt från varje sida.
-   --------------------------------------------------------------
-   procedure Border_Min_Max(Map : in Definitions.World;
-			    Min : out Integer;
-			    Max : out Integer);
-   
    -------------------------------------------------------
    --| Räknar fram avståndet mellan väggarna
    -------------------------------------------------------
