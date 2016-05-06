@@ -36,7 +36,7 @@ package body Game_Engine is
 
       --Banan
       Generate_World(Game.Map);  -- Genererar en helt ny bana med raka väggar. / Eric
-      Game.Settings.Generate_Map := False; -- Sätter i början att banan inte ska genereras.   
+      Game.Settings.Generate_Map := True; -- Sätter i början att banan inte ska genereras.   
       
       --------------------------------------------------
       
@@ -217,7 +217,7 @@ package body Game_Engine is
 	    --------------------------------------------------
 	    --Med Skott:
 	    --------------------------------------------------
-	 elsif L.Object_Type in 1..10 then
+	 elsif L.Object_Type in 1..7 or L.Object_Type in 9..10 then
 	    for I in 1..3 loop      --Ship top
 	       
 	       if X+I = Object_X and Y = Object_Y then
@@ -235,6 +235,25 @@ package body Game_Engine is
 	       
 	    end loop;
 	    --return Player_Collide(X,Y,L.Next);
+	 elsif L.Object_Type = 8 then  --Astroid
+	    for I in 1..3 loop      --Ship top
+	       
+	       if (X+I-1 = Object_X and Y+1 = Object_Y+1) or
+		 (X+I-1 = Object_X+1 and Y+1 = Object_Y+1) then
+		  return True;
+	       end if;
+	    end loop;
+	    
+	    
+	    for I in 1..5 loop      --Ship bottom
+	       
+	       
+	       if (X+I-1 = Object_X and Y+1 = Object_Y+1) or
+		 (X+I-1 = Object_X+1 and Y+1 = Object_Y+1) then
+		  return True;
+	       end if;
+	       
+	    end loop;
 	    
 	    --------------------------------------------------
 	    --Med Fiendeskepp:
@@ -303,6 +322,9 @@ package body Game_Engine is
 		  
 	       elsif L.Object_Type = ShotType(2) then
 		  Player_Ship.Health := Player_Ship.Health-1;
+	       elsif L.Object_Type = ShotType(8) then --Astroid
+		  Player_Ship.Health := Player_Ship.Health-1;
+		  
 	       elsif L.Object_Type = ShotType(9) then
 		  Player_Ship.Health := Player_Ship.Health-3;
 		  Player_Ship.XY(1) := Player_Ship.XY(1)+1;
@@ -386,10 +408,23 @@ package body Game_Engine is
 		  Diff := Diff +1;
 	   end loop;
 	   --Shot_Collide(Shot, Obj.Next);
-	   
-	
+	 elsif Obj.Object_Type = 8 then
+	      --Jämför Hindrets koord.
+	    --------------------------------------------------
+	    Diff := 0;
+	    for A in 1..2 loop
+	       for K in 1..2 loop   --Obstacle width
+		  
+		  if X = Object_X+K-1 and Y = Object_Y+Diff then
+		     return True;	
+		  end if;
+		  
+	       end loop;
+	       Diff := Diff +1;
+	    end loop;
+	    
 	 end if;
-	
+	 
        end if;
        return False;
        
@@ -421,6 +456,8 @@ package body Game_Engine is
 		  
 		  Remove(Obj2);
 		  --alternativt fiende förlorar liv
+	       elsif Obj2.Object_Type = 8 and Shot.Object_Type = 4 Then
+		  Remove(Obj2);
 	       end if;
 	       
 	       Remove(Shot); --skottet ska alltid dö
