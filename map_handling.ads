@@ -10,6 +10,7 @@ package Map_Handling is
    --------------------------------------------------------------------------
    Left_Border  : Integer := X_Led'First;
    Right_Border : Integer := X_Led'Last;
+   Spawn_Y      : Integer := GameBorder_Y;
    
    
    ----------------------------------------------------------
