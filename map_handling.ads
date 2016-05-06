@@ -1,6 +1,7 @@
 with TJa.Window.Text;   use TJa.Window.Text;
 with Definitions;       use Definitions;
 with TJa.Sockets;       use TJa.Sockets;
+with Object_Handling;   use Object_Handling;
    
 package Map_Handling is
    
