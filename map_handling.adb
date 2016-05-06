@@ -226,13 +226,10 @@ package body Map_Handling is
       G,M : Wall_Generation.Generator;
       Wall_Left_Randomize : Integer;
       Wall_Right_Randomize : Integer;
-      Wall_Left_Max  : Integer;
-      Wall_Right_Max : Integer;
       
    begin
       Wall_Generation.Reset(G);
       Map(1) := (others => '0');
-      Border_Min_Max(Map, Wall_Left_Max, Wall_Right_Max);
                         
 	 
 	 if Straight then                          --┃       ┃
@@ -260,14 +257,13 @@ package body Map_Handling is
 	       Make_Straight_Wall(Map, Left_Border);
 	    end if;
 	    
-	    if Border_Difference(Map) > 30 then
+	    if Border_Difference(Map) > 5 then
 	       Make_Left_Wall(Map, Right_Border);
 	    else
 	       Make_Straight_Wall(Map, Right_Border);
 	    end if;  	 
 	 elsif Right then
-	    
-	    if Border_Difference(Map) > 30 then   --  ┏┛    ┏┛
+	    if Border_Difference(Map) > 5 then    --  ┏┛    ┏┛
 	       Make_Right_Wall(Map, Left_Border); -- ┏┛    ┏┛
 	    else                                  --┏┛    ┏┛
 	       Make_Straight_Wall(Map, Left_Border);
@@ -346,20 +342,19 @@ package body Map_Handling is
       end loop;
    end Move_Rows_Down;
    
-   --------------------------------------------------------------
-   --- Räknar hur långt in väggen är maximalt från varje sida.
-   --------------------------------------------------------------
-   procedure Border_Min_Max(Map : in Definitions.World;
-			    Min : out Integer;
-			    Max : out Integer) is
+   -------------------------------------------------------
+   --| Räknar fram avståndet mellan väggarna
+   -------------------------------------------------------
+   function Border_Difference(Map : in World) return Integer is
       
+      Min, Max : Integer;
+      Diff     : Integer := World_X_Length;
    begin
-      -- Startvärdern
-      Max := World_X_Length;
-      Min := 1;
-      
       -- Går igeom alla rader (Y-led)
       for I in World'First+1 .. World'last loop
+	 -- Startvärdern
+	 Max := World_X_Length;
+	 Min := 1;
 	 
 	 --- Går igenom vänsersidan
 	 for J in X_Led'Range loop	    
@@ -380,23 +375,13 @@ package body Map_Handling is
 	       exit;
 	    end if;
 	 end loop;
+	 if Max-Min < Diff then
+	    Diff := Max-Min;
+	 end if;
       end loop;
       
-   end Border_Min_Max;
-   
-   -------------------------------------------------------
-   --| Räknar fram avståndet mellan väggarna
-   -------------------------------------------------------
-   function Border_Difference(Map : in World) return Integer is
-      
-      Max : Integer;
-      Min : Integer;
-      
-   begin
-      Border_Min_Max(Map, Min, Max);
-      return Max-Min;
+      return Diff;
    end Border_Difference;
-   
    
    --------------------------------------------------------
    -- Räknar ut och skickar tillbaka vart vänster vägg är
