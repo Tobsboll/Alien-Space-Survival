@@ -38,7 +38,14 @@ package body Graphics is
 	    if L.Object_Type = 4 then --Speciallösning för String
 	                              --Eftersom att î råkade vara det ty specialtecken
 	       Put("î");
-	    else 
+	    elsif L.Object_Type = 8 then --| Astroider
+	                             
+	       Put("╱╲"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+	       Put("╲╱");
+	       
+--	       Put("╭╮"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+--	       Put("╰╯");
+	    else  
 	       
 	       if L.Attribute = Up then
 		  Set_Foreground_Colour(Player_Laser_1);
