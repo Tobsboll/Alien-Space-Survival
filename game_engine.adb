@@ -29,6 +29,11 @@ package body Game_Engine is
 	 Game.Players(K).Ship.Missile_Ammo := 5;
       end loop;
       
+      -- ser till så att inga odefinierade booleans ställer till det senare // Tobias
+      	 for L in (Num_Players+1)..4 loop
+	    Game.Players(L).Playing := False;
+	 end loop;
+      ------------------------------------------------
       for M in Num_Players+1..4 loop
 	 Game.Players(M).Ship.Health := 0;
       end loop;
