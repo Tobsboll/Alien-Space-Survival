@@ -52,8 +52,11 @@ package Enemy_Ship_Handling is
 		        Movement_Type : in Integer;
 		        Direction     : in Integer;
 		        Enemies_List  : in out Object_List);
+   function Highest_Player(Players : in Player_array) return Integer;
+   
    function Get_Closest_Player(Enemy_X : in Integer;
-			       Players : in Player_Array) return Integer;
+			       Players : in Player_Array;
+			       Waves   : in Enemy_List_Array) return Integer;
    function Above_Wave(Player_Y : in Integer;
 		       Enemies  : in Object_list) return Boolean;
    
@@ -73,6 +76,7 @@ package Enemy_Ship_Handling is
    procedure Move_To_Side(Enemies : in out Object_List);
    procedure Change_Movement_Type(Enemies  : in out Object_List;
 				  New_Type : in Integer);
+   procedure Move_One_Up(Enemies : in out Object_list);
    procedure Move_One_Down(Enemies : in out Object_List);
    
    procedure Change_Direction(Enemies : in out Object_List);
