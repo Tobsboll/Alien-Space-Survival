@@ -4,16 +4,7 @@ with TJa.Sockets;       use TJa.Sockets;
 with Object_Handling;   use Object_Handling;
    
 package Map_Handling is
-   
-   type Astroid_Spec is
-      record
-	 X    : Integer;
-	 Y    : Integer := 0;
-	 Form : Integer;
-      end record;
-   
-   type Astroid_Type is array(1 .. world'Last) of Astroid_spec; 
-   
+
    
    --| Används till att hålla koll vart väggen är när genereringen utförs
    --------------------------------------------------------------------------
