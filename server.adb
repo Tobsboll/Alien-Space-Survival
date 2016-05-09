@@ -85,7 +85,6 @@ begin
    --|
    ----------------------------------------------------------------------------------------------------
    Set_Default_Values(Num_Players, Game);
-   --Waves := (Enemies1, Enemies2, Enemies3, Enemies4);
    Loop_Counter := 1;
    
    
