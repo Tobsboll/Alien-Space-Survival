@@ -138,12 +138,14 @@ begin
    	      EnemyType(1), --Typ
    	      1,
    	      1,
+   	      Gameborder_Y +2,
    	      waves(1));
    
    Spawn_Wave(1, --Antal
    	      EnemyType(3), --Typ
    	      3,
    	      1,
+   	      Gameborder_Y +4,
    	      waves(2));
    
    
@@ -203,12 +205,14 @@ begin
 		       EnemyType(1), --Typ
 		       1,
 		       1,
+		       Gameborder_Y +2,
 		       waves(1));
 	    
 	    Spawn_Wave(Integer(0.5*Float(Game.Settings.Difficulty)), --Antal
 		       EnemyType(3), --Typ
 		       3,
 		       1,
+		       Gameborder_Y +4,
 		       waves(2));
 	 end if;
 	 
