@@ -755,6 +755,7 @@ package body Enemy_Ship_Handling is
 			Enemy_Type    : in Integer;
 			Movement_Type : in Integer;
 			Direction     : in Integer;
+			Y_Value       : in Integer;
 			Enemies_List  : in out Object_List) is
       
       Min_X_Interval : constant Integer := 4;
@@ -769,7 +770,11 @@ package body Enemy_Ship_Handling is
    begin
       
       X := GameBorder_X + 1;
-      Y := GameBorder_Y + 2; -- ingen aning.
+      Y := Y_Value;
+      if Y < Gameborder_Y +2 then
+      -- så vi inte spawnar fiender utanför kanten
+      Y := GameBorder_Y + 2;
+      end if;
       
       -----------------------------------
       -- Egenskaper för fiendetyper
