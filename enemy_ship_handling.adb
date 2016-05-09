@@ -175,7 +175,7 @@ package body Enemy_Ship_Handling is
       
       if not Empty(Enemies) then
 	 
-	 Enemies.Movement_Type := 2;
+	 Enemies.Movement_Type := New_Type;
 	 Change_Movement_Type(Enemies.Next, New_type);
 	 
       end if;
@@ -400,27 +400,42 @@ package body Enemy_Ship_Handling is
       Highest_Player : Integer;
       Y_Value        : Integer;
       New_Y_Value    : Integer;
+      Player_Active  : Boolean := False;
       
    begin
       
-      Highest_Player := 1;
-      Y_Value        := Players(1).Ship.XY(2);
+      Y_Value := 1000; -- skönsvärde för jämförelse första gången
       
-      for I in 2..Players'Last loop
+      for I in Players'range loop
+	 
 	 if Players(I).Playing then
+	    
+	    Player_Active := True;
 	    
 	    New_Y_Value := Players(I).Ship.XY(2);
 	    
-	    if New_Y_Value > Y_Value then
+	    if New_Y_Value < Y_Value then
 	       Y_Value := New_Y_Value;
 	       Highest_Player := I;
 	    end if;
 	    
 	 end if;
+	 
       end loop;
       
-      return Highest_Player;
+      if not Player_Active then 
+	 -- om ingen spelare lever så undviks krasch genom att 
+	 -- skicka en nolla som i update_enemy_position
+	 -- tolkas som att spelararrayen inte ska genomsökas
+	 return 0;
       
+      else
+	 
+	 return Highest_Player;
+	 
+      end if;
+      
+	 
    end Highest_Player;
    --------------------------------------------------
    -- end HIGHEST PLAYER
@@ -437,6 +452,7 @@ package body Enemy_Ship_Handling is
       Next_Distance : Integer;
       Player_Num : Integer;
       High_Player : Integer;
+      Player_Active : Boolean := False;
       
    begin
       
@@ -444,36 +460,50 @@ package body Enemy_Ship_Handling is
       
       High_Player := Highest_Player(Players);
       
-      if Waves(1) /= null and Above_Wave(Players(High_Player).Ship.XY(2), Waves(1)) then
+      if (Waves(1) /= null and High_Player /= 0) and then Above_Wave(Players(High_Player).Ship.XY(2), Waves(1)) then
+	 -- vi kollar så att fiendelistan finns, att vi inte fick en nolla
+	 -- från Highest_player (= alla spelare är döda, vilket leder till
+         -- krasch när vi letar i player_array), samt om i så fall
+	 -- spelaren är ovanför vågen. Denna spelare ska då prioriteras
+	 -- av interceptorn.
+	 
 	 return High_Player;
-
-      else 
 	 
-	 Player_Num := 1; 
-	 -- vi antar tills vidare att spelare 1 är närmast
-	 Distance := abs(Players(1).Ship.XY(1) - Enemy_X);
-	 -- räknar ut hur långt bort första spelarskeppet är
-	 
-	 for I in 2..Players'Last loop
-	    
-	    if Players(I).Playing then
-	       
-	       Next_Distance := abs(Players(1).Ship.XY(1) - Enemy_X);
-	       -- räkna samma för nästa skepp
-	       
-	       if Next_Distance < Distance then
-		  --om närmare, så byt till det, och den spelaren, istället
-		  Distance := Next_Distance;
-		  Player_Num := I;
-	       end if;
-	       
-	    end if;
+   else 
 
-	 end loop;
-      end if;
+	 Distance := 1000; --skönsvärde för jämförelse första gången.
       
+      for I in Players'range loop
+	 
+	 if Players(I).Playing then
+	    
+	    Player_Active := True;
+	    
+	    Next_Distance := abs(Players(I).Ship.XY(1) - Enemy_X);
+	    -- räkna samma för nästa skepp
+	    
+	    if Next_Distance < Distance then
+	       --om närmare, så byt till det, och den spelaren, istället
+	       Distance := Next_Distance;
+	       Player_Num := I;
+	    end if;
+	    
+	 end if;
+
+      end loop;
+   end if;
+      
+   if not Player_Active then
+      	 -- om ingen spelare lever så undviks krasch genom att 
+	 -- skicka en nolla som tolkas som i update_enemy_position
+	 -- tolkas som att spelararrayen inte ska genomsökas
+      return 0;
+      
+   else
       
       return Player_Num;
+      
+      end if;
       
    end Get_Closest_Player;
    --------------------------------------------------
@@ -552,7 +582,7 @@ package body Enemy_Ship_Handling is
 	 Enemies.Direction := 1;
 	 Move_To_Side(Enemies);
 	 
-      elsif Ok_To_Shoot(Enemies.XY_Pos(1), Enemies.XY_Pos(2), 10, Waves) or(Waves(1) /= null and  Above_Wave(Player_XY(2), Waves(1))) then
+      elsif Ok_To_Shoot(Enemies.XY_Pos(1), Enemies.XY_Pos(2), 10, Waves) or (Waves(1) /= null and  Above_Wave(Player_XY(2), Waves(1))) then
 
 	    Create_Enemy_shot(Enemies.Object_Type, Enemies.XY_Pos(1), Enemies.XY_Pos(2)+1, Shot_list);
 
@@ -627,6 +657,8 @@ package body Enemy_Ship_Handling is
 	       
 	       
 	       if Waves(I).Object_Type /= EnemyType(3) then
+	       -- så att inte interceptorn skjuter när den
+	       -- patrullerar
 	       Reset(Chance_For_shot);
 	       Shot_Generator(Waves(I), Waves, Chance_For_Shot, Shot_List);
 	       end if;
@@ -647,31 +679,37 @@ package body Enemy_Ship_Handling is
 
 	    elsif Waves(I).Movement_Type = 3 then
 	       
+
 	       Closest_Player := Get_Closest_Player(Waves(I).XY_Pos(1), Players, Waves);
 	       -- räknar ut vilken spelare som är närmast 
 	       
-	       if Ok_To_Shoot(Waves(I).XY_Pos(1), Waves(I).XY_Pos(2), 4, Waves)  or ((Waves(1) /= null and then Above_Wave(Players(Closest_player).Ship.XY(2), Waves(1)))) then
-		  -- om skeppet har fri sikt eller om spelaren är 
-		  -- ovanför vågen så jagar interceptorn spelaren, 
-		  -- i chase-koden ingår skjutande.
+	       if Closest_Player /= 0 then
+		  -- om Closest_player returnerar en nolla så betyder 
+		  -- det att alla spelare är döda, och vi undviker
+		  -- därför att leta i spelararrayen då, annars kraschar
+		  -- spelet
 		  
-		  if Players(Closest_player).Ship.Health /= 0 then
-		     Chase(Players(Closest_player).Ship.XY, Waves(I), Waves, Shot_List);
-		  end if;
+		  if Ok_To_Shoot(Waves(I).XY_Pos(1), Waves(I).XY_Pos(2), 4, Waves)  or ((Waves(1) /= null and then Above_Wave(Players(Closest_player).Ship.XY(2), Waves(1)))) then
+		     -- om skeppet har fri sikt eller om spelaren är 
+		     -- ovanför vågen så jagar interceptorn spelaren, 
+		     -- i chase-koden ingår skjutande.
 		     
-		 
-		 
-		 --  if Waves(I).XY_Pos(2) < Waves(1).XY_Pos(2)-8 then
-		 --     Move_One_Down(Waves(I)); -- får ej gå lägre än våg.
-		 --  end if;
-		 -- flyttar sig neråt men håller sig ovanför vågen.
-		 
+		     if Players(Closest_player).Playing then
+			Chase(Players(Closest_player).Ship.XY, Waves(I), Waves, Shot_List);
+		     end if;
+		    
+		  else
+		     Waves(I).Movement_Type := 2;
+		     --om den inte kan skjuta eller jaga så
+		     --ställs interceptorn på att zickzacka tills tills vidare.
+		     
+		  end if;
 	       else
+		  -- om alla spelare döda så ska den patrullera nonchalant.
 		  Waves(I).Movement_Type := 2;
-		  --om den inte kan skjuta eller jaga så
-		  --ställs interceptorn på att zickzacka tills tills vidare.
 		  
 	       end if;
+	       
 	       
 	       --------------------------------
 	       -- Destroyer movement
@@ -760,7 +798,7 @@ package body Enemy_Ship_Handling is
       Num_Rows := 1; -- vi tänker oss först en rad.
       Ships_Per_Row := Num_To_Spawn;
    
-      X_Interval := World_X_Length/(Num_To_Spawn + 1);
+      X_Interval := 2*(World_X_Length/3)/(Num_To_Spawn + 1);
       -- räkna ut spacing primärt.
       
       
@@ -769,7 +807,7 @@ package body Enemy_Ship_Handling is
 	 Ships_Per_Row := Num_To_Spawn/Num_Rows; -- räkna ut antal skepp/rad
 	 Spaces_Per_Row := Ships_Per_Row + 1; -- mellanrum/rad
 	 
-	 X_Interval := World_X_Length/Spaces_Per_Row;
+	 X_Interval := 2*(World_X_Length/3)/Spaces_Per_Row;
 	 
       end loop;
       
