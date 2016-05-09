@@ -52,6 +52,7 @@ package Enemy_Ship_Handling is
                         Enemy_Type    : in Integer;
 		        Movement_Type : in Integer;
 		        Direction     : in Integer;
+		        Y_Value       : in Integer;
 		        Enemies_List  : in out Object_List);
    function Highest_Player(Players : in Player_array) return Integer;
    
