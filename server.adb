@@ -16,6 +16,7 @@ with Gnat.Sockets;
 with Window_Handling;              use Window_Handling;
 with Map_Handling;                 use Map_Handling;
 with Player_Handling;              use Player_Handling;
+with Level_Handling;               use Level_Handling;
 
 procedure Server is
    
@@ -172,60 +173,33 @@ begin
 	 Level_Cleared := True;    	    
       end if;
       
-      --------------------------------------------------
-      --| SCROLLING MAP 
-      --| "Level 2" => därför ej nödvändig än
-      --------------------------------------------------
-      if Level_Cleared then
+     if Level_Cleared then
 	 
-	 if Loop_Counter mod 1000 > 1 and Loop_Counter mod 1000  < 20 then
-	    New_Top_Row(Game.Map, Close => True);
-	 elsif Loop_Counter mod 1000 > 50 and Loop_Counter mod 1000  < 75 then
-	    New_Top_Row(Game.Map, Left => True);
-	 elsif Loop_Counter mod 1000 > 100 and Loop_Counter mod 1000 < 150 then
-	    New_Top_Row(Game.Map, Right => True);
-	 elsif Loop_Counter mod 1000 > 200 and Loop_Counter mod 1000 < 225 then
-	    New_Top_Row(Game.Map, Left => True);
-	 elsif Loop_Counter mod 1000 > 250 then
-	    New_Top_Row(Game.Map, Open => True);	    
-	 else
-	    New_Top_Row(Game.Map);
-	 end if;
+	 -- From CLEARED Level To NEW Level
+	 Between_Levels(Loop_Counter, Game, Astroid_List, Obstacle_List, New_Level);
 	 
-	 Spawn_Astroid(Astroid_List, Game.Settings, Game.Map);
 	 
-	 -- Resetar så att banangenereringen börjar igen
-	 -- kan nog ersättas med mod.
-	 if Loop_Counter = 300 then	    
-	    Game.Settings.Difficulty := Game.Settings.Difficulty + 1;
-	    Level_Integer := Level_Integer + 1;
-	    Level_Cleared := False;
-	    
-	    Spawn_Wave(10*Game.Settings.Difficulty, --Antal
-		       EnemyType(1), --Typ
-		       1,
-		       1,
-		       Gameborder_Y +2,
-		       waves(1));
-	    
-	    Spawn_Wave(Integer(0.5*Float(Game.Settings.Difficulty)), --Antal
-		       EnemyType(3), --Typ
-		       3,
-		       1,
-		       Gameborder_Y +4,
-		       waves(2));
-	 end if;
+	 -- Spawning The New Level
+      	 if New_Level then
+	    Spawn_Level(Level, Game.Settings.Difficulty, Waves, Level_Cleared, New_Level);
+      	 end if;
 	 
       else
-	 if Highest_X_Position(Waves(1))-Lowest_X_Position(Waves(1))+20 <= Border_Difference(Game.Map) then
-	    New_Top_Row(Game.Map);                 -- Vanlig randomisering
-	 else
-	    if Loop_Counter mod 3 = 1 then
-	       New_Top_Row(Game.Map, Open => True);
+	 --------------------------------------------------
+	 --| SCROLLING MAP 
+	 --------------------------------------------------
+	 if Loop_Counter mod 8 = 0 then
+	    if Highest_X_Position(Waves(1))-Lowest_X_Position(Waves(1))+20 <= Border_Difference(Game.Map) then
+	       New_Top_Row(Game.Map);                 -- Vanlig randomisering
 	    else
-	       New_Top_Row(Game.Map);
-	    end if;   
-	 end if;
+	       if Loop_Counter mod 3 = 1 then
+		  New_Top_Row(Game.Map, Open => True);
+	       else
+		  New_Top_Row(Game.Map);
+	       end if;   
+	    end if;
+	    Move_Rows_Down(Game.Map);       -- Flyttar ner hela banan ett steg.
+	 end if;   
       end if;   
       
       -----------------------------------
