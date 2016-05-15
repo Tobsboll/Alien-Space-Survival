@@ -237,7 +237,6 @@ package body Map_Handling is
 	    Make_Straight_Wall(Map, Right_Border); --┃       ┃
 	    
 	 elsif Open then
-	    
 	    if Left_Border > 1 then               --┗┓     ┏┛
 	       Make_Left_Wall(Map, Left_Border);  -- ┗┓   ┏┛
 	    else                                  --  ┗┓ ┏┛
@@ -248,22 +247,23 @@ package body Map_Handling is
 	       Make_Right_Wall(Map, Right_Border);
 	    else
 	       Make_Straight_Wall(Map, Right_Border);
-	    end if;  	 
-	 elsif Left then
+	    end if;  	
 	    
+	 elsif Left then	    
 	    if Left_Border > 1 then               --┗┓     ┗┓
 	       Make_Left_Wall(Map, Left_Border);  -- ┗┓     ┗┓
 	    else                                  --  ┗┓     ┗┓
 	       Make_Straight_Wall(Map, Left_Border);
 	    end if;
 	    
-	    if Border_Difference(Map) > 5 then
+	    if Border_Difference(Map) > 30 then
 	       Make_Left_Wall(Map, Right_Border);
 	    else
 	       Make_Straight_Wall(Map, Right_Border);
 	    end if;  	 
+	    
 	 elsif Right then
-	    if Border_Difference(Map) > 5 then    --  ┏┛    ┏┛
+	    if Border_Difference(Map) > 30 then   --  ┏┛    ┏┛
 	       Make_Right_Wall(Map, Left_Border); -- ┏┛    ┏┛
 	    else                                  --┏┛    ┏┛
 	       Make_Straight_Wall(Map, Left_Border);
@@ -275,9 +275,14 @@ package body Map_Handling is
 	       Make_Straight_Wall(Map, Right_Border);
 	    end if;  
 	    
-	 elsif Close then                        --  ┏┛ ┗┓
+	 elsif Close then  
+	    if Border_Difference(Map) > 50 then  --  ┏┛ ┗┓
 	    Make_Right_Wall(Map, Left_Border);   -- ┏┛   ┗┓
-	    Make_Left_Wall(Map, Right_Border);   --┏┛     ┗┓
+	      Make_Left_Wall(Map, Right_Border); --┏┛     ┗┓
+	    else
+	       Make_Straight_Wall(Map, Right_Border);
+	       Make_Straight_Wall(Map, Left_Border);
+	    end if;
 	 else
 	    
 	    
