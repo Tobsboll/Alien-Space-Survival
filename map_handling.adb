@@ -571,38 +571,17 @@ package body Map_Handling is
       Spawn_Range.Reset(X_Coord);
       Spawn_X := Spawn_Range.Random(X_Coord)+GameBorder_X;
       
-      if not Empty(Astroid_List) then
-	 if Spawn_X-GameBorder_X in Border_Left(Map, 1)+2..Border_Right(Map, 1)-5 then
-	    
-	    if not Too_Close_Astroid(Spawn_X, Astroid_List) then
-	       Astroid_Generator(Spawn_X, Astroid, Astroid_List);
-	    end if;
-	    
+      if Spawn_X-GameBorder_X in Border_Left(Map, 1)+2..Border_Right(Map, 1)-5 then
+	 
+	 if not Too_Close_Astroid(Spawn_X, Astroid_List) then
+	    Astroid_Generator(Spawn_X, Astroid, Astroid_List);
 	 end if;
-      else
-	 Astroid_Generator(Spawn_X, Astroid, Astroid_List);
+	 
       end if;
    end Spawn_Astroid;
    -----------------------------------------------------------
    --| END SPAWN ASTROID  |--
    -----------------------------------------------------------
    
-   
-   
-   -----------------------------------------------------------
-                               --| UPDATE ASTROID POSITION |--
-   -----------------------------------------------------------
-   procedure Update_Astroid_Position(Astroid_List : in out Object_List) is 
-     
-   begin
-     
-      null;
-      
-   end Update_Astroid_Position;
-   
-      
-   -----------------------------------------------------------
-   --| END UPDATE ASTROID POSITION |--
-   -----------------------------------------------------------
 
 end Map_Handling;
