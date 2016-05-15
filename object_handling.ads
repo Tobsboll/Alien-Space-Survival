@@ -76,6 +76,8 @@ package Object_Handling is
    procedure DeleteList(L : in out Object_List);
    --  --function Member (Key : in Key_Type;
 --		    L   : in List_Type) return Boolean;
+   procedure Delete_Object_In_List(L  : in out Object_List;
+				   Obj : in Integer);
    procedure Remove (L   : in out Object_List);
    
 
