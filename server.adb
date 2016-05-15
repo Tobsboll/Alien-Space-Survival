@@ -165,6 +165,12 @@ begin
    Game.Settings.Difficulty := 1;
    
    loop 
+      
+      -- Tar bort väggskotten
+      Delete_Object_In_List(Shot_List, ShotType(9));
+      Delete_Object_In_List(Shot_List, ShotType(10));
+      
+     -- Kontrollerar om leveln är avklarad
       if Empty(Waves(1)) and 
 	Empty(Waves(2)) and 
 	Empty(Waves(3)) and 
