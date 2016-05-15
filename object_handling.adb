@@ -208,10 +208,27 @@ package body Object_Handling is
       end if;
    end DeleteList;
    
+   --------------------------------------------------
+   -- DELETE SELECTED OBJECTS
+   --------------------------------------------------OK
+
+   procedure Delete_Object_In_List(L  : in out Object_List;
+				  Obj : in Integer) is
+      
+   begin 
+      if not Empty(L) then
+	 if L.Object_Type = Obj then
+	    Remove(L);
+	    Delete_Object_In_List(L, Obj); -- Rekursion
+	 else
+	    Delete_Object_In_List(L.Next, Obj); -- Rekursion	    
+	 end if;
+      end if;
+   end Delete_Object_In_List;
    
    --------------------------------------------------
-   --  -- REMOVE OBJECT
-   --  -------------------------------------------------- OK
+   -- REMOVE OBJECT
+   -------------------------------------------------- OK
    
    procedure Remove (L   : in out Object_List) is
        Temp : Object_List;
