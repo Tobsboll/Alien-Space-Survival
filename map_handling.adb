@@ -122,11 +122,12 @@ package body Map_Handling is
    ----------------------------------------------------------
    -- Skriver ut banan
    -----------------------------------------------------------
-   procedure Put_World(Map             : World;
-		       X               : Integer;
-		       Y               : Integer;
-		       Wall_Background : Colour_Type;
-		       Wall_Line       : Colour_Type) is
+   procedure Put_World(Map : World) is
+      
+      X               : Integer := Gameborder_X;
+      Y               : Integer := Gameborder_Y;
+      Wall_Background : Colour_Type := Game_Wall_Background;
+      Wall_Line       : Colour_Type := Game_Wall_Line;
       
    begin
       
@@ -214,6 +215,71 @@ package body Map_Handling is
    end Make_Right_Wall;
    
    --------------------------------------------------------------
+   --| Gör en randomiserad väll på VÄNSTER sida
+   --------------------------------------------------------------
+   procedure Make_Left_Random_Wall(Map           : in out World;
+				   Left_Border   : in out Integer) is
+      
+      G : Wall_Generation.Generator;
+      Wall_Left_Randomize : Integer;
+      
+   begin	 
+      Wall_Generation.Reset(G);
+      Wall_Left_Randomize := Wall_Generation.Random(G);
+      
+      if Left_Border = 1 then                    -- Furthest to the left wall
+	 if Wall_Left_Randomize = 1 then
+	    Make_Right_Wall(Map, Left_Border);   -- ┏┛
+	 else
+	    Make_Straight_Wall(Map, Left_Border);-- ┃
+	 end if;
+	 
+      elsif Wall_Left_Randomize = -1 then        -- Moves to the Left
+	 Make_Left_Wall(Map, Left_Border);       -- ┗┓
+	 
+      elsif Wall_Left_Randomize = 1 then         -- Moves to the Right
+	 Make_Right_Wall(Map, Left_Border);      -- ┏┛
+	 
+      else
+	 Make_Straight_Wall(Map, Left_Border);   -- ┃
+      end if;
+      
+   end Make_Left_Random_Wall;
+   
+   
+   --------------------------------------------------------------
+   --| Gör en randomiserad väll på HÖGER sida
+   --------------------------------------------------------------
+   
+   procedure Make_Right_Random_Wall(Map          : in out World;
+				    Right_Border : in out Integer) is
+      
+      G : Wall_Generation.Generator;
+      Wall_Right_Randomize : Integer;
+      
+   begin	 
+      Wall_Generation.Reset(G);
+      Wall_Right_Randomize := Wall_Generation.Random(G);
+      
+      if Right_Border = World_X_Length then          -- Furthest to the right wall 	 
+	 if Wall_Right_Randomize = 1 then
+	    Make_Left_Wall(Map, Right_Border);       -- ┗┓
+	 else
+	    Make_Straight_Wall(Map, Right_Border);   -- ┃
+	 end if;
+	 
+      elsif Wall_Right_Randomize = 1 then            -- Moves to the Right 
+	 Make_Right_Wall(Map, Right_Border);         -- ┏┛
+	 
+      elsif Wall_Right_Randomize = -1 then           -- Moves to the Left
+	 Make_Left_Wall(Map, Right_Border);          -- ┗┓
+	 
+      else
+	 Make_Straight_Wall(Map, Right_Border);      -- ┃
+      end if;
+   end Make_Right_Random_Wall;
+   
+   --------------------------------------------------------------
    --| Genererar en ny vägg kant på var sida.
    --------------------------------------------------------------
    procedure New_Top_Row(Map      : in out Definitions.World;
@@ -223,12 +289,7 @@ package body Map_Handling is
 			 Left     : in Boolean := False;
 			 Right    : in Boolean := False) is
       
-      G,M : Wall_Generation.Generator;
-      Wall_Left_Randomize : Integer;
-      Wall_Right_Randomize : Integer;
-      
    begin
-      Wall_Generation.Reset(G);
       Map(1) := (others => '0');
                         
 	 
@@ -259,14 +320,14 @@ package body Map_Handling is
 	    if Border_Difference(Map) > 30 then
 	       Make_Left_Wall(Map, Right_Border);
 	    else
-	       Make_Straight_Wall(Map, Right_Border);
+	       Make_Right_Random_Wall(Map, Right_Border);
 	    end if;  	 
 	    
 	 elsif Right then
 	    if Border_Difference(Map) > 30 then   --  ┏┛    ┏┛
 	       Make_Right_Wall(Map, Left_Border); -- ┏┛    ┏┛
 	    else                                  --┏┛    ┏┛
-	       Make_Straight_Wall(Map, Left_Border);
+	       Make_Left_Random_Wall(Map, Left_Border);
 	    end if;
 	    
 	    if Right_Border < World_X_Length then
@@ -276,60 +337,16 @@ package body Map_Handling is
 	    end if;  
 	    
 	 elsif Close then  
-	    if Border_Difference(Map) > 50 then  --  ┏┛ ┗┓
-	    Make_Right_Wall(Map, Left_Border);   -- ┏┛   ┗┓
-	      Make_Left_Wall(Map, Right_Border); --┏┛     ┗┓
+	    if Border_Difference(Map) > 50 then     --  ┏┛ ┗┓
+	       Make_Right_Wall(Map, Left_Border);   -- ┏┛   ┗┓
+	       Make_Left_Wall(Map, Right_Border);   --┏┛     ┗┓
 	    else
-	       Make_Straight_Wall(Map, Right_Border);
-	       Make_Straight_Wall(Map, Left_Border);
+	       Make_Left_Random_Wall(Map, Left_Border);
+	       Make_Right_Random_Wall(Map, Right_Border);
 	    end if;
 	 else
-	    
-	    
-	    
-	    ------------
-	    --| LEFT |--
-	    ------------	 
-	    Wall_Left_Randomize := Wall_Generation.Random(G);
-	    
-	    if Left_Border = 1 then                    -- Furthest to the left wall
-	       if Wall_Left_Randomize = 1 then
-		  Make_Right_Wall(Map, Left_Border);   -- ┏┛
-	       else
-		  Make_Straight_Wall(Map, Left_Border);-- ┃
-	       end if;
-	       
-	    elsif Wall_Left_Randomize = -1 then        -- Moves to the Left
-	       Make_Left_Wall(Map, Left_Border);       -- ┗┓
-	       
-	    elsif Wall_Left_Randomize = 1 then         -- Moves to the Right
-	       Make_Right_Wall(Map, Left_Border);      -- ┏┛
-	       
-	    else
-	       Make_Straight_Wall(Map, Left_Border);   -- ┃
-	    end if;
-	    
-	    -------------
-	    --| Right |--
-	    -------------	 
-	    Wall_Right_Randomize := Wall_Generation.Random(G);
-	    
-	    if Right_Border = World_X_Length then          -- Furthest to the right wall 	 
-	       if Wall_Right_Randomize = 1 then
-		  Make_Left_Wall(Map, Right_Border);       -- ┗┓
-	       else
-		  Make_Straight_Wall(Map, Right_Border);   -- ┃
-	       end if;
-	       
-	    elsif Wall_Right_Randomize = 1 then            -- Moves to the Right 
-	       Make_Right_Wall(Map, Right_Border);         -- ┏┛
-	       
-	    elsif Wall_Right_Randomize = -1 then           -- Moves to the Left
-	       Make_Left_Wall(Map, Right_Border);          -- ┗┓
-	       
-	    else
-	       Make_Straight_Wall(Map, Right_Border);      -- ┃
-	    end if;
+	    Make_Left_Random_Wall(Map, Left_Border);
+	    Make_Right_Random_Wall(Map, Right_Border);	    
 	 end if;
    end New_Top_Row;
    
