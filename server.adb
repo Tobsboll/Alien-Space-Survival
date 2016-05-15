@@ -32,16 +32,18 @@ procedure Server is
    Listener                           : Listener_Type;
    
    Num_Players            : Integer;
-   Game                   : Game_Data;
    Loop_Counter           : Integer;
+   Obstacle_Y             : Integer;
+   Level                  : Integer := 1;
+   
+   Game                   : Game_Data;
    Waves                  : Enemy_List_Array;
    Shot_List              : Object_List; --shot_handling.ads
    Astroid_List           : Object_List;
    Obstacle_List          : Object_List;
    Powerup_List           : Object_List;
-   Obstacle_Y             : Integer;
-   Level_Integer          : Integer := 1;
    Level_Cleared          : Boolean := False;
+   New_Level              : Boolean := False;
    
 begin
    Set_Window_Title("Server");
