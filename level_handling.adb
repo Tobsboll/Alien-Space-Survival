@@ -1,4 +1,7 @@
 
+with Ada.Text_IO;                  use Ada.Text_IO;
+with Ada.Integer_Text_IO;          use Ada.Integer_Text_IO;
+
 package body Level_Handling is
    
    procedure Between_Levels(Loop_Counter  : in Integer;
@@ -19,41 +22,49 @@ package body Level_Handling is
       --------------------------------------------------
       --| MOVING MAP WITH ASTROIDS 
       --------------------------------------------------
+      if Loop_Counter mod 20 = 0  and Loop_Counter < 600 then
+	 Reset(Gen);
+	 Wall_Dirr  := Random(Gen);
+      end if;
+      
       if Loop_Counter mod 2 = 0 then
-	 if Loop_Counter mod 1000 > 1 and Loop_Counter mod 1000  < 60 then
+	 if Loop_Counter < 40 then
 	    New_Top_Row(Map, Close => True); -- Stänger väggar
-	    
-	 elsif Loop_Counter mod 1000 > 160 and Loop_Counter mod 1000  < 220 then
-	    New_Top_Row(Map, Left => True); -- Vänster väggar
-	    
-	 elsif Loop_Counter mod 1000 > 320 and Loop_Counter mod 1000 < 440 then
-	    New_Top_Row(Map, Right => True); -- Höger väggar
-	    
-	 elsif Loop_Counter mod 1000 > 540 and Loop_Counter mod 1000 < 600 then
-	    New_Top_Row(Map, Left => True); -- Vänster väggar
-	    
-	 elsif Loop_Counter mod 1000 > 750 then
-	    New_Top_Row(Map, Open => True); -- Öppnar väggar
-	    
+	 elsif Loop_Counter > 450 then
+	    New_Top_Row(Map, Open => True);  -- Öppnar väggar
 	 else
-	    Spawn_Astroid(Astroid_List, Data.Settings, Map);
-	    Spawn_Astroid(Astroid_List, Data.Settings, Map);
-	    New_Top_Row(Map);       -- Randomisering väggar
+	    
+	    if Wall_Dirr = 1 then
+	       New_Top_Row(Map, Close => True); -- Stänger väggar
+	       
+	    elsif Wall_Dirr = 2 then
+	       New_Top_Row(Map, Open => True);  -- Öppnar väggar
+	       
+	    elsif Wall_Dirr = 3 then
+	       New_Top_Row(Map, Left => True);  -- Vänster väggar
+	       
+	    elsif Wall_Dirr = 4 then
+	       New_Top_Row(Map, Right => True); -- Höger väggar
+	       
+	    else                                -- Randomisering väggar
+	       New_Top_Row(Map);
+	    end if;
 	 end if;
 	 Move_Rows_Down(Map);       -- Flyttar ner hela banan ett steg.
+	 
       end if;
       
       --------------------------------------------------
       --| NEW ASTROIDS
       --------------------------------------------------
-      if Loop_Counter mod 1000 > 750 and Loop_Counter mod 1000 < 850 then
+      if Loop_Counter mod 1000 < 550 then
 	 Spawn_Astroid(Astroid_List, Data.Settings, Map);
 	 Spawn_Astroid(Astroid_List, Data.Settings, Map);
 	 Spawn_Astroid(Astroid_List, Data.Settings, Map);	    
       end if;   
       
       -- Setting Up Before The New Level
-      if Loop_Counter = 875 then
+      if Loop_Counter = 580 then
 	 Obstacle_y := GameBorder_Y + World_Y_Length - 4;
 	 for I in 1..7-(Difficulty*2) loop
 	    Create_Wall(Obstacle_List, Obstacle_Y-(I*2));	 --| NEW COVER OBJECTS
@@ -61,7 +72,7 @@ package body Level_Handling is
       end if;
       
       
-      if Loop_Counter = 900 then
+      if Loop_Counter = 600 then
 	 New_Level := True;
       end if;
       
@@ -81,7 +92,6 @@ package body Level_Handling is
 			 Level_Cleared : out Boolean;
 			 New_Level     : out Boolean) is
       
-      Gen       : Generator;
       Gen_Level : Integer;
       
    begin
