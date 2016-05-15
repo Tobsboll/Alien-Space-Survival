@@ -8,10 +8,13 @@ with Ada.Numerics.Discrete_Random;
 package Level_Handling is
    
    
-   subtype One_To_8 is Integer range 1..1;
+subtype One_To_8 is Integer range 1..4;
    package One_To_8_Random is
       new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_8);
    use One_To_8_Random;
+   
+   Gen       : Generator;
+   Wall_Dirr : Integer;
    
    
    procedure Between_Levels(Loop_Counter  : in Integer;
