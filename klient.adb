@@ -208,7 +208,7 @@ begin
 	    Put("Här skriver man.");
 	    -------------------------------------------------
 
-	    Put_World(Data.Map, Gameborder_X, Gameborder_Y, Game_Wall_Background, Game_Wall_Line);
+	    Put_World(Data.Map);
 	    Set_Colours(White, Black);
 	    
 	    
