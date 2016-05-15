@@ -210,7 +210,6 @@ begin
       Obstacle_y := Highest_Y_Position(Obstacle_List);
       Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players, Game.Map);
       
-      Move_Rows_Down(Game.Map);       -- Flyttar ner hela banan ett steg.
 	 
       -- Uppdaterar astroidernas position.
       Shot_Movement(Astroid_List);
