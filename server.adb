@@ -225,7 +225,6 @@ begin
       
       --Uppdatera skottens position
       Shot_Movement(Shot_List);
-      Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game);
       Shots_Collide_In_Objects(Shot_List, Astroid_List, Game);
       for B in Waves'Range loop
 	 Shots_Collide_In_Objects(Shot_List, Waves(B), Game);
@@ -235,7 +234,9 @@ begin
 	 Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
 	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
       end loop;
-
+      
+      Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game);
+      Shots_Collide_In_Objects(Astroid_List, Obstacle_List, Game);
       
       -- Skickar information till klienterna. / Eric
       for I in 1..Num_Players loop
@@ -304,6 +305,7 @@ begin
       ----------------------------------------
       ----------------------------------------
       ----------------------------------------
+      
       
       Loop_Counter := Loop_Counter + 1;
       
