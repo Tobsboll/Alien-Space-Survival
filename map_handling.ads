@@ -114,6 +114,5 @@ package Map_Handling is
    procedure Spawn_Astroid(Astroid_List : in out Object_List;
 			   Astroid      : in Setting_Type;
 			   Map          : in World);
-   procedure Update_Astroid_Position(Astroid_List : in out Object_List);
 
 end Map_Handling;
