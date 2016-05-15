@@ -43,11 +43,7 @@ package Map_Handling is
    ----------------------------------------------------------------
    --| Skriver ut hela banan där X,Y bestämmer vart i terminalen.
    ----------------------------------------------------------------
-   procedure Put_World(Map             : World;
-		       X               : Integer;
-		       Y               : Integer;
-		       Wall_Background : Colour_Type;
-		       Wall_Line       : Colour_Type);
+   procedure Put_World(Map  : World);
    
    --------------------------------------------------------------------
    --| Genererar en ny rad längst upp.
