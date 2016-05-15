@@ -65,6 +65,7 @@ package body Level_Handling is
       
       -- Setting Up Before The New Level
       if Loop_Counter = 580 then
+	 DeleteList(Obstacle_List);
 	 Obstacle_y := GameBorder_Y + World_Y_Length - 4;
 	 for I in 1..7-(Difficulty*2) loop
 	    Create_Wall(Obstacle_List, Obstacle_Y-(I*2));	 --| NEW COVER OBJECTS
