@@ -276,7 +276,7 @@ package body Enemy_Ship_Handling is
       -- man kan se i graphics.ads vilka shots som finns
    begin -- courtesy of Andreas ^^
       
-      Create_Object(ShotType(1), X+1, Y+1, Down, Shot_List); --nummer?
+      Create_Object(ShotType(1), X+1, Y+2, Down, Shot_List); --nummer?
       
    end Create_Enemy_Shot;
    --------------------------------------------------
