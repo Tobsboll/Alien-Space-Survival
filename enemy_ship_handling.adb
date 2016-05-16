@@ -756,18 +756,22 @@ package body Enemy_Ship_Handling is
 			Movement_Type : in Integer;
 			Direction     : in Integer;
 			Y_Value       : in Integer;
+			Difficulty    : in Integer;
 			Enemies_List  : in out Object_List) is
       
       Min_X_Interval : constant Integer := 4;
       Y_Interval     : constant Integer := 3;
       X, X_Interval, Y : Integer; 
-      Difficulty : Integer;
+      --Difficulty : Integer;
+      Shot_Difficulty : Integer;
       Num_Lives  : Integer;  
       Num_Rows   : Integer;
       Ships_Per_Row : Integer;
       Spaces_Per_Row : Integer;
       
    begin
+      
+      Shot_Difficulty := 20 + Difficulty;
       
       X := GameBorder_X + 1;
       Y := Y_Value;
@@ -779,21 +783,21 @@ package body Enemy_Ship_Handling is
       -----------------------------------
       -- Egenskaper för fiendetyper
       -----------------------------------
-      --Behövs kanske ej
-      
+     -- finns bara två typer i nuläget.
       if Enemy_Type = EnemyType(1) then
-	 Difficulty := 1;
-	 Num_Lives  := 2;
-      elsif Enemy_Type = EnemyType(2) then
-	 Difficulty := 10;
-	 Num_Lives := 3;
+
+	 if Difficulty < 5 then
+	    Num_Lives  := Difficulty;
+	 else
+	    Num_Lives := 4;
+	 end if;
+
       elsif Enemy_Type = EnemyType(3) then
-	 Difficulty := 15;
-	 Num_Lives := 5;
-      elsif Enemy_Type = EnemyType(4) then
-	 Difficulty := 15;
-	 Num_Lives := 5;
+	 
+	 Num_Lives := 4 + Diffculty;
+	 
       end if;
+      
       
       
       -----------------------------------
@@ -820,7 +824,7 @@ package body Enemy_Ship_Handling is
 	 
 	 for J in 1..Ships_Per_Row loop
 	    
-	    Spawn_Ship(Enemy_Type, X+X_Interval, Y, Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
+	    Spawn_Ship(Enemy_Type, X+X_Interval, Y, Shot_Difficulty, Num_Lives, Direction, Movement_Type, Enemies_List);
 	    
 	    X := X + X_Interval; -- stega upp X
 	    
