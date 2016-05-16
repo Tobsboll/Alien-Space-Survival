@@ -24,8 +24,11 @@ wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/game
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/game_engine.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/level_handling.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/level_handling.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/task_printer.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/task_printer.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/task_server_communication.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/task_server_communication.ads
 
 
 gnatmake $(~TDDD11/TJa-lib/bin/tja_config) server.adb
 gnatmake $(~TDDD11/TJa-lib/bin/tja_config) klient.adb
-
