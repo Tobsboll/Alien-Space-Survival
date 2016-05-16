@@ -115,12 +115,13 @@ package body Graphics is
 	    --Om det är en fiende:
 	 elsif L.Object_Type in Enemy'Range then
 	    
+	     if L.XY_Pos(1) > 0 and L.XY_Pos(2) > 0 then
 	    --Enemy type 1 only:
 	    Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
 	    Put( Enemy_1(1) );
 	    Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
 	    Put( Enemy_1(2) );
-	 
+	    end if;
 	 
 	 end if;
 	 Put_Objects(L.Next);
