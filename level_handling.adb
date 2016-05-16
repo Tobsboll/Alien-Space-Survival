@@ -124,14 +124,14 @@ package body Level_Handling is
 		       EnemyType(1), --Typ
 		       1,
 		       1,
-		       Gameborder_Y +2,
+		       Gameborder_Y +4,
 		       waves(1));
 	    
 	    Spawn_Wave(Integer(0.5*Float(Difficulty)), --Antal
 		       EnemyType(3), --Typ
 		       3,
 		       1,
-		       Gameborder_Y +4,
+		       Gameborder_Y +2,
 		       waves(2));
 	    
 	 elsif Gen_Level = 2 then
