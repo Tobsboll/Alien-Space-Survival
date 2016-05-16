@@ -99,4 +99,19 @@ package Game_Engine is
    function Waiting(Loop_Counter, When_Done : in Integer) return Boolean;
    --------------------------------------------------
    
+   --Update_Player_Recharge uppdaterar bara en integer i ship_spec för ett skepp
+   --eftersom man kan bara skjuta om den är lika med noll.
+   procedure Update_Player_Recharge (Player : in out Player_Type);
+   
+   --Som det låter:
+   procedure Create_Explosion_Big (L : in out Object_List;
+				   X, Y : in Integer);
+   procedure Create_Explosion_Small ( L : in out Object_List;
+				      X , Y : in Integer);
+   procedure Create_Ricochet ( L : in out Object_List;
+			       X , Y : in Integer);
+   procedure Create_Nitro_Explosion (L : in out Object_List;
+				     X, Y : in Integer);
+   procedure Create_Side_Thrust ( L : in out Object_List;
+				  X , Y : in Integer);
 end Game_Engine;
