@@ -409,6 +409,7 @@ package body Game_Engine is
 		  
 	       elsif L.Object_Type = ShotType(Asteroid) then --Astroid
 		  Player_Ship.Health := Player_Ship.Health-1;
+		  Create_Ricochet(L, L.XY_Pos(1)+1, L.XY_Pos(2)); --Extra ricochet
 		  
 	       elsif L.Object_Type = ShotType(L_Wall) then
 		  Player_Ship.Health := Player_Ship.Health-3;
