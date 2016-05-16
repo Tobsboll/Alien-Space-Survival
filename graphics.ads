@@ -12,17 +12,22 @@ package Graphics is
    Player_Width : constant Integer := 5;
    Player_Height: constant Integer := 2;
    
-   type Shot_Array_Graphics_Type is array (1..10) of Character;
-   ShotGraphics : Shot_Array_Graphics_Type := ('|', --Normal laser
-					       'O', --Laser Upgrade
-					       ' ', --Hitech Laser [UNDEFINED]
-					       ' ', --[î] --Missile
-					       ' ',
-					       ' ',
-					       ' ',
-					       ' ',
-					       ' ',  -- Vänster vägg
-					       ' '); -- Höger vägg
+   type Shot_Array_Graphics_Type is array (1..15) of Character;
+   ShotGraphics : Shot_Array_Graphics_Type := ('|', --1.  Normal laser
+					       'O', --2.  Laser Upgrade
+					       ' ', --3.  Hitech Laser [UNDEFINED]
+					       ' ', --4.  [î] --Missile
+					       ' ', --5.  Explosion
+					       ' ', --6.  Diagonal Laser
+					       ' ', --7.  Nitro_Shot
+					       ' ', --8.  Astroid
+					       ' ', --9.  Vänster vägg
+					       ' ',--10. Höger vägg
+					       ' ',--11. Ricochet
+					       ' ',--12
+					       ' ',--13
+					       ' ',--14
+					       ' ');--15
    
    --  Player ship-prototypes
    --
@@ -46,17 +51,17 @@ package Graphics is
    Obstacle_Hard : constant String (1..Obstacle_Width) := "HHH";
    Obstacle_Unbreakable : constant String (1..Obstacle_Width) := "UUU";
    
-   type Obstacle_Graphics_Type is array (11..20) of String(1..3);
+   type Obstacle_Graphics_Type is array (16..20) of String(1..3);
    Obstacle : Obstacle_Graphics_Type := (Obstacle_Light,
 					 Obstacle_Hard, 
 					 Obstacle_Unbreakable,
 					 "   ",
-					 "   ",
-					 "   ",
-					 "   ",
-					 "   ",
-					 "   ",
 					 "   "
+					 --"   ",
+					 --"   ",
+					 --"   ",
+					 --"   ",
+					 --"   "
 					);
    
    type PowerUp_Graphics_Type is array (21..30) of String(1..3);
@@ -64,10 +69,10 @@ package Graphics is
 					"(m)", --Missile Ammo
 					"(o)", --Laser upgrade
 					"(X)", --Hitech laser
-					"( )", --Empty
-					"( )",
-					"( )",
-					"( )",
+					"(3)", --Tri-Laser
+					"(D)", --Diagonal-laser
+					"(N)", --Nitro-shot
+					"(M)", --Super Missile
 					"( )",
 					"( )"
 				      );
