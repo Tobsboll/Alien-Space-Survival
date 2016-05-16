@@ -794,7 +794,7 @@ package body Enemy_Ship_Handling is
 
       elsif Enemy_Type = EnemyType(3) then
 	 
-	 Num_Lives := 4 + Diffculty;
+	 Num_Lives := 4 + Difficulty;
 	 
       end if;
       
