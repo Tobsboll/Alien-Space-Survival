@@ -129,7 +129,7 @@ package body Level_Handling is
 		       waves(2));
 	    
 	 elsif Gen_Level = 2 then
-	    Kamekazee_Level(Waves);
+	    Kamikazee_Level(Waves);
 	 elsif Gen_Level = 3 then
 	    null;
 	 elsif Gen_Level = 4 then
