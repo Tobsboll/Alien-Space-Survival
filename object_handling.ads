@@ -41,7 +41,7 @@ package Object_Handling is
 	 Player         : Integer;
 	 
 	 --För fiendeskepp exklusivt:
-	 Direction      : Integer;
+	 Direction      : Integer ;
 	 Movement_Type  : Integer;
 	 Difficulty     : Integer;
 	 
@@ -60,7 +60,16 @@ package Object_Handling is
 			   X,Y            : in Integer;
 			   Attr           : in Integer;
 			   L              : in out Object_List;
-			   Player         : in Integer := 0);
+			   Player         : in Integer := 0;
+			   Dir            : in Integer := 0);
+   
+   procedure Insert_Last  (Type_Of_Object : in Integer ;
+			   X, Y           : in Integer ;
+			   Attr           : in Integer ;
+			   L              : in out Object_List;
+			   Player         : in Integer := 0;
+			   Dir            : in Integer := 0);
+   
    function Highest_Y_Position(List : in Object_List;	
 			       Y    : in Integer := GameBorder_Y+World_Y_Length-2) return Integer;
    function Lowest_Y_Position(List : in Object_List;
@@ -74,10 +83,10 @@ package Object_Handling is
    --  --  procedure Insert(Data : in Shot_Data_Type;
    --  		    L    : in out Shot_Fired);
    procedure DeleteList(L : in out Object_List);
-   --  --function Member (Key : in Key_Type;
---		    L   : in List_Type) return Boolean;
    procedure Delete_Object_In_List(L  : in out Object_List;
 				   Obj : in Integer);
+   --  --function Member (Key : in Key_Type;
+--		    L   : in List_Type) return Boolean;
    procedure Remove (L   : in out Object_List);
    
 
