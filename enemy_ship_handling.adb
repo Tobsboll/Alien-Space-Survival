@@ -594,8 +594,47 @@ package body Enemy_Ship_Handling is
    --------------------------------------------------
    
    --------------------------------------------------
+   -- KAMIKAZEE_CHASE
+   --------------------------------------------------
+   procedure Kamikazee_Chase(Player_XY : in XY_Type; 
+		             Enemies   : in out Object_List;
+		             Waves     : in out Enemy_List_Array;
+		             Shot_List : in out Object_list) is
+      
+   begin
+      
+         -------------- Y-LED
+      
+	    Move_One_Down(Enemies);
+-- gå alltid neråt! Den får ha så mycket liv att den krossar sig igenom fiendernas linjer.
+ 
+      
+      
+      
+      -------------- X-LED
+      
+      if Player_XY(1) - Enemies.XY_Pos(1) < 0 then
+
+	 Enemies.Direction := -1;
+	 Move_To_Side(Enemies);
+	 
+      elsif Player_XY(1) - Enemies.XY_Pos(1) > 0 then
+	 
+	 Enemies.Direction := 1;
+	 Move_To_Side(Enemies);
+	 
+      end if;
+      
+      
+   end Kamikazee_Chase;
+   --------------------------------------------------
+   -- end KAMIKAZEE_CHASE
+   --------------------------------------------------
+   
+   --------------------------------------------------
    --UPDATE ENEMY POSITION
    --------------------------------------------------
+   
    
    procedure Update_Enemy_Position(Waves : in out Enemy_List_array;
 				   Shot_List : in out Object_List;
@@ -608,7 +647,7 @@ package body Enemy_Ship_Handling is
       -- 1) move zigzag, classic space invaders
       -- 2) move only zigzag, don't go downwards
       -- 3) Interceptor movement (chase and shoot) 
-      -- 4) Destroyer movement
+      -- 4) Kamikazee movement
       
       Closest_Player  : Integer;
       Chance_For_Shot : Generator;
@@ -666,9 +705,11 @@ package body Enemy_Ship_Handling is
 	       --------------------
 	       if Waves(I).Object_Type = EnemyType(3) then
 		  Waves(I).Movement_type := 3;
+	       elsif Waves(I).Object_Type = EnemyType(4) then
+		  Waves(I).Movement_Type := 4;
 	       end if;
-	       -- ser till så att en interceptor som väntar på lucka
-	       -- ställs tillbaka till att kolla efter spelare
+	       -- ser till så att ett skepp som tillfälligt patrullerar
+	       -- ställs tillbaka till sitt egna beteende.
 	       --------------------
 	       
 	       
@@ -712,36 +753,53 @@ package body Enemy_Ship_Handling is
 	       
 	       
 	       --------------------------------
-	       -- Destroyer movement
+	       -- Kamikazee movement
 	       --------------------------------
 	       
-	       -- Här behövs wait(), så se till att skicka in
-	       -- loop_counter så småningom.
+
 	       
 	    elsif Waves(I).Movement_Type = 4 then
 	       
 	       if Waves(I).XY_Pos(2) = World_Y_Length  then
-		  --Delete_Enemy_List(Waves(I));
 		  DeleteList(Waves(I));
 	       else
 		  
+		  Closest_Player := Get_Closest_Player(Waves(I).XY_Pos(1), Players, Waves);
 		  
-		  Move_One_Down(Waves(I));
-	       for I in 1..4 loop
+		  if Closest_Player /= 0 then
+		     -- om Closest_player returnerar en nolla så betyder 
+		     -- det att alla spelare är döda, och vi undviker
+		     -- därför att leta i spelararrayen då, annars kraschar
+		     -- spelet
+		     
+		     if Ok_To_Shoot(Waves(I).XY_Pos(1), Waves(I).XY_Pos(2), 4, Waves)  or ((Waves(1) /= null and then Above_Wave(Players(Closest_player).Ship.XY(2), Waves(1)))) then
+			-- om skeppet har fri sikt eller om spelaren är 
+			-- ovanför vågen så jagar skeppet spelaren
+			
+			if Players(Closest_player).Playing then
+			   Kamikazee_chase(Players(Closest_player).Ship.XY, Waves(I), Waves, Shot_List);
+			end if;
+			
+		     else
+			Waves(I).Movement_Type := 2;
+			--om den inte kan skjuta eller jaga så
+			--ställs interceptorn på att zickzacka tills vidare.
+			
+		     end if;
+
+		  end if;
 		  
-		  Shot_Generator(Waves(I), Waves, Chance_For_Shot, Shot_List);
-		  
-	       end loop;
-	    end if;
+	       end if;
 	       
 	    end if;
-	    
 	 end if;
 	 
-	    
+	 
       end loop;
      
    end Update_Enemy_position;
+
+   
 
    
    --------------------------------------------------
