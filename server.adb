@@ -17,6 +17,7 @@ with Window_Handling;              use Window_Handling;
 with Map_Handling;                 use Map_Handling;
 with Player_Handling;              use Player_Handling;
 with Level_Handling;               use Level_Handling; 
+with Task_Server_Communication;    use Task_Server_Communication;
 
 procedure Server is
    
@@ -32,16 +33,17 @@ procedure Server is
    Listener                           : Listener_Type;
    
    Num_Players            : Integer;
-   Game                   : Game_Data;
+   Obstacle_Y             : Integer;
+   Level                  : Integer := 1;
    Loop_Counter           : Integer;
+   
+   Game                   : Game_Data;
    Waves                  : Enemy_List_Array;
    Shot_List              : Object_List; --shot_handling.ads
    Astroid_List           : Object_List;
    Obstacle_List          : Object_List;
    Powerup_List           : Object_List;
    Explosion_List         : Object_List;
-   Obstacle_Y             : Integer;
-   Level                  : Integer := 1;
    Level_Cleared          : Boolean := False;
    New_Level              : Boolean := False; 
    
@@ -101,30 +103,6 @@ begin
    
    Obstacle_Y := Obstacle_Y_Pos; --konstant från definitions, men kan varieras nedan. (Jag har en plan)
    
-   
-   --Testar att skapa olika typer av väggar
-   --Create_Object(ObstacleType(1), 2, Obstacle_Y, Light, Obstacle_List);
-   
-   --  Create_Object(ObstacleType(2), 10, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 15, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 20, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 25, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 30, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 35, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 40, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 45, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 50, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 55, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 60, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 65, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 70, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 75, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 80, 20, Obstacle_Y, Obstacle_List);
-   --  Create_Object(ObstacleType(2), 85, 20, Obstacle_Y, Obstacle_List);
-
-   
-   -- Create_Object(ObstacleType(3), 25, 20, Obstacle_Y, Obstacle_List);
-   
    --for I in 1..6 loop
    --Create_Wall(Obstacle_List, Obstacle_Y-(I*2));
    -- end loop;
@@ -139,55 +117,7 @@ begin
      Create_Object(PowerUpType(Super_Missile), 90, Obstacle_Y_Pos+6, 0, Powerup_List);
      Create_Object(PowerUpType(Laser_Upgrade), 97, Obstacle_Y_Pos+6, 0, Powerup_List);
    
-   -----------------------------------
-   -- SPAWN FIRST WAVE
-   -----------------------------------
      Game.Settings.Difficulty := 1;
-   
-   
-   Spawn_Wave(15, --Antal
-   	      Minion, --Typ
-   	      1,
-   	      1,
-	      Gameborder_X +1,
-   	      Gameborder_Y +4,
-   	      Game.Settings.Difficulty,
-   	      waves(1));
-   
-   Spawn_Wave(1, --Antal
-   	      Interceptor, --Typ
-   	      4,
-	      1,
-	      Gameborder_X+1,
-   	      Gameborder_Y +2,
-   	      Game.Settings.Difficulty,
-	      waves(2));
-   
-      Spawn_Wave(1, --Antal
-   	      Kamikazee, --Typ
-   	      4,
-	      1,
-	      Gameborder_X+15,
-   	      Gameborder_Y +2,
-   	      Game.Settings.Difficulty,
-		 waves(3));
-      
-         Spawn_Wave(1, --Antal
-   	      Kamikazee, --Typ
-   	      4,
-	      1,
-	      Gameborder_X+20,
-   	      Gameborder_Y +2,
-   	      Game.Settings.Difficulty,
-	      waves(4));
-   
-   
-   
-   -----------------------------------
-   -- end SPAWN FIRST WAVE
-   -----------------------------------
-   
-   
    
    loop 
       
@@ -255,19 +185,6 @@ begin
       -- Sorterar Scoreboard.
       Sort_Scoreboard(Game, Num_Players);
       
-      --Uppdatera skottens position
-      --Shot_Movement(Shot_List);
-      --  Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game);
-      --  Shots_Collide_In_Objects(Shot_List, Astroid_List, Game);
-      --  for B in Waves'Range loop
-      --  	 Shots_Collide_In_Objects(Shot_List, Waves(B), Game);
-      --  end loop;
-      
-      --  for I in World'first..World'Last-1 loop -- Väggskott
-      --  	 Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
-      --  	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
-      --  end loop;
-
       
       -- Skickar information till klienterna. / Eric
       for I in 1..Num_Players loop
@@ -275,8 +192,6 @@ begin
 	    Game.Players(I).Playing := False;
 	    Game.Players(I).Ship.Laser_Recharge := 1; --Nu kan man inte skjuta mera
 	 end if;
-	 
-	 --exit when Players_Are_Dead(Game.Players);  --detta ballar ur.
 	 
 	 --------------------------------------------------
 	 --Uppdaterar spelarna om de spelar:
@@ -303,22 +218,9 @@ begin
 	    end loop;
 	 end if;                                         
 
-	 --  Put(Sockets(I), Astroid_List);
-	 --  Put(Sockets(I), Shot_List);
-	 --  Put(Sockets(I), Obstacle_List);
-	 --  Put(Sockets(I), Powerup_List);
-	 --  Send_Map(Sockets(I), Game);      -- Map_Handling
-	 --  Put_Game_Data(Sockets(I),Game);
-
       end loop;
       
-      --  for I in 1..Num_Players loop
-      --  	 for J in Waves'Range loop
-      --  	    Put_Enemy_ships(Waves(J), Sockets(I));
-      --  	 end loop;
-      --  end loop;
       
-      --här
       --Shot_Movement(Shot_List);
       Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game);
       Shots_Collide_In_Objects(Shot_List, Astroid_List, Game);
@@ -331,24 +233,16 @@ begin
 	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
       end loop;
       
-      --Shots_Collide_In_Objects(
-      --Shot_Movement(Shot_List); --expl åker iväg 
+      if Players_Are_Dead (Game.Players) then
+	 Game.Settings.Gameover := 1;
+      end if;
+
+      
       -----------------------------------
       -- end PUT ENEMY SHIPS
       ----------------------------------- 
       for I in 1..Num_Players loop
-      	 Put(Sockets(I), Astroid_List);
-	 Put(Sockets(I), Shot_List);
-	 Put(Sockets(I), Obstacle_List);
-	 Put(Sockets(I), Powerup_List);
-	 Send_Map(Sockets(I), Game);      -- Map_Handling
-	 Put_Game_Data(Sockets(I),Game);
-      end loop;
-            for I in 1..Num_Players loop
-	 for J in Waves'Range loop
-	    --Put_Enemy_ships(Waves(J), Sockets(I));
-	    Put(Sockets(I), Waves(J));
-	 end loop;
+         Put_Data(Sockets(I), Astroid_List, Shot_List, Obstacle_List, Powerup_List, Game, Waves);
       end loop;
      
       Shot_Movement(Shot_List);
