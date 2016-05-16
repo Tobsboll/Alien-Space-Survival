@@ -34,7 +34,7 @@ procedure Server is
    
    Num_Players            : Integer;
    Obstacle_Y             : Integer;
-   Level                  : Integer := 1;
+   Level                  : Integer := 0;
    Loop_Counter           : Integer;
    
    Game                   : Game_Data;
