@@ -149,19 +149,19 @@ begin
 	    DeleteList(Astroid_List);
 	    Get(Socket,Astroid_List);
 	    DeleteList(Shot_List);
-	    Get(Socket, Shot_List);
+	    Get(Socket, Shot_List); Put_Line("shot klar");
 	    DeleteList(Obstacle_List);
-	    Get(Socket, Obstacle_List);
+	    Get(Socket, Obstacle_List); Put_Line("obstacle klar");
 	    DeleteList(Powerup_List);
 	    Get(Socket, Powerup_List);
 	    
-	    Get_Map(Socket, Data);        -- Map_Handling
-	    Get_Game_Data(Socket,Data);
+	    Get_Map(Socket, Data);       Put_Line("Map klar"); -- Map_Handling
+	    Get_Game_Data(Socket,Data);  Put_Line("Game data klar");
 	    
             --Enemies tas emot som objekt
 	    for I in 1..4 loop
 	       DeleteList(Waves(I));
-	       Get(Socket, Waves(I));
+	       Get(Socket, Waves(I)); Put_Line("Wave klar");
 	    end loop;
             ---------------------------------------------------------------------
             -- SKRIV UT DATA
@@ -229,30 +229,33 @@ begin
 	    end if;
 	    --------------------------------------------------
 	    
-	    --Sänder ut användarens input från tangentbordet
-	    Send_Input(Socket);
-            --------------------------------------------------------------------
-            -- Done
-            --------------------------------------------------------------------	    
-	    
+
 	    ----------------------------------------
 	    --| Delay depending on |----------------    -- // Eric
 	    ----------------------------------------
 	    
 	    --| Number of Players |--
-	    if NumPlayers = 1 then    -- Just nu är det ingen skillnad
+	    if Klient_Number = 1 then    -- Just nu är det ingen skillnad
 	       delay(0.05);           -- Men det kanske kommer ändras 
-	    elsif NumPlayers = 2 then -- beroende på vad servern gör.
-	       delay(0.04);
-	    elsif NumPlayers = 3 then
-	       delay(0.04);
-	    elsif NumPlayers = 4 then
-	       delay(0.04);
+--	    elsif NumPlayers = 2 then -- beroende på vad servern gör.
+--	       delay(0.04);
+--	    elsif NumPlayers = 3 then
+--	       delay(0.04);
+--	    elsif NumPlayers = 4 then
+--	       delay(0.04);
 	    end if;
 	    
 	    ----------------------------------------
 	    ----------------------------------------
 	    ----------------------------------------
+	    
+
+
+	    --Sänder ut användarens input från tangentbordet
+	    Send_Input(Socket);
+            --------------------------------------------------------------------
+            -- Done
+            --------------------------------------------------------------------	    
 	    
 	    --Följande ballar ur.
 	    --  if Players_Are_Dead(Data.Players) then
