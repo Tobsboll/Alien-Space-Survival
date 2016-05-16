@@ -10,13 +10,14 @@ package body Object_Handling is
       -- if not Empty(L) then
       
       if L /= null then
-	 Put(Socket, L.Object_Type);
-	 Put(Socket, L.XY_Pos(1));
-	 Put(Socket, L.XY_Pos(2));
-	 Put(Socket, L.Attribute);
+	 Put_Line(Socket, L.Object_Type);
+	 Put_Line(Socket, L.XY_Pos(1));
+	 Put_Line(Socket, L.XY_Pos(2));
+	 Put_line(Socket, L.Attribute);
+	 Put_Line(Socket, L.Direction);
 	 Put(Socket, L.Next);
       else
-	 Put(Socket,0);
+	 Put_Line(Socket,0);
       end if;
       
    end Put;
@@ -49,6 +50,7 @@ package body Object_Handling is
       X      : Integer;
       Y      : Integer;
       Attr   : Integer;
+      Dir    : Integer;
    begin
       Get(Socket, Object);
       if Object = 0 then
@@ -58,8 +60,9 @@ package body Object_Handling is
 	 Get(Socket, X);
 	 Get(Socket, Y);
 	 Get(Socket, Attr);
+	 Get(Socket, Dir);
 	 
-	 Create_Object(Object, X, Y, Attr, L);
+	 Create_Object(Object, X, Y, Attr, L, 0 ,Dir);
 	 
 	 Get(Socket, L.Next);
       --  else
@@ -79,7 +82,8 @@ package body Object_Handling is
 			   X, Y           : in Integer ;
 			   Attr           : in Integer ;
 			   L              : in out Object_List;
-			   Player         : in Integer := 0) is
+			   Player         : in Integer := 0;
+			   Dir            : in Integer := 0) is
       
       Temp : Object_List;
       
@@ -91,11 +95,42 @@ package body Object_Handling is
       Temp.XY_Pos(2)   := Y;
       Temp.Attribute   := Attr;
       Temp.Player      := Player;
+      Temp.Direction   := Dir;
       Temp.Next        := L; 
       L := Temp; 
       
    end Create_Object;
    --------------------------------------------------
+   
+    --------------------------------------------------
+   --INSERT LAST
+   --------------------------------------------------OK
+
+   
+   procedure Insert_Last  (Type_Of_Object : in Integer ;
+			   X, Y           : in Integer ;
+			   Attr           : in Integer ;
+			   L              : in out Object_List;
+			   Player         : in Integer := 0;
+			   Dir            : in Integer := 0) is
+   begin
+      
+      if Empty(L) then
+	 Create_Object (Type_Of_Object, 
+			X, Y,          
+			Attr,      
+			L,
+			Player,
+		        Dir);
+      else
+	 Insert_Last (Type_Of_Object, 
+		      X, Y,
+		      Attr,
+		      L.Next,  ---Rekursion
+		      Player,
+		      Dir);
+      end if;
+      end Insert_Last;
    
 
 
@@ -226,9 +261,10 @@ package body Object_Handling is
       end if;
    end Delete_Object_In_List;
    
+   
    --------------------------------------------------
-   -- REMOVE OBJECT
-   -------------------------------------------------- OK
+   --  -- REMOVE OBJECT
+   --  -------------------------------------------------- OK
    
    procedure Remove (L   : in out Object_List) is
        Temp : Object_List;
