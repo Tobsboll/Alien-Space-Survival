@@ -1,3 +1,9 @@
+with Window_Handling;     use Window_Handling;
+with Ada.Text_IO;         use Ada.Text_IO;
+with TJa.Window.Text;     use TJa.Window.Text;
+with Definitions;         use Definitions;
+with Map_Handling;        use Map_Handling;
+
 package Background_Handling is
    
    type Ship_Move_Type is array(1..4) of Integer;
@@ -7,6 +13,7 @@ package Background_Handling is
    type Small_Ship_Y_Length is array (1..6) of Small_Ship_X_Length;
    
    Loop_Counter : Integer := 0;
+   
    
    procedure Put_Spacebattle(Move           : in out Ship_Move_Type;
 			     Shot           : in out Ship_Shot_Type;
