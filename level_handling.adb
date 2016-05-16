@@ -63,16 +63,6 @@ package body Level_Handling is
 	 Spawn_Astroid(Astroid_List, Data.Settings, Map);	    
       end if;   
       
-      -- Setting Up Before The New Level
-      if Loop_Counter = 580 then
-	 DeleteList(Obstacle_List);
-	 Obstacle_y := GameBorder_Y + World_Y_Length - 4;
-	 for I in 1..7-(Difficulty*2) loop
-	    Create_Wall(Obstacle_List, Obstacle_Y-(I*2));	 --| NEW COVER OBJECTS
-	 end loop;
-      end if;
-      
-      
       if Loop_Counter = 600 then
 	 New_Level := True;
       end if;
