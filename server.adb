@@ -144,28 +144,44 @@ begin
    -----------------------------------
      Game.Settings.Difficulty := 1;
    
+   
    Spawn_Wave(15, --Antal
-   	      EnemyType(1), --Typ
+   	      Minion, --Typ
    	      1,
    	      1,
-	      Gameborder_Y +4,
-	      Game.Settings.Difficulty, 
+	      Gameborder_X +1,
+   	      Gameborder_Y +4,
+   	      Game.Settings.Difficulty,
    	      waves(1));
    
    Spawn_Wave(1, --Antal
-   	      EnemyType(3), --Typ
-   	      3,
-   	      1,
-	      Gameborder_Y +2,
-	      Game.Settings.Difficulty, 
-   	      waves(2));
+   	      Interceptor, --Typ
+   	      4,
+	      1,
+	      Gameborder_X+1,
+   	      Gameborder_Y +2,
+   	      Game.Settings.Difficulty,
+	      waves(2));
+   
+      Spawn_Wave(1, --Antal
+   	      Kamikazee, --Typ
+   	      4,
+	      1,
+	      Gameborder_X+15,
+   	      Gameborder_Y +2,
+   	      Game.Settings.Difficulty,
+		 waves(3));
+      
+         Spawn_Wave(1, --Antal
+   	      Kamikazee, --Typ
+   	      4,
+	      1,
+	      Gameborder_X+20,
+   	      Gameborder_Y +2,
+   	      Game.Settings.Difficulty,
+	      waves(4));
    
    
-   --  Spawn_Wave(2, --Antal
-   --  	      EnemyType(1), --Typ
-   --  	      4,
-   --  	      1,
-   --  	      waves(3));
    
    -----------------------------------
    -- end SPAWN FIRST WAVE
