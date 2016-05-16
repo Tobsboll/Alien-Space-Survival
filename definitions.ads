@@ -143,7 +143,8 @@ package Definitions is
    
    Chatt_Window_X : constant Integer := Gameborder_X;
    Chatt_Window_Y : constant Integer := Gameborder_Y+World_Y_Length+1;
-   
+   Chatt_Window_Heigth : constant Integer := 2;
+
    Border_Width  : constant Integer := World_X_Length+GameBorder_X + Highscore_Window_Width - 2;
    Border_Height : constant Integer := World_Y_Length + GameBorder_Y + Chatt_Window_Heigth;
 
