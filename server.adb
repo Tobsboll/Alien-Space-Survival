@@ -45,7 +45,7 @@ procedure Server is
    Powerup_List           : Object_List;
    Explosion_List         : Object_List;
    Level_Cleared          : Boolean := False;
-   New_Level              : Boolean := False; 
+   New_Level              : Boolean := True; 
    
 begin
    Set_Window_Title("Server");
@@ -186,6 +186,11 @@ begin
       Sort_Scoreboard(Game, Num_Players);
       
       
+      for I in World'first..World'Last-1 loop -- Väggskott
+	 Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
+	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
+      end loop;
+      
       -- Skickar information till klienterna. / Eric
       for I in 1..Num_Players loop
 	 if Game.Players(I).Ship.Health <= 0 then
@@ -220,11 +225,6 @@ begin
 
       end loop;
       
-      for I in World'first..World'Last-1 loop -- Väggskott
-	 Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
-	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
-      end loop;
-      
       --Shot_Movement(Shot_List);
       Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game);
       Shots_Collide_In_Objects(Shot_List, Astroid_List, Game);
@@ -254,7 +254,6 @@ begin
 	 Put_Game_Data(Sockets(I),Game);
 
 	 for J in Waves'Range loop
-	    --Put_Enemy_ships(Waves(J), Sockets(I));
 	    Put(Sockets(I), Waves(J));
 	 end loop;
 
