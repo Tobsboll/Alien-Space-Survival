@@ -119,7 +119,7 @@ package body Level_Handling is
 	 Reset(Gen);
 	 Gen_Level  := Random(Gen);
 	 
-	 if Gen_Level = 1 then
+	 if Gen_Level = 1 or level = 1 then
 	    Spawn_Wave(10*Difficulty, --Antal
 		       EnemyType(1), --Typ
 		       1,
