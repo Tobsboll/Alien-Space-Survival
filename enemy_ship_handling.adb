@@ -112,7 +112,7 @@ package body Enemy_Ship_Handling is
    begin -- förrvirrad ordning här eftersom listan är sorterad baklänges (sist in - först ut).
       
       
-      if not Empty(Enemies) then
+      if not Empty(Enemies) and then Enemies.XY_Pos(2) > 0 then
 
 	 if Enemies.Direction = 1 then -- höger 
 	    
