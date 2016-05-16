@@ -103,7 +103,7 @@ package Definitions is
    type Setting_Type is
       record
 	 Generate_Map    : Boolean;     -- Generering av banan Activ/Inaktiv
-	 Astroid_Active  : Boolean;     -- Generering av astroider Activ/Inaktiv
+	 Gameover        : Integer := 0;
 	 Difficulty      : Integer;
       end record;
    ---------------------------------------------------
