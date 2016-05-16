@@ -117,7 +117,29 @@ begin
      Create_Object(PowerUpType(Super_Missile), 90, Obstacle_Y_Pos+6, 0, Powerup_List);
      Create_Object(PowerUpType(Laser_Upgrade), 97, Obstacle_Y_Pos+6, 0, Powerup_List);
    
+    
+        -----------------------------------
+   -- SPAWN FIRST WAVE
+   -----------------------------------
      Game.Settings.Difficulty := 1;
+   
+     Spawn_Wave(15, --Antal
+		EnemyType(1), --Typ
+		1,
+		1,
+		Gameborder_X +1, 
+		Gameborder_Y +4,
+		Game.Settings.Difficulty, 
+		waves(1));
+     
+     Spawn_Wave(1, --Antal
+		EnemyType(3), --Typ
+		3,
+		1,
+		Gameborder_X +1, 
+		Gameborder_Y +2,
+		Game.Settings.Difficulty, 
+		waves(2));
    
    loop 
       
