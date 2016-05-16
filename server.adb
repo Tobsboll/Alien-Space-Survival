@@ -141,7 +141,7 @@ begin
    	      EnemyType(1), --Typ
    	      1,
    	      1,
-   	      Gameborder_Y +2,
+   	      Gameborder_Y +4,
    	      Game.Settings.Difficulty,
    	      waves(1));
    
@@ -149,7 +149,7 @@ begin
    	      EnemyType(3), --Typ
    	      3,
    	      1,
-   	      Gameborder_Y +4,
+   	      Gameborder_Y +2,
    	      Game.Settings.Difficulty,
    	      waves(2));
    
