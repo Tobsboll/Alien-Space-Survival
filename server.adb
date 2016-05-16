@@ -220,17 +220,16 @@ begin
 
       end loop;
       
+      for I in World'first..World'Last-1 loop -- Väggskott
+	 Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
+	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
+      end loop;
       
       --Shot_Movement(Shot_List);
       Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game);
       Shots_Collide_In_Objects(Shot_List, Astroid_List, Game);
       for B in Waves'Range loop
 	 Shots_Collide_In_Objects(Shot_List, Waves(B), Game);
-      end loop;
-      
-      for I in World'first..World'Last-1 loop -- Väggskott
-	 Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
-	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
       end loop;
       
       if Players_Are_Dead (Game.Players) then
@@ -253,12 +252,14 @@ begin
 	 Put(Sockets(I), Powerup_List);
 	 Send_Map(Sockets(I), Game);      -- Map_Handling
 	 Put_Game_Data(Sockets(I),Game);
-      end loop;
-            for I in 1..Num_Players loop
+
 	 for J in Waves'Range loop
 	    --Put_Enemy_ships(Waves(J), Sockets(I));
 	    Put(Sockets(I), Waves(J));
 	 end loop;
+
+         Put_line(Sockets(I), Game.Settings.Gameover);
+
       end loop;
      
       Shot_Movement(Shot_List);
