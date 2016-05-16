@@ -125,6 +125,7 @@ package body Level_Handling is
 		       1,
 		       1,
 		       Gameborder_Y +4,
+		       Difficulty,
 		       waves(1));
 	    
 	    Spawn_Wave(Integer(0.5*Float(Difficulty)), --Antal
@@ -132,6 +133,7 @@ package body Level_Handling is
 		       3,
 		       1,
 		       Gameborder_Y +2,
+		       Difficulty,
 		       waves(2));
 	    
 	 elsif Gen_Level = 2 then
