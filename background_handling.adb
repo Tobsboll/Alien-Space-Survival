@@ -1,10 +1,3 @@
-with Window_Handling;     use Window_Handling;
-with Ada.Text_IO;         use Ada.Text_IO;
-with Box_Hantering;       use Box_Hantering;
-with TJa.Window.Text;     use TJa.Window.Text;
-with Definitions;         use Definitions;
-with Map_Handling;        use Map_Handling;
-
 package body Background_Handling is
    
    procedure Put_Spacebattle(Move           : in out Ship_Move_Type;
@@ -22,42 +15,35 @@ package body Background_Handling is
 	 Set_Colours(Yellow, Old_Background);  
 	 Goto_XY(3+X,2+Y);        Put("."); 
 	 Goto_XY(9+X,10+Y);       Put("."); 
-	 Goto_XY(17+X,5+Y);       Put(".");  
+	 Goto_XY(17+X,5+Y);       Put(".");
+	 Goto_XY(2+X,21+Y);       Put(".");  
+	 Goto_XY(15+X,26+Y);      Put(".");
+	 Goto_XY(25+X,11+Y);      Put("."); 
+	 Goto_XY(29+X,21+Y);      Put("."); 
+	 Goto_XY(49+X,15+Y);      Put("."); 
+	 Goto_XY(57+X,3+Y);       Put(".");  
+	 Goto_XY(59+X,21+Y);      Put(".");	 
+	 Goto_XY(35+X,27+Y);      Put(".");  
+	 Goto_XY(61+X,27+Y);      Put(".");   
+	 Goto_XY(65+X,11+Y);      Put("."); 
+	 Goto_XY(39+X,36+Y);      Put(".");  
+	 Goto_XY(79+X,10+Y);      Put(".");
 	 
-	 if World_X_Length > 60 and World_Y_Length > 25 then
-	   Goto_XY(2+X,21+Y);       Put(".");  
-	   Goto_XY(15+X,26+Y);      Put(".");
-	   Goto_XY(25+X,11+Y);      Put("."); 
-	   Goto_XY(29+X,21+Y);      Put("."); 
-	   Goto_XY(49+X,15+Y);      Put("."); 
-	   Goto_XY(57+X,3+Y);       Put(".");  
-	   Goto_XY(59+X,21+Y);      Put(".");
-	 end if;
+	 Goto_XY(69+X,21+Y);      Put(".");	 
+	 Goto_XY(135+X,7+Y);      Put(".");  
+	 Goto_XY(101+X,27+Y);      Put(".");   
+	 Goto_XY(105+X,11+Y);      Put("."); 
+	 Goto_XY(109+X,36+Y);      Put(".");  
+	 Goto_XY(119+X,10+Y);      Put(".");
 	 
-	 if World_X_Length > 66 and World_Y_Length > 30 then
-	   Goto_XY(35+X,27+Y);      Put(".");  
-	   Goto_XY(61+X,27+Y);      Put(".");   
-	   Goto_XY(65+X,11+Y);      Put("."); 
-	 end if;
-	 
-	 
-	 if World_X_Length > 80 and World_Y_Length > 37 then 
-	   Goto_XY(39+X,36+Y);      Put(".");  
-	   Goto_XY(79+X,10+Y);      Put(".");
-	 end if;
-	   
 	 Set_Colours(Bright_Yellow, Old_Background); 
 	 
-	 if World_X_Length > 90 and World_Y_Length >38 then
-	   Goto_XY(7+X,38+Y);       Put(".");
-	   Goto_XY(89+X,25+Y);      Put("."); 
-	   Goto_XY(84+X,14+Y);      Put("\u2736");
-	   Goto_XY(79+X,31+Y);      Put("\u2736");
-	 end if;
-	   
-	     
-	 Goto_XY(40+X,20+Y);        Put("\u2736");  
-	 Goto_XY(4+X,29+Y);         Put("\u2736"); 
+	 Goto_XY(7+X,38+Y);       Put(".");
+	 Goto_XY(89+X,25+Y);      Put("."); 
+	 Goto_XY(84+X,14+Y);      Put("✶");
+	 Goto_XY(79+X,31+Y);      Put("✶");
+	 Goto_XY(40+X,20+Y);      Put("✶");  
+	 Goto_XY(4+X,29+Y);       Put("✶"); 
 	 
 	 	 
 	 --  Set_Colours(Cyan, Old_Background); 
@@ -264,30 +250,30 @@ package body Background_Handling is
       procedure Put_All_Shot(Shot           : in out Ship_Shot_Type;
 			     Move           : in out Ship_Move_Type;
 			     X ,Y           : in Integer;
-			     World_X_Length : in Integer) is
+			     Length         : in Integer) is
 	 
 	 procedure Put_Shot(Shot           : in out Integer;
 			    Move           : in out Integer;
 			    X ,Y           : in Integer;
-			    World_X_Length : in Integer) is
+			    Length         : in Integer) is
 			      
       begin
-	 if Shot <= World_X_Length+X+1 and Shot > X+1 
+	 if Shot <= Length+X+1 and Shot > X+1 
 	   and Move-42 < Shot then
 	    Goto_XY(Shot-2+X,Y);
 	    Put("~");
-	    if Shot = World_X_Length+X+1 then
+	    if Shot = Length+X+1 then
 	       Shot := 1;
 	    end if;
 	 end if;
 	 
-	 if Shot <= World_X_Length+X and Shot > X 
+	 if Shot <= Length+X and Shot > X 
 	   and Move-43 < Shot then
 	    Goto_XY(Shot-1+X,Y);
 	    Put("~");
 	 end if;
 	 
-	 if Shot <= World_X_Length+X-1 and Shot > X-1 
+	 if Shot <= Length+X-1 and Shot > X-1 
 	   and Move-44 < Shot then
 	    Goto_XY(Shot+X,Y);
 	    Put("~");
@@ -299,9 +285,9 @@ package body Background_Handling is
       begin
 	 Set_Foreground_Colour(Red);
 	 
-	 Put_Shot(Shot(1),Move(1),X,Y+5,World_X_Length);
+	 Put_Shot(Shot(1),Move(1),X,Y+5,Length);
 	 
-	 if Move(1) > World_X_Length then
+	 if Move(1) > Length then
 	    Shot(1) := 0;
 	 end if;
 	 
@@ -311,12 +297,12 @@ package body Background_Handling is
       Set_Colours(White, Black);
       Clear_Window;
       
-      Put_Stars(X,Y,World_X_Length, World_Y_Length);
+      Put_Stars(X,Y,Border_Width-5, Border_Height);
       
-      Put_Double_Line_Box(X,Y,World_X_Length+2,World_Y_Length,Black,Dark_Grey);
+      Put_Double_Line_Box(X, Y, Border_Width, Border_Height, Black, Dark_Grey);
       
       if Loop_Counter > 5 and Background_Battle_Bigship then
-	 Put_Big_Ship(Move(1),X,1+Y,World_X_Length);
+	 Put_Big_Ship(Move(1),X,1+Y,Border_Width-2);
 	 
 	 if Loop_Counter mod 8 = 0 then
 	    Move(1) := Move(1) + 1 ;
@@ -325,7 +311,7 @@ package body Background_Handling is
       
       if Background_Battle_Smallship then
 	 if Loop_Counter > 200 then
-	    Put_Small_Ship(Move(2),X+1,16+Y,World_X_Length);
+	    Put_Small_Ship(Move(2),X+1,16+Y,Border_Width-2);
 	    
 	    if Loop_Counter mod 3 = 0 then
 	       Move(2) := Move(2) + 1 ;
@@ -334,7 +320,7 @@ package body Background_Handling is
 	 
 	 
 	 if Loop_Counter > 500 then
-	    Put_Small_Ship(Move(3),X+1,23+Y,World_X_Length);
+	    Put_Small_Ship(Move(3),X+1,23+Y,Border_Width-2);
 	    
 	    if Loop_Counter mod 2 = 0 then
 	       Move(3) := Move(3) + 1 ;
@@ -343,7 +329,7 @@ package body Background_Handling is
 	 
 	 
 	 if Loop_Counter > 5 then
-	    Put_Small_Ship(Move(4),X+1,30+Y,World_X_Length);
+	    Put_Small_Ship(Move(4),X+1,30+Y,Border_Width-2);
 	    
 	    if Loop_Counter mod 4 = 0 then
 	       Move(4) := Move(4) + 1 ;
@@ -353,7 +339,7 @@ package body Background_Handling is
       
       
       if Background_Battle_Bigship_Shot then
-	 Put_ALL_Shot(Shot,Move,X,Y,World_X_Length);
+	 Put_ALL_Shot(Shot,Move,X,Y,Border_Width-5);
 	 
 	 if Loop_Counter mod 1 = 0 then
 	    Shot(1) := Shot(1) + 1;
