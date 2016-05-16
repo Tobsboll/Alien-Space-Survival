@@ -39,7 +39,7 @@ package body Task_Server_Communication is
 	 end loop;      
 	 
 	 -- Game Over Check
-	 Put_line(Soc, Game.Settings.Gameover);
+	 Put_line(Soc, G.Settings.Gameover);
 	 
       end loop;
    end Send_Data_To_Player;
