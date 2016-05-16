@@ -996,7 +996,28 @@ package body Enemy_Ship_Handling is
    -- end GREATEST_Y_VALUE
    --------------------------------------------------
    
-   
+   ---------------------------------------------------
+   -- ALL_ENEMIES_DEAD
+   --------------------------------------------------
+   function All_Enemies_Dead(Waves : in Enemy_List_array) return Boolean is
+      
+   begin
+      
+      for I in Waves'Range loop
+	 
+	 if not Empty(Waves(I)) then
+	    return False;
+	 end if;
+	  
+      end loop;
+      
+      return True;
+      
+   end All_Enemies_Dead;
+   --------------------------------------------------
+   -- end ALL ENEMIES DEAD
+   --------------------------------------------------
+
 
    
 end Enemy_Ship_Handling;
