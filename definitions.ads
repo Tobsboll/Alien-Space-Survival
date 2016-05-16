@@ -4,16 +4,44 @@ with TJa.Sockets;                  use TJa.Sockets;
 package Definitions is
    
    World_X_Length : constant Integer := 110;
-   World_Y_Length : constant Integer := 35;
+   World_Y_Length : constant Integer := 30;
    
    type X_Led is array(1 .. World_X_Length) of Character;
    type World is array(1 .. World_Y_Length) of X_Led;
    
    Up              : constant Integer := -1;
    Down            : constant Integer := 1;
+   Left            : constant Integer := -1;
+   Right           : constant Integer := 1;
+   
    Light           : constant Integer := 1;
    Hard            : constant Integer := 5;
    Unbreakable     : constant Integer := 999;
+   
+   --------------------------------------------------
+   --Powerups
+   Health         : constant Integer := 1;
+   Missile_Ammo   : constant Integer := 2;
+   Laser_Upgrade  : constant Integer := 3;
+   Hitech_Laser   : constant Integer := 4;
+   Tri_Laser      : constant Integer := 5;
+   Diagonal_Laser : constant Integer := 6;
+   Nitro_Upgrade  : constant Integer := 7;
+   Super_Missile  : constant Integer := 8;
+   
+   --------------------------------------------------
+   --Shots
+   Normal_Laser_Shot       : constant Integer := 1;
+   Laser_Upgraded_Shot     : constant Integer := 2;
+   Hitech_Laser_Shot       : constant Integer := 3;
+   Missile_Shot            : constant Integer := 4;
+   Explosion               : constant Integer := 5;
+   --  Diagonal_Laser : constant Integer := 6;
+   Nitro_Shot              : constant Integer := 7;
+   Asteroid                : constant Integer := 8;
+   L_Wall                  : constant Integer := 9;
+   R_Wall                  : constant Integer := 10;
+   Ricochet                : constant Integer := 15;
    
    Move_Horisontal : constant Integer := 2;
    
@@ -25,11 +53,12 @@ package Definitions is
 	array (1..4) of Socket_Type;
    
     --Types represented by integerz
-   type Shot_Array_Type is array (1..10) of Integer;
-   ShotType : Shot_Array_Type := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10); 
+   type Shot_Array_Type is array (1..15) of Integer;
+   ShotType : Shot_Array_Type := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15); 
      
-   type Obstacle_Array_Type is array (1..10) of Integer;
-   ObstacleType : Obstacle_Array_Type := (11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+   type Obstacle_Array_Type is array (1..5) of Integer;
+   ObstacleType : Obstacle_Array_Type := (16, 17, 18, 19, 20);
+   
    type PowerUp_Array_Type is array (1..10) of Integer;
    PowerUpType : PowerUp_Array_Type := (21, 22, 23, 24, 25, 26, 27, 28, 29, 30);
    
@@ -46,6 +75,10 @@ package Definitions is
   	 Health   : Integer; 
   	 Laser_Type : Integer;
 	 Missile_Ammo : Integer;
+	 Laser_Recharge : Integer;
+	 Tri_Laser      : Boolean;
+	 Diagonal_Laser : Boolean;
+	 Super_Missile  : Boolean;
       end record;
    
    ------------------------------------------------
@@ -136,6 +169,9 @@ package Definitions is
    
    Enemy_Laser_1         : constant Colour_Type := Bright_Green;
    Player_Laser_1        : constant Colour_Type := Bright_Red;
+   Hitech_Laser_Colour   : constant Colour_Type := Cyan;
+   Explosion_1           : constant Colour_Type := Bright_Yellow;
+   Nitro_Shot_Colour     : constant Colour_Type := Green;
    ---------------------------------------------------
    
    
