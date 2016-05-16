@@ -20,6 +20,7 @@ with Background_Handling;     use Background_Handling;
 with Menu_Handling;           use Menu_Handling;
 with Window_Handling;         use Window_Handling;
 with Map_Handling;            use Map_Handling;
+with Task_Printer;            use Task_Printer;
 
 procedure Klient is
 
@@ -179,51 +180,9 @@ begin
             ---------------------------------------------------------------------
             -- SKRIV UT DATA
             ---------------------------------------------------------------------
-	    Clear_Window;
-	    
-	    Put_Player_Ships(Data, NumPlayers);          -- put Ships // Andreas
-	    
-	    for I in Waves'range loop	
-	       Put_Objects(Waves(I));
-	    end loop;
-	    
-	    Put_Objects(Astroid_List);
-	    Put_Objects(Shot_List);
-	    Put_Objects(Obstacle_List);
-	    Put_Objects(Powerup_List);
-	    Goto_XY(World_X_Length , World_Y_Length);
-	    
-	    if Background then
-	       Put_Background(NumPlayers);
-	    end if;
-	    
-	    -------------------------------------------------
-	    --| Highscore fönster
-	    -------------------------------------------------
-	    Put_Block_Box(Highscore_Window_X, Highscore_Window_Y, Highscore_Window_Width, 
-			  Highscore_Window_Height+NumPlayers, HighScore_Background, HighScore_Border);     -- En låda runt scorelistan Eric
-	    
-	    Goto_XY(Highscore_Window_X+1, Highscore_Window_Y+1);
-	    Put_Space(Highscore_Window_Width-2, HighScore_Background);
-	    Goto_XY(Highscore_Window_X+1, Highscore_Window_Y+2);
-	    Put_Space(Highscore_Window_Width-2, HighScore_Background);
-	    Put_Score(Data, NumPlayers, Highscore_X, Highscore_Y, 
-		      HighScore_Background, White);    -- Skriver ut den sorterade scorelistan / Eric
-	    
-	    -------------------------------------------------
-	    
-	    -------------------------------------------------
-	    --| Där man skriver för att chatta
-	    -------------------------------------------------
-	    Put_Block_Box(Chatt_Window_X, Chatt_Window_Y,                    -- Ett litet fönster för att skriva i. / Eric 
-			  World_X_Length, 2, Chatt_Background, Chatt_Border); 
-	    Goto_XY(Gameborder_X+1,Gameborder_Y+World_Y_Length+2);
-	    Put("Här skriver man.");
-	    -------------------------------------------------
-
-	    Put_World(Data.Map);
-	    Set_Colours(White, Black);
-	    
+            
+            -- Task_Printer
+	    Printer(Data, Waves, Astroid_List, Shot_List, Obstacle_List, Powerup_List, NumPlayers, Gameover, Klient_Number, Choice);
 	    
             --------------------------------------------------------------------
             -- SKICKA DATA
