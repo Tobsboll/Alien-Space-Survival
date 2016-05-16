@@ -142,6 +142,7 @@ begin
    	      1,
    	      1,
    	      Gameborder_Y +2,
+   	      Game.Settings.Difficulty,
    	      waves(1));
    
    Spawn_Wave(1, --Antal
@@ -149,6 +150,7 @@ begin
    	      3,
    	      1,
    	      Gameborder_Y +4,
+   	      Game.Settings.Difficulty,
    	      waves(2));
    
    
