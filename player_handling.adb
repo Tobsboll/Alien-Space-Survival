@@ -164,9 +164,11 @@ package body Player_Handling is
 	 if Data.Players(I).Ship.Health > 0 then
 	    
 	    Put_Ship_Data(Socket,Data.Players(I).Ship);
-	    Put_Line(Socket,Data.Players(I).Score);
 	    
 	 end if;
+	 
+	 Put_Line(Socket,Data.Players(I).Score);
+	 
       end loop;
       
       for I in Ranking_List'Range loop
@@ -334,11 +336,13 @@ package body Player_Handling is
 	    --Tar emot spelarens skeppdata
 	    Get_Ship_Data(Socket,Data.Players(I).Ship);
 	    
-	    -- Tar emot spelarens poäng
-	    Get(Socket,Data.Players(I).Score);
 	 else
 	    Data.Players(I).Playing := False;   
 	 end if;
+	 
+	 -- Tar emot spelarens poäng
+	 Get(Socket,Data.Players(I).Score);
+	 
       end loop;
       
       for I in Ranking_List'Range loop
