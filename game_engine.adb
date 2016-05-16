@@ -24,9 +24,13 @@ package body Game_Engine is
 	 Xpos := Xpos + Interval;
 	 
 	 --Equipment
-	 Game.Players(K).Ship.Health := 10;
-	 Game.Players(K).Ship.Laser_Type := 1;
-	 Game.Players(K).Ship.Missile_Ammo := 5;
+	 Game.Players(K).Ship.Health           := 10;
+	 Game.Players(K).Ship.Laser_Type       := 1;
+	 Game.Players(K).Ship.Missile_Ammo     := 5;
+	 Game.Players(K).Ship.Laser_Recharge   := 0;
+	 Game.Players(K).Ship.Tri_Laser        := False;
+	 Game.Players(K).Ship.Diagonal_Laser   := False;
+	 Game.Players(K).Ship.Super_Missile    := False;
       end loop;
       
  
@@ -51,16 +55,31 @@ package body Game_Engine is
    --------------------------------------------------
    procedure Shot_Movement ( L : in out Object_List ) is
       Direction : Integer; -- := L.Attribute;
+      Strafe    : Integer;
       Ydiff     : constant Integer := 1;
+      Xdiff     : constant Integer := 1;
    begin
       
       if not Empty(L) then
 	 Direction := L.Attribute;
+	 Strafe    := L.Direction;
 	 L.XY_Pos(2) := L.XY_Pos(2) + Ydiff*Direction;
-	 if L.XY_Pos(2) <= GameBorder_Y or L.XY_Pos(2) >= World_Y_Length+GameBorder_Y then
+	 
+	 
+	 if L.Object_Type = ShotType(Missile_Shot) and L.Direction /= 0 then
+	    if L.XY_Pos(2) mod 2 = 0 then
+	       Create_Side_Thrust(L, L.XY_Pos(1), L.XY_Pos(2)+1);
+	    end if;
+	 else
+	    L.XY_Pos(1) := L.Xy_Pos(1) + Xdiff*Strafe;
+	 end if;
+	 
+	 if L.XY_Pos(2) <= GameBorder_Y or L.XY_Pos(2) >= World_Y_Length+GameBorder_Y or
+	   L.Xy_Pos(1) <= GameBorder_X or L.XY_Pos(1) >= World_X_Length+GameBorder_X then
 	    Remove(L);
 	    Shot_Movement(L);
 	 else
+	    
 	    Shot_Movement(L.Next);
 	 end if;
       end if;
@@ -85,6 +104,8 @@ package body Game_Engine is
       Y          : Integer;
       Laser_Type : Integer;
       Ammo       : Integer;
+      Recharge   : Integer;
+      Special    : Integer;
    begin
       
       for I in 1..Num_Players loop
@@ -92,6 +113,7 @@ package body Game_Engine is
 	    Y          := Data.Players(I).Ship.XY(2);
 	    Laser_Type := Data.Players(I).Ship.Laser_Type;
 	    Ammo       := Data.Players(I).Ship.Missile_Ammo;
+	    Recharge   := Data.Players(I).Ship.Laser_Recharge;
 	    
 	    
 	    Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
@@ -117,22 +139,82 @@ package body Game_Engine is
 	       elsif Keyboard_Input = 'd' and then not Player_Collide(X+Move_Horisontal, Y , Obstacle_List) then
 		  Data.Players(I).Ship.XY(1) := Integer'Min(GameBorder_X+Border_Right(Data.Map, Data.Players(I).Ship.XY(2)-GameBorder_Y) - Player_Width ,X + Move_Horisontal);
 	       elsif Keyboard_input = ' ' then 
-		  --Data.Players(I).Playing := False;  --Suicide
 		  
-		  Create_Object(ShotType(Laser_Type),
+		  if Laser_Type = ShotType(Hitech_Laser_Shot) then --hitech laser
+		    if  Recharge /= 0 then 
+		     
+		     Create_Object(ShotType(Laser_Type),
 				X+2,
-				Y,
-				Up,
+				Y-1,
+				Up*100,
 				Shot_List,
-				I                           );
+				   I                           );
+		    else 
+		       Data.Players(I).Ship.Laser_Type := Normal_Laser_Shot;
+		    end if;
+		  elsif Recharge = 0 then
+		  
+		     Create_Object(ShotType(Laser_Type),
+				   X+2,
+				   Y-1,
+				   Up,
+				   Shot_List,
+				   I                           );
+		     --
+		     if Laser_Type = ShotType(Nitro_Shot) then
+			Data.Players(I).Ship.Laser_Recharge := 20;
+		     else
+			Data.Players(I).Ship.Laser_Recharge := 10;
+		  
+			--Tri-Laser active?
+			if Data.Players(I).Ship.Tri_Laser = True then
+			   Create_Object(ShotType(Laser_Type),
+					 X,
+					 Y,
+					 Up,
+					 Shot_List,
+					 I                           );
+			   Create_Object(ShotType(Laser_Type),
+					 X+4,
+					 Y,
+					 Up,
+					 Shot_List,
+					 I                           );
+			end if;
+			
+			--Diagonal_Laser active?
+			if Data.Players(I).Ship.Diagonal_Laser = True then
+			   Create_Object(ShotType(Diagonal_Laser),
+					 X+1,
+					 Y-1,
+					 Up,
+					 Shot_List,
+					 I,
+					 Left);
+			   Create_Object(ShotType(Diagonal_Laser),
+					 X+3,
+					 Y-1,
+					 Up,
+					 Shot_List,
+					 I,
+					 Right);
+			end if;
+		     end if;
+		  end if;
+		  
 	       elsif Keyboard_input = 'm' and then Ammo > 0 then
-		  
-		  Create_Object(ShotType(4), -- 4 = Missile
+		  if Data.Players(I).Ship.Super_Missile = True then
+		     Special := 1;
+		  else 
+		     Special := 0;
+		  end if;
+		  Create_Object(ShotType(Missile_Shot), -- 4 = Missile
 				X+2,
-				Y,
+				Y-1,
 				Up,
 				Shot_List,
-				I                           );
+				I,
+				Special );
 		  Data.Players(I).Ship.Missile_Ammo := Ammo - 1;
 		  
 	       elsif Keyboard_Input = 'e' then exit; -- betyder "ingen input" för servern.
@@ -160,7 +242,7 @@ package body Game_Engine is
 	 --------------------------------------------------
 	 --Med hinder:
 	 --------------------------------------------------
-	 if L.Object_Type in 11..20 then
+	 if L.Object_Type in 16..20 then
 	    
 	    --Jämför Hindrets koord. med hela ship top:
 	    --------------------------------------------------
@@ -218,7 +300,7 @@ package body Game_Engine is
 	    --------------------------------------------------
 	    --Med Skott:
 	    --------------------------------------------------
-	 elsif L.Object_Type in 1..7 or L.Object_Type in 9..10 then
+	 elsif L.Object_Type in 1..7 or L.Object_Type in 9..15 then
 	    for I in 1..3 loop      --Ship top
 	       
 	       if X+I = Object_X and Y = Object_Y then
@@ -317,21 +399,27 @@ package body Game_Engine is
 	    --------------------------------------------------
 	    --Beskjuten?
 	    --------------------------------------------------
-	    if L.Object_Type in 1..10 then
-	       if L.Object_Type = ShotType(1) then
+	    if L.Object_Type in 1..15 then
+	       if L.Object_Type = ShotType(Normal_Laser_Shot) then
 		  Player_Ship.Health := Player_Ship.Health-1;
 		  
-	       elsif L.Object_Type = ShotType(2) then
-		  Player_Ship.Health := Player_Ship.Health-1;
-	       elsif L.Object_Type = ShotType(8) then --Astroid
+	       elsif L.Object_Type = ShotType(Laser_Upgraded_Shot) or
+		 L.Object_Type = ShotType(Explosion) Then
+		  Player_Ship.Health := Player_Ship.Health-2;
+		  
+	       elsif L.Object_Type = ShotType(Asteroid) then --Astroid
 		  Player_Ship.Health := Player_Ship.Health-1;
 		  
-	       elsif L.Object_Type = ShotType(9) then
+	       elsif L.Object_Type = ShotType(L_Wall) then
 		  Player_Ship.Health := Player_Ship.Health-3;
 		  Player_Ship.XY(1) := Player_Ship.XY(1)+1;
-	       elsif L.Object_Type = ShotType(10) then
+		  
+	       elsif L.Object_Type = ShotType(R_Wall) then
 		  Player_Ship.Health := Player_Ship.Health-3;
 		  Player_Ship.XY(1) := Player_Ship.XY(1)-1;
+		  
+	       --elsif L.Object_Type = ShotType(Missile_Shot) then
+		  
 		  
 	       end if;
 	       Remove(L);
@@ -341,14 +429,31 @@ package body Game_Engine is
 	       --------------------------------------------------
 	    elsif L.Object_Type in 21..30 then
 	       
-	       if L.Object_Type = PowerUpType(1) then
-		  null; --Öka Ship.Health
-	       elsif L.Object_Type = PowerUpType(2) then
+	       if L.Object_Type = PowerUpType(Health) then
+		  Player_Ship.Health := Integer'Min(10,Player_Ship.Health +5);
 		  
+	       elsif L.Object_Type = PowerUpType(Missile_Ammo) then
 		  Player_Ship.Missile_Ammo := Player_Ship.Missile_Ammo + 10;
 		  
-	       elsif L.Object_Type = PowerUpType(3) then
-		  Player_Ship.Laser_Type := ShotType(2);
+	       elsif L.Object_Type = PowerUpType(Laser_Upgrade) then --laser upgrade
+		  Player_Ship.Laser_Type := ShotType(Laser_Upgraded_Shot);
+		  
+	       elsif L.Object_Type = PowerUpType(Hitech_Laser) then --hitech laser
+		  Player_Ship.Laser_Type := ShotType(Hitech_Laser_Shot);
+		  Player_Ship.Laser_Recharge := 300;
+		  
+	       elsif L.Object_Type = PowerUpType(Tri_Laser) then 
+		  Player_Ship.Tri_Laser := True;
+		  
+	       elsif L.Object_Type = PowerUpType(Diagonal_Laser) then
+		  Player_Ship.Diagonal_Laser := True;
+		  
+	       elsif L.Object_Type = PowerUpType(Nitro_Upgrade) then
+		  Player_Ship.Laser_Type := ShotType(Nitro_Shot);
+		  
+	       elsif L.Object_Type = PowerUpType(Super_Missile) then
+		  Player_Ship.Super_Missile := True;
+	      
 		  
 		  
 	       end if;
@@ -379,7 +484,7 @@ package body Game_Engine is
       X, Object_X, Object_Y, Y : Integer;
       Diff : Integer;
    begin
-       if not Empty(Obj) and not Empty(Shot) then
+      if (not Empty(Obj) and not Empty(Shot) )and then Shot.Object_Type /= ShotType(Ricochet) then
 	 X := Shot.XY_Pos(1);
 	 Y := Shot.XY_Pos(2);
 	 
@@ -389,12 +494,36 @@ package body Game_Engine is
 	 --------------------------------------------------
 	 --Med hinder:
 	 --------------------------------------------------
-	 if Obj.Object_Type in 11..20 or Obj.Object_Type in 31..40 then
+	 
+	 if Obj.Object_Type in 16..20 or Obj.Object_Type in 31..40 then
 	    
-	    --Jämför Hindrets koord.
-	    --------------------------------------------------
-	    Diff := 0;
-	   for A in 1..2 loop
+	    --Specialfall Hitech laser:
+	    if Shot.Object_Type = ShotType(Hitech_Laser_Shot) then
+	       --Asteroid:
+	       if Obj.Object_Type = ShotType(Asteroid) then
+		  for B in 1..2 loop
+		     if X = Object_X+B-1 then
+			return True;
+		     end if;
+		  end loop;
+		  
+	       else --Övriga hinder
+		  for B in 1..3 loop
+		     if X = Object_X+B-1 then
+			return True;
+		     end if;
+		  end loop;
+	       end if;
+
+
+	    else
+	       
+	       
+	       
+	       --Jämför Hindrets koord.
+	       --------------------------------------------------
+	       Diff := 0;
+	       for A in 1..2 loop
 		  for K in 1..3 loop   --Obstacle width
 		     
 		     if X = Object_X+K-1 and Y = Object_Y+Diff then
@@ -407,10 +536,15 @@ package body Game_Engine is
 		     
 		  end loop;
 		  Diff := Diff +1;
-	   end loop;
-	   --Shot_Collide(Shot, Obj.Next);
+	       end loop;
+	       --Shot_Collide(Shot, Obj.Next);
+	       
+	       
+	    end if;
+	    	       
+	    ---Asteroider
 	 elsif Obj.Object_Type = 8 then
-	      --Jämför Hindrets koord.
+	    --Jämför Hindrets koord.
 	    --------------------------------------------------
 	    Diff := 0;
 	    for A in 1..2 loop
@@ -425,9 +559,8 @@ package body Game_Engine is
 	    end loop;
 	    
 	 end if;
-	 
-       end if;
-       return False;
+      end if;
+      return False;
        
    end Shot_Collide;
 
@@ -439,15 +572,20 @@ package body Game_Engine is
    procedure A_Shot_Collide_In_Object (Shot, Obj2 : in out Object_List;
 				      Game        : in out Game_Data) is
 
-
+      X, Y : Integer;
    begin
       if not Empty(Shot) then
+	 X := Shot.XY_Pos(1);
+	 Y := Shot.XY_Pos(2);
+	 
 	 if not Empty(Obj2) then
 	    
 	    if Shot_Collide(Shot,Obj2) then
+	      
+	       --Create_Nitro_Explosion(Shot, X, Y);  --[NITRO MODE]
 	       
 	       --Avgörandet:
-	       if Obj2.Object_Type in 11..20 then --skott träffar hinder
+	       if Obj2.Object_Type in 16..20 then --skott träffar hinder
 		  Remove(Obj2);
 	       elsif Obj2.Object_Type in 31..40 then --skott träffar fiende
 		  
@@ -455,13 +593,40 @@ package body Game_Engine is
 		     Game.Players(Shot.Player).Score := Game.Players(Shot.Player).Score + 1;
 		  end if;
 		  
-		  Remove(Obj2);
-		  --alternativt fiende förlorar liv
-	       elsif Obj2.Object_Type = 8 and Shot.Object_Type = 4 Then
+		  --Fiende förlorar liv:
+		  if Shot.Object_Type = ShotType(Laser_Upgraded_Shot) then
+		     Obj2.Attribute := Obj2.Attribute - 5;
+		  else
+		     Obj2.Attribute := Obj2.Attribute - 1;
+		  end if;
+		  if Obj2.Attribute <= 0 or Shot.Object_Type = ShotType(Hitech_Laser_Shot) then
+		     Remove(Obj2);
+		  end if;
+		  
+	       elsif Obj2.Object_Type = ShotType(Asteroid) and
+		 ( Shot.Object_Type = ShotType(Missile_Shot)
+		     or Shot.Object_Type = ShotType(Nitro_Shot)
+		     or Shot.Object_Type = ShotType(Hitech_Laser_Shot)
+		     --or Shot.Object_Type = ShotType(Explosion)   
+		 )then
 		  Remove(Obj2);
 	       end if;
 	       
-	       Remove(Shot); --skottet ska alltid dö
+	       if Shot.Object_Type = ShotType(Missile_Shot) then --Om det är en missil
+	       	  Create_Explosion_Big(Shot, X, Y);
+	       elsif Shot.Object_Type = ShotType(Nitro_Shot) then
+		  Create_Nitro_Explosion(Shot,X ,Y);
+	       end if;
+	       
+	       
+	       
+	       
+	       if Shot.Object_Type /= ShotType(Explosion) and Shot.Object_Type /= ShotType(Hitech_Laser_Shot) then
+		  Create_Ricochet(Shot, X, Y);
+		  Remove(Shot); --skottet ska alltid dö
+		  
+	       end if;
+	        --Create_Explosion_Small(Shot, X, Y);
 	    else
 	       A_Shot_Collide_In_Object(Shot, Obj2.Next, Game);
 	    end if;
@@ -562,9 +727,164 @@ package body Game_Engine is
       return Loop_Counter /= When_Done;
       
    end Waiting;
-   --------------------------------------------------
-   -- end WAITING
-   --------------------------------------------------
    
+   
+   --------------------------------------------------
+   --Update Player recharge
+   --------------------------------------------------
+   procedure Update_Player_Recharge (Player : in out Player_Type) is
+      Recharge : Integer := Player.Ship.Laser_Recharge;
+      
+   begin
+      --Recharge := Player.Ship.Laser_Recharge;
+      
+      if Recharge /= 0 then
+	 Recharge := Recharge - 1;
+      end if;
+      
+      --  if Recharge < 0 then  --borde aldrig hända
+      --  	 Recharge := 0;
+      --  end if;
+      
+      Player.Ship.Laser_Recharge := Recharge; --out
+      
+   end Update_Player_Recharge;
+   
+   
+   --------------------------------------------------
+   --Explosions
+   --------------------------------------------------
+   procedure Create_Explosion_Big (L : in out Object_List;
+				 X, Y : in Integer) is
+      
+   begin
+      --
+      --  YYY
+      --XXXXXXX
+      --  ZZZ
+      --
+      
+      --för alla Y:
+	 for B in -1..1 loop
+	    Insert_Last  (ShotType(Explosion),
+			  X+B,
+			  Y-1,
+			  Up*100,
+			  L,
+			  L.Player                      );
+	 end loop;
+     
+      
+	 --för alla X:
+	 for A in -4..4 loop
+	    if A/=0 then
+	       Insert_Last  (ShotType(Explosion),
+			     X+A,
+			     Y,
+			     Up*100,
+			     L,
+			     L.Player                      );
+	    end if;
+	 end loop;
+	 
+	 --for alla Z:
+	 for C in -1..1 loop
+	    Insert_Last  (ShotType(Explosion),
+			  X+C,
+			  Y+1,
+			  Up*100,
+			  L,
+			  L.Player                      );
+	 end loop;
+	    
+   end Create_Explosion_Big;
+
+   procedure Create_Explosion_Small ( L : in out Object_List;
+				      X , Y : in Integer) is
+   begin
+      Insert_Last  (ShotType(Explosion),
+			  X,
+			  Y,
+			  Up*100,
+			  L,
+		    L.Player                      );
+   end Create_Explosion_Small;
+   
+   procedure Create_Ricochet ( L : in out Object_List;
+			       X , Y : in Integer) is
+   begin
+      Insert_Last  (ShotType(Ricochet),
+			  X,
+			  Y,
+			  Up*100,
+			  L,
+		    L.Player                      );
+   end Create_Ricochet;
+   
+   
+   procedure Create_Nitro_Explosion (L : in out Object_List;
+			   X, Y : in Integer) is
+   begin
+      --
+      --  \A/
+      --  < >
+      --  /V\
+      --
+      
+      --------------------------------------------------
+      
+      for I in -1..1 loop
+	 -- \A/ :
+	 Insert_Last  (ShotType(Explosion),
+		       X+I,
+		       Y-1,
+		       Up,
+		       L,
+		       L.Player,
+		       Right*I);
+	 --  < >  :
+	 if I /= 0 then
+	    Insert_Last  (ShotType(Explosion),
+			  X+I,
+			  Y,
+			  0,
+			  L,
+			  L.Player,
+			  Right*I);
+	 end if;
+	 
+	 --  /V\  :
+         Insert_Last  (ShotType(Explosion),
+		       X+I,
+		       Y+1,
+		       Down,
+		       L,
+		       L.Player,
+		       Right*I);
+	 
+      end loop;
+      
+      --------------------------------------------------
+      
+      
+      
+   end Create_Nitro_Explosion;
+   
+   procedure Create_Side_Thrust ( L : in out Object_List;
+				  X , Y : in Integer) is
+   begin
+      for I in -1..1 loop
+	 if I /=0 then
+	    Insert_Last  (ShotType(5),
+			  X+I,
+			  Y,
+			  0,
+			  L,
+			  L.Player,
+			  Right*I);
+	 end if;
+      end loop;
+   end Create_Side_Thrust;
+      
 
 end Game_Engine;
