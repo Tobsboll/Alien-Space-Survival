@@ -19,7 +19,6 @@ with Player_Handling;         use Player_Handling;
 with Background_Handling;     use Background_Handling;
 with Menu_Handling;           use Menu_Handling;
 with Window_Handling;         use Window_Handling;
-with Box_Hantering;           use Box_Hantering;
 with Map_Handling;            use Map_Handling;
 
 procedure Klient is
@@ -33,6 +32,9 @@ procedure Klient is
    Socket : Socket_Type; --Socket_type används för att kunna kommunicera med en server
 
    NumPlayers     : Integer;
+   Gameover       : Integer := 0;
+   Klient_Number  : Integer;               -- Servern skickar klientnumret
+   
    Keyboard_Input : Key_Type;
    Esc            : constant Key_Code_Type := 27;
    Data           : Game_Data;    -- Spelinformation som tas emot från servern.
@@ -47,9 +49,6 @@ procedure Klient is
    Ipadress       : String(1..9) := "localhost"; -- Tänkt att kunna skriva adress
    Portadress     : Integer      := 3400;        -- i menyn
    
-   Klient_Number        : Integer;               -- Servern skickar klientnumret
-   Player_Colour        : String(1..15);         -- Används i början till att överföra spelarnas färger
-   Player_Colour_Length : Integer;               -- Används för att hålla koll hur lång färgnamnet är
    
    ----------------------------------------------------------------------------------------------------
    ----------------------------------------------------------------------------------------------------
@@ -72,13 +71,13 @@ begin
       -------------------------------------------------------------
       loop
       	 delay(0.1);
+	 exit when Choice = 'C' or Choice ='J' or Choice = 'E' or Choice = 'R';
+	 
       	 Put_Spacebattle(Ship_Move, Ship_Shot, Gameborder_X, GameBorder_Y, 
       			 World_X_Length, World_Y_Length);
 	 
       	 Put_Menu(Choice, NumPlayers, Portadress, Ipadress, 
       		  Data.Players(1).Name, Data.Players(1).NameLength);
-	 
-      	 exit when Choice = 'C' or Choice ='J' or Choice = 'E';
 	 
       end loop;
       -------------------------------------------------------------
@@ -88,9 +87,21 @@ begin
       
       if Choice = 'E' then -- Exit
 	 
-      	 -- Put_Exiting_Game;                   -- A screen shuting down the game.
+	 Reset_Colours;
+	 Clear_Window;
+	 Put("Exiting the game.");
+	 for I in 1 .. 5 loop
+	    
+	    delay(1.0);
+	    Put('.');
+	    
+	 end loop;
 	 
-      	 exit;
+	 New_Line;
+	 Put("Bye");
+
+	 exit;
+
       end if;
       
       begin
@@ -143,8 +154,6 @@ begin
             -- TA EMOT DATA
             ---------------------------------------------------------------------	    
             
-            -- Get(Socket,Loop_Counter);    -- tar emot serverns loop_counter
-	    
 	    --Här får vi info om alla skottens koordinater
 	    DeleteList(Astroid_List);
 	    Get(Socket,Astroid_List);
@@ -163,6 +172,10 @@ begin
 	       DeleteList(Waves(I));
 	       Get(Socket, Waves(I)); Put_Line("Wave klar");
 	    end loop;
+	    
+	    Get(Socket, Gameover);
+	    Skip_Line(Socket);
+	    
             ---------------------------------------------------------------------
             -- SKRIV UT DATA
             ---------------------------------------------------------------------
@@ -216,86 +229,27 @@ begin
             -- SKICKA DATA
             --------------------------------------------------------------------
 	    
-	    Get_Input;
+	    if Gameover /= 1 then
+	       Get_Input;
 	    
-	    --------------------------------------------------
-	    if Is_Esc
-	      --or Players_Are_Dead(Data.Players)
-	    then -- måste ändras
-	       Put("Exiting...");
-	       Skip_Line;
-	       Put_Line(Socket, 'e');
-	       exit;
+	       --Sänder ut användarens input från tangentbordet
+	       Send_Input(Socket);   
+	       
+	    elsif Gameover = 1 then
+	       Get_Input(Navigate_Input);             -- Get Player navigation choice
+	       if Is_Return(Navigate_Input) then
+		  Get_From_Printer(Choice);
+	       end if;
+	       
+	       Put_Line(Socket, Choice);
+	       
+	       if Is_Return(Navigate_Input) then
+		  exit;
+	       end if;
 	    end if;
-	    --------------------------------------------------
-	    
 
-	    ----------------------------------------
-	    --| Delay depending on |----------------    -- // Eric
-	    ----------------------------------------
 	    
-	    --| Number of Players |--
-	    if Klient_Number = 1 then    -- Just nu är det ingen skillnad
-	       delay(0.05);           -- Men det kanske kommer ändras 
---	    elsif NumPlayers = 2 then -- beroende på vad servern gör.
---	       delay(0.04);
---	    elsif NumPlayers = 3 then
---	       delay(0.04);
---	    elsif NumPlayers = 4 then
---	       delay(0.04);
-	    end if;
-	    
-	    ----------------------------------------
-	    ----------------------------------------
-	    ----------------------------------------
-	    
-
-
-	    --Sänder ut användarens input från tangentbordet
-	    Send_Input(Socket);
-            --------------------------------------------------------------------
-            -- Done
-            --------------------------------------------------------------------	    
-	    
-	    --Följande ballar ur.
-	    --  if Players_Are_Dead(Data.Players) then
-	    --     --exit;
-	    --     raise GNAT.SOCKETS.SOCKET_ERROR;
-	    --  end if;
-	    
-	    -----------------------------------
-	    -- GET ENEMY WAVE
-	    -----------------------------------
-	    
-	    --for I in waves'range loop
-
-	      -- Delete_enemy_list(Waves(I));
-
-	     --  Get_Enemy_Ships(Waves(I), Socket); -- Tobias
-						  --DeleteList(Enemies);
-						  --Get(Socket, Enemies);
-	    -- end loop;
-	    
-	    -----------------------------------
-	    -- end GET ENEMY WAVE
-	    -----------------------------------
-	    
-	    --  if NumPlayers = 1 then
-	    --     delay(0.001);
-	    --  elsif NumPlayers = 2 then
-	    --     delay(0.05);
-	    --  elsif NumPlayers = 3 then
-	    --     delay(0.05);
-	    --  elsif NumPlayers = 4 then
-	    --     delay(0.05);
-	    --  end if;
-
-	    --delay(0.005); -- senare bra om vi gör så att server och
-	    -- klient synkar exakt!
-	    -- Loop_Counter := Loop_Counter + 1;
-	    
-	    --exit when Players_Are_Dead(Data.Players);  --Ballar ur.
-	 end loop;
+	    end loop;
 	 
 	 --Fria allokerat minne
 	 DeleteList(Shot_List);
