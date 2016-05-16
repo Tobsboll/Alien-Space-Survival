@@ -545,20 +545,22 @@ package body Game_Engine is
 	    	       
 	    ---Asteroider
 	 elsif Obj.Object_Type = 8 then
-	    --Jämför Hindrets koord.
-	    --------------------------------------------------
-	    Diff := 0;
-	    for A in 1..2 loop
-	       for K in 1..2 loop   --Obstacle width
-		  
-		  if X = Object_X+K-1 and Y = Object_Y+Diff then
-		     return True;	
-		  end if;
-		  
+	    for I in 1..2 loop
+	       for J in 1..2 loop       -- Astroid width
+		  Diff := 0;
+		  for A in 1..2 loop
+		     for K in 1..3 loop   --Obstacle width
+			
+			if X+I-1 = Object_X+K-1 and Y+J-1 = Object_Y+Diff then
+			   return True;
+			end if;
+			
+		     end loop;
+		     Diff := Diff +1;
+		  end loop;
 	       end loop;
-	       Diff := Diff +1;
 	    end loop;
-	    
+
 	 end if;
       end if;
       return False;
@@ -608,6 +610,7 @@ package body Game_Engine is
 		 ( Shot.Object_Type = ShotType(Missile_Shot)
 		     or Shot.Object_Type = ShotType(Nitro_Shot)
 		     or Shot.Object_Type = ShotType(Hitech_Laser_Shot)
+		     or  Shot.Object_Type = 9 or Shot.Object_Type = 10
 		     --or Shot.Object_Type = ShotType(Explosion)   
 		 )then
 		  Remove(Obj2);
