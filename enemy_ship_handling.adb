@@ -771,7 +771,7 @@ package body Enemy_Ship_Handling is
       
    begin
       
-      Shot_Difficulty := 20 + Difficulty;
+      Shot_Difficulty := 2 + Difficulty;
       
       X := GameBorder_X + 1;
       Y := Y_Value;
