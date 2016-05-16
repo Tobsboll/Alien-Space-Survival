@@ -221,7 +221,7 @@ package body Game_Engine is
 	       end if;
 	       
 	       --Kollar om man kan plocka upp power-up nu när spelaren har flyttats:
-	       Player_Collide_In_Object(X,Y, Data.Players(I).Ship, Powerup_List);
+	       --Player_Collide_In_Object(X,Y, Data.Players(I).Ship, Powerup_List);
 	    end if;
       end loop;
       
