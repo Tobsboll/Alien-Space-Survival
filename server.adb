@@ -234,6 +234,12 @@ begin
 				      Game.Players(I).Ship, --Uppdaterar ship_spec
 				      Astroid_List);        --Om spelare träffas
 							    --Av asteroid
+							    
+	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
+				      Game.Players(I).Ship.XY(2),
+				      Game.Players(I).Ship, --Uppdaterar ship_spec
+				      Powerup_List);        --Om spelare träffas
+							    --Av powerup
 	    
 	    for K in 1..4 loop
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
