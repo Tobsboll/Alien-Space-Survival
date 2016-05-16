@@ -241,8 +241,24 @@ begin
       -----------------------------------
       -- end PUT ENEMY SHIPS
       ----------------------------------- 
+     -- for I in 1..Num_Players loop
+     --    Put_Data(Sockets(I), Astroid_List, Shot_List, Obstacle_List, Powerup_List, Game, Waves);
+     -- end loop;
+     
+     
       for I in 1..Num_Players loop
-         Put_Data(Sockets(I), Astroid_List, Shot_List, Obstacle_List, Powerup_List, Game, Waves);
+      	 Put(Sockets(I), Astroid_List);
+	 Put(Sockets(I), Shot_List);
+	 Put(Sockets(I), Obstacle_List);
+	 Put(Sockets(I), Powerup_List);
+	 Send_Map(Sockets(I), Game);      -- Map_Handling
+	 Put_Game_Data(Sockets(I),Game);
+      end loop;
+            for I in 1..Num_Players loop
+	 for J in Waves'Range loop
+	    --Put_Enemy_ships(Waves(J), Sockets(I));
+	    Put(Sockets(I), Waves(J));
+	 end loop;
       end loop;
      
       Shot_Movement(Shot_List);
