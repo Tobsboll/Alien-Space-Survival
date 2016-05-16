@@ -124,6 +124,7 @@ package body Level_Handling is
 		       EnemyType(1), --Typ
 		       1,
 		       1,
+		       Gameborder_X +1,
 		       Gameborder_Y +4,
 		       Difficulty,
 		       waves(1));
@@ -132,6 +133,7 @@ package body Level_Handling is
 		       EnemyType(3), --Typ
 		       3,
 		       1,
+		       Gameborder_X +1,
 		       Gameborder_Y +2,
 		       Difficulty,
 		       waves(2));
