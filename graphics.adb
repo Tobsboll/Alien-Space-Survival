@@ -42,11 +42,12 @@ package body Graphics is
 		  Put("î");
 	       elsif L.Object_Type = ShotType(Asteroid) then --| Astroider
 		  
-		  Put("  "); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
-		  Put("  ");
-		  
-		  --	       Put("  "); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
-		  --	       Put("  ");
+		    Put("╱╲"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
+	            Put("╲╱"); 
+	        
+		--	       Put("╭╮"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
+	 	--	       Put("╰╯"); 
+
 	       elsif L.Object_Type = ShotType(Explosion)
 		 or L.Object_Type = ShotType(Ricochet) then -- explosion
 		  Set_Background_Colour(Explosion_1);
