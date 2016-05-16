@@ -457,6 +457,7 @@ package body Game_Engine is
 		  
 		  
 	       end if;
+	       Create_Ricochet(L, L.XY_Pos(1), L.XY_Pos(2));
 	       Remove(L);
 	       
 	       -------------------------------------------------
