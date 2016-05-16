@@ -1,6 +1,26 @@
-with Box_Hantering;           use Box_Hantering;
-
 package body Menu_Handling is
+   
+   procedure Menu(Option : in Integer;
+		  Mark   : in Integer;
+		  X      : in Integer;
+		  Y      : in Integer;
+		  Width  : in Integer;
+		  Height : in Integer;
+		  Name   : in String) is
+      
+   begin
+      Set_Colours(Menu_Text,Menu_Background);
+      
+      if Option = Mark then
+	 Put_Block_Box(X, Y, Width, Height, Menu_Background, Menu_Selected);	 
+      else
+	 Put_Block_Box(X, Y, Width, Height, Menu_Background, Menu_Non_Selected);
+      end if;
+      
+      Goto_XY(X+1, Y+1);
+      Put(Name);
+   end Menu;
+
    
    procedure Put_Menu(Choice        : in out Character;
 		      NumPlayers    : in out Integer;
@@ -31,29 +51,7 @@ package body Menu_Handling is
       end Choose_Nickname_Window;
       
       
-      procedure Menu(Option : in Integer;
-		     Mark   : in Integer;
-		     X      : in Integer;
-		     Y      : in Integer;
-		     Width  : in Integer;
-		     Height : in Integer;
-		     Name   : in String) is
-	 
-      begin
-	 Set_Colours(Menu_Text,Menu_Background);
-	 
-	 if Option = Mark then
-	    Put_Block_Box(X, Y, Width, Height, Menu_Background, Menu_Selected);	 
-	 else
-	    Put_Block_Box(X, Y, Width, Height, Menu_Background, Menu_Non_Selected);
-	 end if;
-	 
-	 Goto_XY(X+1, Y+1);
-	 Put(Name);
-      end Menu;
-      
-      
-      Position_X : Integer := Gameborder_X+(World_X_Length/2)-6;
+      Position_X : Integer := (Border_Width/2)-6;
       Position_Y : Integer := Gameborder_Y + 10;
       Max_Length : Integer := 10;
       
@@ -62,7 +60,7 @@ package body Menu_Handling is
 	 Choose_Nickname_Window(Position_X-1, Position_Y+5);    -- A window for entering nickname
 	 Cursor_Visible;
 	 Get_String(Player_Name, Player_Name_Length, Max_Length,  -- procedure that gets and put what you write
-		    (World_X_Length/2-5)+Gameborder_X, Gameborder_Y+18, White, Menu_Background);
+		    Border_Width/2-5, Gameborder_Y+18, White, Menu_Background);
 	 Cursor_Invisible;
 	 Set_Echo(Off);
 	 Choice := '1';
@@ -193,5 +191,63 @@ package body Menu_Handling is
       
    
    end Put_Menu;
+   
+   procedure Put_Gameover_Box(Data          : in Game_Data;
+			      Klient_Number : in Integer;
+			      Choice        : in out Character) is
+      
+      Position_X : Integer := 35;
+      Position_Y : Integer := 15;
+      Button_X   : Integer := 37;
+      Button_Y   : Integer := 21;
+        
+   begin
+      Set_Colours(HighScore_Border, Highscore_Background);
+      
+      Put_Block_Box(Position_X, Position_Y, 40, 9, HighScore_Background, HighScore_Border);      for I in 1 .. 8 loop
+	 Goto_XY(36, 15+I);
+	 Put("                                      ");
+      end loop;
+      
+      Set_Foreground_Colour(Red);
+      Goto_XY(51, 17);
+      Put("GAME OVER");
+      
+      Goto_XY(40, 19);
+      Put("You got a total of ");
+      Set_Foreground_Colour(Green);
+      Put(Data.Players(Klient_Number).Score, Width => 5);
+      Set_Foreground_Colour(Red);
+      Put(" Points");
+      
+      
+      Menu(Option, 1, Button_X   , Button_Y   , 11, 2, " Restart ");
+      Menu(Option, 2, Button_X+12, Button_Y   , 11, 2, "  Save   ");
+      Menu(Option, 3, Button_X+24, Button_Y   , 11, 2, "  Menu   ");
+      
+      
+      if Is_Return(Navigate_Input) then        -- Enter
+	 if Option = 1 then                    -- Restart
+	    Choice := 'R';
+	 elsif Option = 2 then                 -- Save
+	    Choice := 'S';
+	 elsif Option = 3 then                 -- Menu
+	    Choice := '1';
+	 end if;
+      elsif Is_Left_Arrow(Navigate_Input) then  -- Left
+	 if Option in 2..3 then
+	    Option := Option - 1;
+	 elsif Option = 1 then
+	    Option := 3;
+	 end if;
+      elsif Is_Right_Arrow(Navigate_Input) then -- Right
+	 if Option in 1..2 then
+	    Option := Option + 1;
+	 elsif Option = 3 then
+	    Option := 1;
+	 end if;
+      end if;
+      
+   end Put_Gameover_Box;
    
 end Menu_Handling;
