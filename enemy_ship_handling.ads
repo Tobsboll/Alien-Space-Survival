@@ -35,7 +35,18 @@ package Enemy_Ship_Handling is
       new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_100);
    use One_To_100_Random;
    
- --  Chance_For_Shot : Generator;
+   --  Chance_For_Shot : Generator;
+   
+   
+   
+   --------------------------------------------------
+   -- CONSTANTS
+   --------------------------------------------------
+   
+   Minion      : Integer := EnemyType(1);
+   Interceptor : Integer := EnemyType(3);
+   Kamikazee   : Integer := EnemyType(4);
+   
    
    --------------------------------------------------
    -- PROCEDURES AND FUNCTIONS
@@ -52,6 +63,7 @@ package Enemy_Ship_Handling is
                         Enemy_Type    : in Integer;
 		        Movement_Type : in Integer;
 		        Direction     : in Integer;
+			X_Value       : in Integer;
 		        Y_Value       : in Integer;
 		        Difficulty    : in Integer;
 		        Enemies_List  : in out Object_List);
@@ -67,6 +79,12 @@ package Enemy_Ship_Handling is
 		   Enemies  : in out Object_List;
 		   Waves    : in out Enemy_List_Array;
 		   Shot_List : in out Object_list);
+   
+   procedure Kamikazee_Chase(Player_XY : in XY_Type; 
+		             Enemies   : in out Object_List;
+		             Waves     : in out Enemy_List_Array;
+		             Shot_List : in out Object_list);
+   
    
    procedure Update_Enemy_Position(Waves : in out Enemy_List_Array;
 				   Shot_List : in out Object_List;
@@ -103,6 +121,8 @@ package Enemy_Ship_Handling is
 			Enemies : in Object_List) return Boolean;
    function Greatest_Y_Value(Y : in Integer;
 			     Enemies : in Object_List) return Boolean;
+   function All_Enemies_Dead(Waves : in Enemy_List_array) return Boolean;
+   
   
    
   
