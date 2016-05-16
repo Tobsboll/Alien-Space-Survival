@@ -129,7 +129,7 @@ package body Level_Handling is
 		       waves(2));
 	    
 	 elsif Gen_Level = 2 then
-	    null;
+	    Kamekazee_Level(Waves);
 	 elsif Gen_Level = 3 then
 	    null;
 	 elsif Gen_Level = 4 then
@@ -146,6 +146,34 @@ package body Level_Handling is
       end if;
       
    end Spawn_Level;
+   
+    ----------------------------------------------------------------------
+   --| DIFFERENT LEVELS:
+   ----------------------------------------------------------------------
+   
+   procedure Kamikazee_Level ( Wave : out Enemy_List_Array) is
+      
+   begin
+      for I in 0..1 loop
+	 Spawn_Ship(EnemyType(4), Gameborder_X + (World_X_Length/4),
+		    Gameborder_Y-10   - 20*I, 
+		   
+		    1, --Difficulty
+		    5, --health
+		    1,
+		    4,
+		    Wave(1+I));
+	 
+	 Spawn_Ship(EnemyType(4), Gameborder_X+(World_X_Length*3/4), 
+	 	    Gameborder_Y  - 20*I,
+	 	    1, --Difficulty
+	 	    5, --health
+	 	    1,
+	 	    4,
+	 	    Wave(3+I));
+      end loop;
+
+   end Kamikazee_Level;
    
    
 end Level_Handling;
