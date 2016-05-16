@@ -755,6 +755,7 @@ package body Enemy_Ship_Handling is
 			Enemy_Type    : in Integer;
 			Movement_Type : in Integer;
 			Direction     : in Integer;
+			X_Value       : in Integer;
 			Y_Value       : in Integer;
 			Difficulty    : in Integer;
 			Enemies_List  : in out Object_List) is
@@ -773,7 +774,7 @@ package body Enemy_Ship_Handling is
       
       Shot_Difficulty := 2 + Difficulty;
       
-      X := GameBorder_X + 1;
+      X := X_Value;
       Y := Y_Value;
       if Y < Gameborder_Y +2 then
       -- så vi inte spawnar fiender utanför kanten
@@ -784,7 +785,7 @@ package body Enemy_Ship_Handling is
       -- Egenskaper för fiendetyper
       -----------------------------------
      -- finns bara två typer i nuläget.
-      if Enemy_Type = EnemyType(1) then
+      if Enemy_Type = Minion then
 
 	 if Difficulty < 5 then
 	    Num_Lives  := Difficulty;
@@ -792,9 +793,13 @@ package body Enemy_Ship_Handling is
 	    Num_Lives := 4;
 	 end if;
 
-      elsif Enemy_Type = EnemyType(3) then
+      elsif Enemy_Type = Interceptor then
 	 
 	 Num_Lives := 4 + Difficulty;
+	 
+      elsif Enemy_Type = Kamikazee then
+	 
+	 Num_Lives := 10;
 	 
       end if;
       
