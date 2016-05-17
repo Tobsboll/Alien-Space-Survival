@@ -12,6 +12,7 @@ package body Task_Printer is
       Klient_Number : Integer;
       Gameover      : Integer;
       Choice        : Character;
+      Stop_Task     : Boolean := False;
       
    begin
       loop
@@ -24,8 +25,7 @@ package body Task_Printer is
 				    P  : in Object_List;
 				    N  : in Integer;
 				    G  : in Integer;
-				    K  : in Integer;
-				    C  : in Character) do
+				    K  : in Integer) do
 	       
 	       Data          := D;
 	       Waves         := W;
@@ -36,7 +36,6 @@ package body Task_Printer is
 	       NumPlayers    := N;
 	       Klient_Number := K;
 	       Gameover      := G;
-	       Choice        := C;
 	       
 	    end Print_Everything;
 	    Clear_Window;
@@ -83,7 +82,9 @@ package body Task_Printer is
 
 	    Put_World(Data.Map);
 	    
-	    if Gameover = 1 then
+	    if Gameover = 1 then 
+	       Get_Input(Navigate_Input);             -- Get Player navigation choice
+		  
 	       Put_Gameover_Box(Data, Klient_Number, Choice);
 	    end if;
 	    
@@ -95,8 +96,16 @@ package body Task_Printer is
 	       C := Choice;
 	       
 	    end Get_Choice;
+	 or
+	    accept Stop do
+	       Stop_Task := True;
+	    end Stop;
 	 end select;
+	 
+	 exit when Stop_Task;
       end loop;
+      
+   Put("Printer has stopped!");   
    end Print_all;
    
    task body Astroid is
