@@ -511,4 +511,42 @@ package body Player_Handling is
       end if;
    end Get_Player_Nick_Colour;
    -------------------------------------------------------------------------------------
+   
+   function Check_Players_Choice(Players     : in Players_Choice_Array;
+				 C           : in Character;
+				 Num_Players : in Integer) return Boolean is
+      
+   begin
+      for I in 1..Num_Players loop
+	 if Players(I) = C then
+	    return True;
+	 end if;
+      end loop;
+      return False;
+   end Check_Players_Choice;
+   -------------------------------------------------------------------------------------
+   
+   procedure Get_Players_Choice( Players_Choice : in out Players_Choice_Array;
+				 Sockets        : in Socket_Array;
+				 Num_Players     : in Integer) is
+      
+      Temp_Char : Character;
+      
+   begin
+      for I in 1..Num_Players loop
+	 if Players_Choice(I) = 'o' or Players_Choice(I) = 'S' then
+	    Get(Sockets(I), Players_Choice(I));
+	 else
+	    Get(Sockets(I), Temp_Char);
+	 end if;
+	 
+	 if Players_Choice(I) = 'S' then
+	    -- Save_Score(Game.Players(I));
+	    null;
+	 end if;
+	 
+      end loop;
+   end Get_Players_Choice;
+   -------------------------------------------------------------------------------------
+   
 end Player_Handling;
