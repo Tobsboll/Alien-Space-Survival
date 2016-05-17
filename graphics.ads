@@ -3,6 +3,7 @@ with tja.window.Elementary;   use tja.window.Elementary;
 with Object_Handling;         use Object_Handling;
 with Enemy_ship_handling;     use Enemy_ship_handling;
 with Definitions;             use Definitions;
+with Tja.Window.Text;         use Tja.Window.Text; --Finns i definitions men funkar inte utan detta?? 
 
 package Graphics is
    
@@ -47,22 +48,18 @@ package Graphics is
    --
    Obstacle_Width : constant Integer := 3;
    Obstacle_Radius : constant Integer := 1;
-   Obstacle_Light : constant String (1..Obstacle_Width) := "LLL";
-   Obstacle_Hard : constant String (1..Obstacle_Width) := "HHH";
-   Obstacle_Unbreakable : constant String (1..Obstacle_Width) := "UUU";
+   --  Obstacle_Light : constant String (1..Obstacle_Width) := "LLL";
+   --  Obstacle_Hard : constant String (1..Obstacle_Width) := "HHH";
+   --  Obstacle_Unbreakable : constant String (1..Obstacle_Width) := "UUU";
    
-   type Obstacle_Graphics_Type is array (16..20) of String(1..3);
-   Obstacle : Obstacle_Graphics_Type := (Obstacle_Light,
-					 Obstacle_Hard, 
-					 Obstacle_Unbreakable,
-					 "   ",
-					 "   "
-					 --"   ",
-					 --"   ",
-					 --"   ",
-					 --"   ",
-					 --"   "
-					);
+   type Obstacle_Graphics_Type is array (16..18) of Colour_Type;
+   Obstacle : Obstacle_Graphics_Type := (Obstacle_Light_Colour,
+					  Obstacle_Hard_Colour, 
+					  Obstacle_Unbreakable_Colour
+					    --"   ",
+					 --"   " --2st lediga
+			        
+					 );
    
    type PowerUp_Graphics_Type is array (21..30) of String(1..3);
    PowerUp : PowerUp_Graphics_Type := ( "(h)", --Health
