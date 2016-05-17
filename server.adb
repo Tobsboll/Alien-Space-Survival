@@ -212,8 +212,8 @@ begin
       
       
       for I in World'first..World'Last-1 loop -- Väggskott
-	 Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
-	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Shot_List);
+	 Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Wall_List);
+	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Wall_List);
       end loop;
       
       -- Skickar information till klienterna. / Eric
