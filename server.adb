@@ -60,21 +60,24 @@ begin
    
    Put_Line("Servern är igång, väntar på connection");
    
-   -------------------------------------------------------------
-   --| Player setup before the game ----------------------------
-   -------------------------------------------------------------
-   
-   Add_All_Players(Listener, Sockets, Num_Players);   --| Adding Player
-   
-   Put_Line("The server are finished with adding players");
-   
-   for I in 1..Num_Players loop
-      Get_Players_Nick_Colour(Sockets(I), Game.Players(I));
-      
-      for J in 1..Num_Players loop
-	 Send_Players_Nick_Colour(Sockets(J), Game.Players(I));
-      end loop;
-   end loop;
+   loop
+      -------------------------------------------------------------
+      --| Player setup before the game ----------------------------
+      -------------------------------------------------------------
+      if not Check_Players_Choice(Players_Choice, 'R', Num_Players) then
+	 Add_All_Players(Listener, Sockets, Num_Players);   --| Adding Player
+	 
+	 Put_Line("The server are finished with adding players");
+	 
+	 for I in 1..Num_Players loop
+	    Get_Players_Nick_Colour(Sockets(I), Game.Players(I));
+	    
+	    for J in 1..Num_Players loop
+	       Send_Players_Nick_Colour(Sockets(J), Game.Players(I));
+	    end loop;
+	 end loop;
+	 
+      end if;
    -------------------------------------------------------------
    --| Done with the player setup ------------------------------
    -------------------------------------------------------------
