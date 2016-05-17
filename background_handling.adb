@@ -26,19 +26,19 @@ package body Background_Handling is
 	 Goto_XY(35+X,27+Y);      Put(".");  
 	 Goto_XY(61+X,27+Y);      Put(".");   
 	 Goto_XY(65+X,11+Y);      Put("."); 
-	 Goto_XY(39+X,36+Y);      Put(".");  
+	 Goto_XY(39+X,34+Y);      Put(".");  
 	 Goto_XY(79+X,10+Y);      Put(".");
 	 
 	 Goto_XY(69+X,21+Y);      Put(".");	 
 	 Goto_XY(135+X,7+Y);      Put(".");  
 	 Goto_XY(101+X,27+Y);      Put(".");   
 	 Goto_XY(105+X,11+Y);      Put("."); 
-	 Goto_XY(109+X,36+Y);      Put(".");  
+	 Goto_XY(109+X,29+Y);      Put(".");  
 	 Goto_XY(119+X,10+Y);      Put(".");
 	 
 	 Set_Colours(Bright_Yellow, Old_Background); 
 	 
-	 Goto_XY(7+X,38+Y);       Put(".");
+	 Goto_XY(107+X,4+Y);       Put(".");
 	 Goto_XY(89+X,25+Y);      Put("."); 
 	 Goto_XY(84+X,14+Y);      Put("✶");
 	 Goto_XY(79+X,31+Y);      Put("✶");
@@ -311,7 +311,7 @@ package body Background_Handling is
       
       if Background_Battle_Smallship then
 	 if Loop_Counter > 200 then
-	    Put_Small_Ship(Move(2),X+1,16+Y,Border_Width-2);
+	    Put_Small_Ship(Move(2),X+1,15+Y,Border_Width-2);
 	    
 	    if Loop_Counter mod 3 = 0 then
 	       Move(2) := Move(2) + 1 ;
@@ -320,7 +320,7 @@ package body Background_Handling is
 	 
 	 
 	 if Loop_Counter > 500 then
-	    Put_Small_Ship(Move(3),X+1,23+Y,Border_Width-2);
+	    Put_Small_Ship(Move(3),X+1,22+Y,Border_Width-2);
 	    
 	    if Loop_Counter mod 2 = 0 then
 	       Move(3) := Move(3) + 1 ;
@@ -329,7 +329,7 @@ package body Background_Handling is
 	 
 	 
 	 if Loop_Counter > 5 then
-	    Put_Small_Ship(Move(4),X+1,30+Y,Border_Width-2);
+	    Put_Small_Ship(Move(4),X+1,28+Y,Border_Width-2);
 	    
 	    if Loop_Counter mod 4 = 0 then
 	       Move(4) := Move(4) + 1 ;
