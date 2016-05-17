@@ -23,9 +23,9 @@ package Task_Printer is
 			     P  : in Object_List;
 			     N  : in Integer;
 			     G  : in Integer;
-			     K  : in Integer;
-			     C  : in Character); 
+			     K  : in Integer); 
       entry Get_Choice(C : out Character);
+      entry Stop;
    end Print_All;
    
    procedure Printer(D  : in Game_Data;
@@ -36,10 +36,11 @@ package Task_Printer is
 		     P  : in Object_List;
 		     N  : in Integer;
 		     G  : in Integer;
-		     K  : in Integer;
-		     C  : in Character) renames Print_All.Print_Everything;
+		     K  : in Integer) renames Print_All.Print_Everything;
    
    procedure Get_From_Printer(C : out Character) renames Print_All.Get_Choice;
+   
+   procedure Stop_Printer renames Print_All.Stop;
    
    task Astroid is
       entry Print(L : Object_List);
