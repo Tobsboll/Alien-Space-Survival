@@ -85,31 +85,12 @@ begin
       -------------------------------------------------------------
       --| End of Menu ---------------------------------------------
       -------------------------------------------------------------
-      
-      
-      if Choice = 'E' then -- Exit
-	 
-	 Set_Colours(White, Black);
-	 Clear_Window;
-	 Put("Exiting the game.");
-	 for I in 1 .. 5 loop
-	    
-	    delay(1.0);
-	    Put('.');
-	    
-	 end loop;
-	 
-	 New_Line;
-	 Put("Bye");
 
-	 exit;
-
-      end if;
       
       begin
          -- Initierar en socket, detta krävs för att kunna ansluta denna till
 	 -- servern.
-	 if Choice /= 'R' or Choice /= 'E' then
+	 if Choice /= 'R' and Choice /= 'E' then
 	 Initiate(Socket);
 	 
 	 Put_Line("Waiting for connection");
