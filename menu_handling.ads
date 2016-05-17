@@ -13,6 +13,7 @@ package Menu_Handling is
    Menu_Text       : Colour_Type := Black;
    Menu_Background : Colour_Type := Dark_Grey;
    Option          : Integer := 1;   -- Saves where you are in the menu
+   Choice          : Character := '0';
    Navigate_Input  : Key_Type;       -- Players navigate input
    
    procedure Put_Menu(Choice     : in out Character; -- 0 = Choose Nickname
