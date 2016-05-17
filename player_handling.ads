@@ -74,5 +74,11 @@ package Player_Handling is
 				     Klient_Number : in Integer);
    procedure Get_Player_Nick_Colour(Socket : in Socket_Type;
 				    Player : in out Player_Type);
-
+   function Check_Players_Choice(Players     : in Players_Choice_Array;
+				 C           : in Character;
+				 Num_Players : in Integer) return Boolean;
+   procedure Get_Players_Choice( Players_Choice : in out Players_Choice_Array;
+				 Sockets        : in Socket_Array;
+				 Num_Players     : in Integer);
+   
 end Player_Handling;
