@@ -185,7 +185,7 @@ begin
             ---------------------------------------------------------------------
             
             -- Task_Printer
-	    Printer(Data, Waves, Astroid_List, Shot_List, Obstacle_List, Powerup_List, NumPlayers, Gameover, Klient_Number, Choice);
+	    Printer(Data, Waves, Astroid_List, Shot_List, Obstacle_List, Powerup_List, NumPlayers, Gameover, Klient_Number);
 	    
             --------------------------------------------------------------------
             -- SKICKA DATA
@@ -214,6 +214,8 @@ begin
 
 	    
 	    end loop;
+	 
+	 end if;
 	 
 	 --Fria allokerat minne
 	 DeleteList(Shot_List);
