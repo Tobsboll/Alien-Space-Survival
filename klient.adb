@@ -220,12 +220,12 @@ begin
 		 end if;
 		 
 		 for I in 1..NumPlayers loop
-		    while (Players_Choice(I) /= 'o' or Players_Choice(I) /= 'R')
-		      or Players_Choice(I) /= 'E' loop
+--		    while (Players_Choice(I) /= 'o' or Players_Choice(I) /= 'R')
+--		      or Players_Choice(I) /= 'E' loop
 		       
 		       Get(Socket, Players_Choice(I));
 		       
-		    end loop;
+--		    end loop;
 		 end loop;   
 	       end if;
 	       
@@ -256,7 +256,17 @@ begin
 	    exit;                              -- Meningen är att man kanske kommer tillbaka till menyn.
       end;
       
+      Clear_Window;
       if Choice = 'E' then
+	 Put("Closing the program.");
+	 for I in 1..3 loop
+	    delay(0.5);
+	    Put('.');
+	 end loop;
+	 exit;
+      elsif Check_Players_Choice(Players_Choice, 'E', NumPlayers) then
+      
+	 Put("Someone has closed the game!");
 	 exit;
       end if;
       
