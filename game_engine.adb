@@ -117,7 +117,7 @@ package body Game_Engine is
 	    
 	    
 	    Get(Sockets(I), Keyboard_Input); -- får alltid något, minst ett 'o'
-	    Skip_Line(Sockets(I)); -- DETTA kan bli problem om server går långsammare än klienterna!! /Andreas
+--	    Skip_Line(Sockets(I)); -- DETTA kan bli problem om server går långsammare än klienterna!! /Andreas
 				   --------------------------------------------------
 				   --| Movement tjafs 
 				   --|
