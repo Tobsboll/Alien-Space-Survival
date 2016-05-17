@@ -39,11 +39,13 @@ procedure Server is
    
    Game                   : Game_Data;
    Waves                  : Enemy_List_Array;
-   Shot_List              : Object_List; --shot_handling.ads
+   Shot_List              : Object_List;
    Astroid_List           : Object_List;
    Obstacle_List          : Object_List;
    Powerup_List           : Object_List;
    Explosion_List         : Object_List;
+   Wall_List              : Object_List;
+   
    Level_Cleared          : Boolean := False;
    New_Level              : Boolean := True; 
    
@@ -144,8 +146,9 @@ begin
    loop 
       
       -- Tar bort väggskotten
-      Delete_Object_In_List(Shot_List, ShotType(9)); 
-      Delete_Object_In_List(Shot_List, ShotType(10));
+      --Delete_Object_In_List(Wall_List, ShotType(9)); 
+      --Delete_Object_In_List(Wall_List, ShotType(10));
+      DeleteList(Wall_List);
       
       -- Kontrollerar om leveln är avklarad:
       if Empty(Waves(1)) and 
@@ -240,7 +243,13 @@ begin
 				      Game.Players(I).Ship, --Uppdaterar ship_spec
 				      Powerup_List);        --Om spelare träffas
 							    --Av powerup
-	    
+	   
+	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
+				     Game.Players(I).Ship.XY(2),
+				     Game.Players(I).Ship, --Uppdaterar ship_spec
+				     Wall_List);           --Om spelare träffas
+							   --Av Vägg
+
 	    for K in 1..4 loop
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 					 Game.Players(I).Ship.XY(2),
@@ -256,6 +265,11 @@ begin
       --Shot_Movement(Shot_List);
       Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game);
       Shots_Collide_In_Objects(Shot_List, Astroid_List, Game);
+      Shots_Collide_In_Objects(Shot_List, Wall_List, Game);
+      Shots_Collide_In_Objects(Astroid_List, Obstacle_List, Game);
+      Shots_Collide_In_Objects(Astroid_List, Wall_List, Game);
+      Shots_Collide_In_Objects(Obstacle_List, Wall_List, Game);
+      
       for B in Waves'Range loop
 	 Shots_Collide_In_Objects(Shot_List, Waves(B), Game);
       end loop;
