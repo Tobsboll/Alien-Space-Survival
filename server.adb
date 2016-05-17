@@ -39,11 +39,11 @@ procedure Server is
    
    Game                   : Game_Data;
    Waves                  : Enemy_List_Array;
+   Players_Choice         : Players_Choice_Array :=('o', 'o', 'o', 'o');
    Shot_List              : Object_List;
    Astroid_List           : Object_List;
    Obstacle_List          : Object_List;
    Powerup_List           : Object_List;
-   Explosion_List         : Object_List;
    Wall_List              : Object_List;
    
    Level_Cleared          : Boolean := False;
@@ -92,7 +92,6 @@ begin
    --|
    ----------------------------------------------------------------------------------------------------
    Set_Default_Values(Num_Players, Game);
-   --Waves := (Enemies1, Enemies2, Enemies3, Enemies4);
    Loop_Counter := 1;
    
    
@@ -146,8 +145,6 @@ begin
    loop 
       
       -- Tar bort väggskotten
-      --Delete_Object_In_List(Wall_List, ShotType(9)); 
-      --Delete_Object_In_List(Wall_List, ShotType(10));
       DeleteList(Wall_List);
       
       -- Kontrollerar om leveln är avklarad:
@@ -304,7 +301,32 @@ begin
       end loop;
      
       Shot_Movement(Shot_List);
-      Get_Player_Input(Sockets, Num_Players, Game, Shot_List, Obstacle_List, Powerup_List);
+      	 
+      	 ---| Tar emot från klienterna
+	 if Game.Settings.Gameover /= 1 then
+	    Get_Player_Input(Sockets, Num_Players, Game, 
+			     Shot_List, Obstacle_List, Powerup_List);
+	 else
+	    
+	    Get_Players_Choice( Players_Choice , Sockets, Num_Players);
+	    
+	    
+	    for I in 1..Num_Players loop
+	       for J in 1..Num_Players loop	 
+		  if not Check_Players_Choice(Players_Choice, 'S', Num_Players)
+		    and not Check_Players_Choice(Players_Choice, 'o', Num_Players) then
+		     
+		     Put(Players_Choice(1));
+		     
+		     Put(Sockets(I), Players_Choice(J));
+		     
+		  else
+		     Put(Sockets(I), 'o');
+		  end if;   
+	       end loop;
+	    end loop;
+	    
+	 end if;
 
       
       Loop_Counter := Loop_Counter + 1;
@@ -317,23 +339,44 @@ begin
    
    --Efter spelets slut.
    
-   for I in 1..Num_Players loop
+      DeleteList(Shot_List);
+      DeleteList(Obstacle_List);
+      DeleteList(Powerup_List);
+      DeleteList(Astroid_List);
+      DeleteList(Wall_List);
+   
+        if Check_Players_Choice(Players_Choice, 'E', Num_Players) then
+	 for J in 1..Num_Players loop
+	    Remove_Player(Sockets(J), J);
+	 end loop;
+	 exit;
+      end if;
       
-      Remove_Player(Sockets(I), I);
+      if Check_Players_Choice(Players_Choice, 'S', Num_Players) then
+	 --	 Save_Score(Game.Players(I));
+	 null;
+      end if;
       
-   end loop; 
+   end loop;
+   
+   new_Line;
+   Put("Precis innan end!!");
 exception
    when GNAT.SOCKETS.SOCKET_ERROR => 
       
       DeleteList(Shot_List);
       DeleteList(Obstacle_List);
       DeleteList(Powerup_List);
+      DeleteList(Astroid_List);
+      DeleteList(Wall_List);
       New_Line;
       Put("Someone disconnected!");
    when STORAGE_ERROR =>
       DeleteList(Shot_List);
       DeleteList(Obstacle_List);
       DeleteList(Powerup_List);
+      DeleteList(Astroid_List);
+      DeleteList(Wall_List);
       New_Line;
       Put("VI HAR EN MINNESLÄCKAA!");
       
