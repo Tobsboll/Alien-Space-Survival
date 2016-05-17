@@ -42,11 +42,11 @@ package body Graphics is
 		  Put("î");
 	       elsif L.Object_Type = ShotType(Asteroid) then --| Astroider
 		  
-		    Put("╱╲"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
-	            Put("╲╱"); 
+		    Put("  "); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
+	            Put("  "); 
 	        
-		--	       Put("╭╮"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
-	 	--	       Put("╰╯"); 
+		--	       Put("  "); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
+	 	--	       Put("  "); 
 
 	       elsif L.Object_Type = ShotType(Explosion)
 		 or L.Object_Type = ShotType(Ricochet) then -- explosion
@@ -98,16 +98,18 @@ package body Graphics is
 	    --Om det är ett hinder:
 	 elsif L.Object_Type in Obstacle'Range then
 	    
+	    Set_Background_Colour(Obstacle(ObstacleType(L.Attribute)));
 	    for I in 1..2 loop
 	       Goto_XY(L.XY_Pos(1) , L.XY_Pos(2)+I-1);
-	       Put(Obstacle(L.Object_Type));
+	       Put("   ");
 	    end loop;
+	    Set_Background_Colour(Old_Bg_Colour);
 	    
 	    --Om det är en powerup:
 	 elsif L.Object_Type in PowerUp'Range then
 	    Goto_XY(L.XY_Pos(1)-1 , L.XY_Pos(2));
 	    if L.Object_Type = PowerUpType(Health) then
-	       Put("(♥)");
+	       Put("( )");
 	    else
 	    Put(PowerUp(L.Object_Type));
 	    end if;
@@ -115,14 +117,14 @@ package body Graphics is
 	    --Om det är en fiende:
 	 elsif L.Object_Type in Enemy'Range then
 	    
-	     if L.XY_Pos(1) > 0 and L.XY_Pos(2) > 0 then
-	    --Enemy type 1 only:
-	    Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
-	    Put( Enemy_1(1) );
-	    Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
-	    Put( Enemy_1(2) );
-	    end if;
+	    if L.XY_Pos(1) > 0 and L.XY_Pos(2) > 0 then
+	       --Enemy type 1 only:
+	       Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
+	       Put( Enemy_1(1) );
+	       Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+	       Put( Enemy_1(2) );
 	 
+	    end if;
 	 end if;
 	 Put_Objects(L.Next);
       end if;
