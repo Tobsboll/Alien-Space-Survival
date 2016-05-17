@@ -42,11 +42,11 @@ package body Graphics is
 		  Put("î");
 	       elsif L.Object_Type = ShotType(Asteroid) then --| Astroider
 		  
-		    Put("  "); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
-	            Put("  "); 
+		    Put("╱╲"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
+	            Put("╲╱"); 
 	        
-		--	       Put("  "); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
-	 	--	       Put("  "); 
+		--	       Put("╭╮"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
+	 	--	       Put("╰╯"); 
 
 	       elsif L.Object_Type = ShotType(Explosion)
 		 or L.Object_Type = ShotType(Ricochet) then -- explosion
@@ -109,7 +109,7 @@ package body Graphics is
 	 elsif L.Object_Type in PowerUp'Range then
 	    Goto_XY(L.XY_Pos(1)-1 , L.XY_Pos(2));
 	    if L.Object_Type = PowerUpType(Health) then
-	       Put("( )");
+	       Put("(♥)");
 	    else
 	    Put(PowerUp(L.Object_Type));
 	    end if;
