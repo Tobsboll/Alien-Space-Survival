@@ -226,12 +226,109 @@ package body Game_Engine is
       end loop;
       
    end Get_Player_Input;
+   --------------------------------------------------
+   --| OVERLAPPING X
+   --------------------------------------------------
+   function Overlapping_X (X1, X2 : in Integer;
+			   X1_Width, X2_Width : in Integer;
+			   X1_Offset : in Integer := 0) return Boolean is
+      
+   begin
+      for B in 1..X1_Width loop
+	 for A in 1..X2_Width loop
+	    if X1+X1_Offset + B-1  = X2 + A-1 then
+	       return True;
+	    end if;
+	 end loop;
+      end loop;
+      
+      return False;
+      
+   end Overlapping_X;
+   
+   --------------------------------------------------
+   --| OVERLAPPING Y
+   --------------------------------------------------
+   function Overlapping_Y (Y1, Y2 : in Integer;
+			   Y1_Length, Y2_Length : in Integer;
+			   Y1_Offset : in Integer := 0) return Boolean is
+   begin
+      return Overlapping_X(Y1, Y2, Y1_Length, Y2_Length, Y1_Offset);
+   end Overlapping_Y;
+   
+   --------------------------------------------------
+   --| OVERLAPPING XY
+   --------------------------------------------------
+   function Overlapping_XY (XY1, XY2 : in XY_Type;
+			    X1_Width, Y1_Length, X2_Width, Y2_Length : in Integer;
+			    X1_Offset : in Integer := 0; 
+			    Y1_Offset : in Integer := 0
+			   ) return Boolean is
+      X1 : Integer := XY1(1);
+      X2 : Integer := XY2(1); 
+      Y1 : Integer := XY1(2);
+      Y2 : Integer := XY2(2);
+   begin
+      
+      if Overlapping_X(X1, X2, X1_Width, X2_Width, X1_Offset)
+	and Overlapping_Y(Y1, Y2, Y1_Length, Y2_Length, Y1_Offset) then
+	 return True;
+      else
+	   return False;
+      end if;
+      
+   end Overlapping_XY;
+   
+   --------------------------------------------------
+   --| SHIP OVERLAPPING
+   --------------------------------------------------
+   function Ship_Overlapping (X1,Y1, X2,Y2, X2_Width,Y2_Length: in Integer
+			   ) return Boolean is
+      XY1, XY2 : XY_Type;
+      
+   begin
+      
+      XY1(1) := X1;
+      XY1(2) := Y1;
+      
+      XY2(1) := X2;
+      XY2(2) := Y2;
+      
+      if Overlapping_XY(XY1, XY2,
+			--Mått på Skeppets topp [x,y]:
+			3,1,
+			
+			--Objektets mått [x,y]:
+			X2_Width,Y2_Length,
+			
+			--Förskjutning[x,y]:
+			1,0
+		       )
+	
+	or Overlapping_XY(XY1, XY2,
+			--Mått på Skeppets botten [x,y]:
+			5,1,
+			
+			--Objektets mått [x,y]:
+			X2_Width,Y2_Length,
+			
+			--Förskjutning[x,y]:
+			0,1
+			 )
+      then
+	 return True;
+      else
+	 return False;
+      end if;
+      
+   end Ship_Overlapping;
    
      --------------------------------------------------
    --| PLAYER COLLIDE
    --------------------------------------------------
    function Player_Collide (X,Y : in Integer;
 			    L   : in Object_List
+			    
 			   ) return Boolean is
       Object_X : Integer; 
       Object_Y : Integer;
@@ -244,130 +341,61 @@ package body Game_Engine is
 	 --------------------------------------------------
 	 if L.Object_Type in 16..20 then
 	    
-	    --Jämför Hindrets koord. med hela ship top:
-	    --------------------------------------------------
-	    for A in 1..2 loop      --Obstacle height
-	       for I in 1..3 loop      --Ship top
-		  for K in 1..3 loop   --Obstacle width
-		     
-		     if X+I = Object_X+K-1 and Y = Object_Y+A-1 then
-			return True;
-		     end if;
-		  end loop;
-	       end loop;
-	    end loop;
 	    
-	    --Jämför Hindrets koord. med hela ship bottom:
-	    --------------------------------------------------
-	    for A in 1..2 loop      --Obstacle height
-	       for I in 1..5 loop      --Ship bottom
-		  for K in 1..3 loop   --Obstacle width
-		     
-		     if X+I-1 = Object_X+K-1 and Y+1 = Object_Y+A-1 then
-			return True;
-		     end if;
-		  end loop;
-	       end loop;
-	    end loop;
-	    
-	    
-	    return Player_Collide(X,Y,L.Next);
+	    if Ship_Overlapping(X,Y, Object_X,Object_Y,
+				
+				--Objektets mått [x,y]:
+				3,2)  then
+	       return True;
+	       
+	    else
+	       return Player_Collide(X,Y,L.Next); --Rekursion för att Player_Collide
+						  --används i sin råa form gällande 
+						  --hinder i get_player_input
+	    end if;
 	    --------------------------------------------------
 	    --Med PowerUps:
 	    --------------------------------------------------
 	 elsif L.Object_Type in 21..30 then
 	    
-	    for I in 1..3 loop      --Ship top
-	       for K in 1..3 loop   --Object width
-		  
-		  if X+I = Object_X+K-2 and Y = Object_Y then
-		     return True;
-		  end if;
-	       end loop;
-	    end loop;
+	    return  Ship_Overlapping(X,Y, Object_X,Object_Y,
+				     
+				     --Objektets mått [x,y]:
+				     3,1);
 	    
-	    for I in 1..5 loop      --Ship bottom
-	       for K in 1..3 loop   --Object width
-		  
-		  if X+I-1 = Object_X+K-2 and Y+1 = Object_Y then
-		     return True;
-		  end if;
-	       end loop;
-	    end loop;
-	    
-	    --return Player_Collide(X,Y,L.Next);
+
+	    --  --  return Player_Collide(X,Y,L.Next);
 	    
 	    --------------------------------------------------
 	    --Med Skott:
-	    --------------------------------------------------
 	 elsif L.Object_Type in 1..7 or L.Object_Type in 9..15 then
-	    for I in 1..3 loop      --Ship top
-	       
-	       if X+I = Object_X and Y = Object_Y then
-		  return True;
-	       end if;
-	    end loop;
+	    
+	    return Ship_Overlapping(X,Y, Object_X,Object_Y,
+				     
+				     --Skottets mått [x,y]:
+				    1,1);
 	    
 	    
-	    for I in 1..5 loop      --Ship bottom
-	       
-	       
-	       if X+I-1 = Object_X and Y+1 = Object_Y then
-		  return True;
-	       end if;
-	       
-	    end loop;
 	    --return Player_Collide(X,Y,L.Next);
-	 elsif L.Object_Type = 8 then  --Astroid
-	    for I in 1..3 loop      --Ship top
-	       
-	       if (X+I-1 = Object_X and Y+1 = Object_Y+1) or
-		 (X+I-1 = Object_X+1 and Y+1 = Object_Y+1) then
-		  return True;
-	       end if;
-	    end loop;
-	    
-	    
-	    for I in 1..5 loop      --Ship bottom
-	       
-	       
-	       if (X+I-1 = Object_X and Y+1 = Object_Y+1) or
-		 (X+I-1 = Object_X+1 and Y+1 = Object_Y+1) then
-		  return True;
-	       end if;
-	       
-	    end loop;
 	    
 	    --------------------------------------------------
-	    --Med Fiendeskepp:
+	    --| Med Astroid:
+	 elsif L.Object_Type = 8 then 
+	    
+	    return Ship_Overlapping(X,Y, Object_X,Object_Y,
+				     
+				     --Astroidens mått [x,y]:
+				    2,2);
+	    
 	    --------------------------------------------------
+	    --| Med Fiendeskepp:
 	 elsif  L.Object_Type in 31..40 then
 	    
-	    --Jämför Hindrets koord. med hela ship top:
-	    --------------------------------------------------
-	    for A in 1..2 loop      --Obstacle height
-	       for I in 1..3 loop      --Ship top
-		  for K in 1..3 loop   --Obstacle width
-		     
-		     if X+I = Object_X+K-1 and Y = Object_Y+A-1 then
-			return True;
-		     end if;
-		  end loop;
-	       end loop;
-	    end loop;
+	    return Ship_Overlapping(X,Y, Object_X,Object_Y,
+				    
+				    --Fiendens mått [x,y]:
+				    3,2);
 	    
-	    --Jämför Hindrets koord. med hela ship bottom:
-	    --------------------------------------------------
-	    for A in 1..2 loop      --Obstacle height
-	       for I in 1..5 loop      --Ship bottom
-		  for K in 1..3 loop   --Obstacle width
-		     
-		     if X+I-1 = Object_X+K-1 and Y+1 = Object_Y+A-1 then
-			return True;
-		     end if;
-		  end loop;
-	       end loop;
-	    end loop;
 	    
 	    
 	 end if;
@@ -389,7 +417,8 @@ package body Game_Engine is
       procedure Player_Collide_In_Object ( X,Y         : in Integer;
 					--Data        : out Integer;
 					Player_Ship : in out Ship_Spec;
-					L           : in out Object_List) is
+					L           : in out Object_List
+					) is
       
    begin
       if not Empty(L) then
@@ -423,8 +452,12 @@ package body Game_Engine is
 		  
 		  
 	       end if;
+	       Create_Ricochet(L, L.XY_Pos(1), L.XY_Pos(2));
 	       Remove(L);
 	       
+	       
+	      
+				  
 	       --------------------------------------------------
 	       --PowerUp?
 	       --------------------------------------------------
@@ -458,7 +491,6 @@ package body Game_Engine is
 		  
 		  
 	       end if;
-	       Create_Ricochet(L, L.XY_Pos(1), L.XY_Pos(2));
 	       Remove(L);
 	       
 	       -------------------------------------------------
@@ -484,7 +516,7 @@ package body Game_Engine is
    --------------------------------------------------
    function Shot_Collide (Shot, obj : in Object_List) return boolean is
       X, Object_X, Object_Y, Y : Integer;
-      Diff : Integer;
+      --Diff : Integer;
    begin
       if (not Empty(Obj) and not Empty(Shot) )and then Shot.Object_Type /= ShotType(Ricochet) then
 	 X := Shot.XY_Pos(1);
@@ -494,78 +526,81 @@ package body Game_Engine is
 	 Object_Y := Obj.XY_Pos(2);
 	 
 	 --------------------------------------------------
-	 --Med hinder:
+	 --Med hinder och fiendeskepp (Object)
 	 --------------------------------------------------
-	 
-	 if Obj.Object_Type in 16..20 or Obj.Object_Type in 31..40 then
+	 if Obj.Object_Type in 16..20 or Obj.Object_Type in 31..40
+	   or Obj.Object_Type = ShotType(Asteroid)
+	   or Obj.Object_Type = ShotType(L_Wall)
+	   or Obj.Object_Type = ShotType(R_Wall)
+	 then
 	    
-	    --Specialfall Hitech laser:
+	    --------------------------------------------------
+	    --| HITECH LASER:
 	    if Shot.Object_Type = ShotType(Hitech_Laser_Shot) then
-	       --Asteroid:
-	       if Obj.Object_Type = ShotType(Asteroid) then
-		  for B in 1..2 loop
-		     if X = Object_X+B-1 then
-			return True;
-		     end if;
-		  end loop;
-		  
-	       else --Övriga hinder
-		  for B in 1..3 loop
-		     if X = Object_X+B-1 then
-			return True;
-		     end if;
-		  end loop;
-	       end if;
-
-
-	    else
+	       return Overlapping_X(X, Object_X, 
+				    
+				    --skottets bredd:
+				    1,
+				    
+				    --objektets bredd:
+				    3);
 	       
-	       
-	       
-	       --Jämför Hindrets koord.
 	       --------------------------------------------------
-	       Diff := 0;
-	       for A in 1..2 loop
-		  for K in 1..3 loop   --Obstacle width
-		     
-		     if X = Object_X+K-1 and Y = Object_Y+Diff then
-			--Remove(Obj);
-			--Remove(Shot);
-			return True;
-			--Shot_Collide(Shot, Obj);
-		     end if;
-		     
-		     
-		  end loop;
-		  Diff := Diff +1;
-	       end loop;
-	       --Shot_Collide(Shot, Obj.Next);
+	       --| ASTROID:
+	    elsif Shot.Object_Type = ShotType(Asteroid) then
+	       return Overlapping_XY(Shot.XY_Pos, Obj.XY_Pos,
+				     --Skottets mått [x,y]:
+				     2,2,
+				     
+				     --Objektets mått [x,y]:
+				     3,2);
+	          
+	       --------------------------------------------------
+	       --| OBSTACLE:
+	    elsif Shot.Object_Type = ShotType(Asteroid) then
+	       return Overlapping_XY(Shot.XY_Pos, Obj.XY_Pos,
+				     --Skottets mått [x,y]:
+				     2,3,
+				     
+				     --Objektets mått [x,y]:
+				     1,1);
+	       --------------------------------------------------
+	       --| VANLIGA SKOTT:
+	    else
+	       if Obj.Object_Type = ShotType(Asteroid) then
+		  return Overlapping_XY(Shot.XY_Pos, Obj.XY_Pos,
+					--Skottets mått [x,y]:
+					1,1,
+					
+					--Objektets mått [x,y]:
+					2,2);
+		  
+	       elsif Obj.Object_Type = ShotType(L_Wall)
+		 or Obj.Object_Type = ShotType(R_Wall) Then
+		  return Overlapping_XY(Shot.XY_Pos, Obj.XY_Pos,
+					--Skottets mått [x,y]:
+					1,1,
+					
+					--Objektets mått [x,y]:
+					1,1);
+	       else
+		  return Overlapping_XY(Shot.XY_Pos, Obj.XY_Pos,
+					--Skottets mått [x,y]:
+					1,1,
+					
+					--Objektets mått [x,y]:
+					3,2);
+	       end if;
 	       
-	       
-	    end if;
-	    	       
-	    ---Asteroider
-	 elsif Obj.Object_Type = 8 then
-	    for I in 1..2 loop
-	       for J in 1..2 loop       -- Astroid width
-		  Diff := 0;
-		  for A in 1..2 loop
-		     for K in 1..3 loop   --Obstacle width
-			
-			if X+I-1 = Object_X+K-1 and Y+J-1 = Object_Y+Diff then
-			   return True;
-			end if;
-			
-		     end loop;
-		     Diff := Diff +1;
-		  end loop;
-	       end loop;
-	    end loop;
 
+	    end if;
+
+	    
 	 end if;
       end if;
+      
       return False;
-       
+      
    end Shot_Collide;
 
    
@@ -588,16 +623,26 @@ package body Game_Engine is
 	      
 	       --Create_Nitro_Explosion(Shot, X, Y);  --[NITRO MODE]
 	       
-	       --Avgörandet:
-	       if Obj2.Object_Type in 16..20 then --skott träffar hinder
-		  Remove(Obj2);
-	       elsif Obj2.Object_Type in 31..40 then --skott träffar fiende
-		  
-		  if Shot.Player > 0 then
-		     Game.Players(Shot.Player).Score := Game.Players(Shot.Player).Score + 1;
+	       --------------------------------------------------
+	       --| WHAT IS HIT?:
+	       
+	       if Obj2.Object_Type in 16..18 then --skott träffar hinder
+		  Obj2.Attribute := Obj2.Attribute - 1;
+		  if Obj2.Attribute <= 0 then
+		     Remove(Obj2);
 		  end if;
 		  
-		  --Fiende förlorar liv:
+	       elsif Obj2.Object_Type in 31..40 then --skott träffar fiende
+		  
+		  --------------------------------------------------
+		  --| Score
+		  if Shot.Player > 0 then
+		     Game.Players(Shot.Player).Score := Game.Players(Shot.Player).Score + 1;
+		   
+		  end if;
+		  
+		  --------------------------------------------------
+		  --| Fiende förlorar liv:
 		  if Shot.Object_Type = ShotType(Laser_Upgraded_Shot) then
 		     Obj2.Attribute := Obj2.Attribute - 5;
 		  else
@@ -607,13 +652,17 @@ package body Game_Engine is
 		     Remove(Obj2);
 		  end if;
 		  
-	       elsif Obj2.Object_Type = ShotType(Asteroid) and
+		  --------------------------------------------------
+		  --| skott träffar asteroid:
+	       elsif Obj2.Object_Type = ShotType(Asteroid) and 
 		 ( Shot.Object_Type = ShotType(Missile_Shot)
 		     or Shot.Object_Type = ShotType(Nitro_Shot)
 		     or Shot.Object_Type = ShotType(Hitech_Laser_Shot)
-		     or  Shot.Object_Type = 9 or Shot.Object_Type = 10
-		     --or Shot.Object_Type = ShotType(Explosion)   
+		     or Shot.Object_Type = ShotType(L_Wall)
+		     or Shot.Object_Type = ShotType(R_Wall)
+		     or Shot.Object_Type = ShotType(Explosion)   
 		 )then
+		  --Create_Ricochet(Shot, X+1, Y) --Extra ricochet
 		  Remove(Obj2);
 	       end if;
 	       
@@ -627,7 +676,9 @@ package body Game_Engine is
 	       
 	       
 	       if Shot.Object_Type /= ShotType(Explosion) and Shot.Object_Type /= ShotType(Hitech_Laser_Shot) then
-		  Create_Ricochet(Shot, X, Y);
+		  if Shot.Object_Type not in 16..20 then
+		     Create_Ricochet(Shot, X, Y);
+		  end if;
 		  Remove(Shot); --skottet ska alltid dö
 		  
 	       end if;
@@ -692,7 +743,7 @@ package body Game_Engine is
       Xdiff := 0;
       while Xdiff < World_X_Length-Wall_Width loop
 	 
-	 Create_Object(ObstacleType(1), 2+Xdiff, Ypos, Light, L);
+	 Create_Object(ObstacleType(1), 2+Xdiff, Ypos, Hard, L);
 	 Xdiff := Xdiff + Wall_Width;
       end loop;
    end Create_Wall;
