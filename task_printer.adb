@@ -47,10 +47,11 @@ package body Task_Printer is
 	       Put_Objects(Waves(I));
 	    end loop;
 	    
-	    Astroid.Print(Astroid_List);
-	    Shot.Print(Shot_List);
-	    Obstacle.Print(Obstacle_List);
 	    Powerup.Print(Powerup_List);
+	    Astroid.Print(Astroid_List);
+	    --shot.prit ev här
+	    Obstacle.Print(Obstacle_List);
+	    Shot.Print(Shot_List);
 	    
 	    if Background then
 	       Put_Background(NumPlayers);
