@@ -32,9 +32,9 @@ procedure Klient is
    
    Socket : Socket_Type; --Socket_type används för att kunna kommunicera med en server
 
-   NumPlayers     : Integer;
+   NumPlayers     : Integer := 1;
    Gameover       : Integer := 0;
-   Klient_Number  : Integer;               -- Servern skickar klientnumret
+   Klient_Number  : Integer := 1;               -- Servern skickar klientnumret
    
    Keyboard_Input : Key_Type;
    Esc            : constant Key_Code_Type := 27;
@@ -44,6 +44,7 @@ procedure Klient is
    Obstacle_List  : Object_List;
    Powerup_List   : Object_List;
    Waves          : Enemy_List_array;
+   Players_Choice : Players_Choice_Array := ('o', 'o', 'o', 'o');
    Choice         : Character := '0';    -- Player choice in the menu 0 = Start
    Ship_Move      : Ship_Move_Type := (others => 0);    -- position av skepp i startanimeringen
    Ship_Shot      : Ship_Shot_Type := (others => 0);    -- Position av skott
@@ -190,27 +191,45 @@ begin
             --------------------------------------------------------------------
             -- SKICKA DATA
             --------------------------------------------------------------------
-	    
-	    delay(0.01);
-	    
-	    if Gameover /= 1 then
-	       Get_Input;
-	    
-	       --Sänder ut användarens input från tangentbordet
-	       Send_Input(Socket);   
+
+	    delay(0.04);
 	       
-	    elsif Gameover = 1 then
-	       
-	       if Is_Return(Navigate_Input) then
-		  Get_From_Printer(Choice);
+	       if Gameover /= 1 then
+		  Get_Input;
+		  
+		  --Sänder ut användarens input från tangentbordet
+		  Send_Input(Socket);   
+		  
+	       elsif Gameover = 1 then
+		  if (Choice /= 'E' and Choice /= 'R') then
+		     
+		     
+		     if Is_Return(Navigate_Input) then
+			
+			Get_From_Printer(Choice);
+			
+			Put_Line(Socket, Choice);
+			
+		     else
+			Send_Input(Socket);   
+		     end if;
+		 end if;
+		 
+		 if Choice = 'E' and Choice = 'R' then
+		    Put("Waiting for players");
+		 end if;
+		 
+		 for I in 1..NumPlayers loop
+		    while (Players_Choice(I) /= 'o' or Players_Choice(I) /= 'R')
+		      or Players_Choice(I) /= 'E' loop
+		       
+		       Get(Socket, Players_Choice(I));
+		       
+		    end loop;
+		 end loop;   
 	       end if;
 	       
-	       Put_Line(Socket, Choice);
-	       
-	       if Is_Return(Navigate_Input) then
-		  exit;
-	       end if;
-	    end if;
+	       exit when not Check_Players_Choice( Players_Choice, 'o', NumPlayers);
 
 	    
 	    end loop;
