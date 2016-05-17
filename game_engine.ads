@@ -59,6 +59,29 @@ package Game_Engine is
 			      Powerup_List  : in out Object_List
 			     );
    
+   --Overlapping_X returnerar true om två intervall i x-led har samma värde
+   function Overlapping_X (X1, X2 : in Integer;
+			   X1_Width, X2_Width : in Integer;
+			   X1_Offset : in Integer := 0) return Boolean;
+   
+   --Overlapping_Y returnerar true om två intervall i y-led har samma värde
+     function Overlapping_Y (Y1, Y2 : in Integer;
+			     Y1_Length, Y2_Length : in Integer;
+			     Y1_Offset : in Integer := 0) return Boolean;
+     
+     --Overlapping_XY är en kombination av ovanstående och returnerar därför
+     --true om två fyrkanter överlappar varandra
+     function Overlapping_XY  (XY1, XY2 : in XY_Type;
+			       X1_Width, Y1_Length, X2_Width, Y2_Length : in Integer;
+			       X1_Offset : in Integer :=0;
+			       Y1_Offset : in Integer := 0
+			      ) return Boolean;
+     
+     --Ship_Overlapping är en funktion som ovan fast utformad för skeppets unika
+     --form
+     function Ship_Overlapping (X1,Y1, X2,Y2, X2_Width,Y2_Length: in Integer
+			   ) return Boolean;
+   
    -- Funktionen player_collide retunerar en boolean beroende på om spelarens grafiska
    -- koordinater krockar med andra objekts grafiska koordinater.
    -- Varje jämförelse är därför unik.
