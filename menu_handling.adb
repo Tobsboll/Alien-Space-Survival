@@ -223,7 +223,7 @@ package body Menu_Handling is
       
       Menu(Option, 1, Button_X   , Button_Y   , 11, 2, " Restart ");
       Menu(Option, 2, Button_X+12, Button_Y   , 11, 2, "  Save   ");
-      Menu(Option, 3, Button_X+24, Button_Y   , 11, 2, "  Menu   ");
+      Menu(Option, 3, Button_X+24, Button_Y   , 11, 2, "  Exit   ");
       
       
       if Is_Return(Navigate_Input) then        -- Enter
@@ -231,8 +231,8 @@ package body Menu_Handling is
 	    Choice := 'R';
 	 elsif Option = 2 then                 -- Save
 	    Choice := 'S';
-	 elsif Option = 3 then                 -- Menu
-	    Choice := '1';
+	 elsif Option = 3 then                 -- Exit
+	    Choice := 'E';
 	 end if;
       elsif Is_Left_Arrow(Navigate_Input) then  -- Left
 	 if Option in 2..3 then
