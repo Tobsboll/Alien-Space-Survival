@@ -95,6 +95,7 @@ package Definitions is
       end record;
    
    type Player_Array is array (1..4) of Player_Type;
+   type Players_Choice_Array is array (1..4) of Character;
    ------------------------------------------------
    
    ---------------------------------------------------
