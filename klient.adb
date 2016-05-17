@@ -88,7 +88,7 @@ begin
       
       if Choice = 'E' then -- Exit
 	 
-	 Reset_Colours;
+	 Set_Colours(White, Black);
 	 Clear_Window;
 	 Put("Exiting the game.");
 	 for I in 1 .. 5 loop
@@ -108,6 +108,7 @@ begin
       begin
          -- Initierar en socket, detta krävs för att kunna ansluta denna till
 	 -- servern.
+	 if Choice /= 'R' or Choice /= 'E' then
 	 Initiate(Socket);
 	 
 	 Put_Line("Waiting for connection");
@@ -134,7 +135,9 @@ begin
 	 for I in 1 .. NumPlayers loop
 	    Get_Player_Nick_Colour(Socket, Data.Players(I));
 	 end loop;
+	 end if;
 	 
+	 if Choice /='E' then
 	 Get_Map(Socket, Data, Check_Update => False);
 	 
 	 -------------------------------------------------------------
@@ -197,7 +200,7 @@ begin
 	       Send_Input(Socket);   
 	       
 	    elsif Gameover = 1 then
-	       Get_Input(Navigate_Input);             -- Get Player navigation choice
+	       
 	       if Is_Return(Navigate_Input) then
 		  Get_From_Printer(Choice);
 	       end if;
@@ -216,10 +219,8 @@ begin
 	 DeleteList(Shot_List);
 	 DeleteList(Obstacle_List);
 	 DeleteList(Powerup_List);
+	 DeleteList(Astroid_List);
 	 
-	 --Innan programmet avslutar stängs socketen, detta genererar ett exception
-	 --hos servern, pss kommer denna klient få ett exception när servern avslutas
-	 Close(Socket);
 	 
       exception
 	 when GNAT.SOCKETS.SOCKET_ERROR =>
@@ -227,14 +228,26 @@ begin
 	    DeleteList(Shot_List);
 	    DeleteList(Obstacle_List);
 	    DeleteList(Powerup_List);
+	    DeleteList(Astroid_List);
 	    Cursor_visible;
 	    New_Line;
 	    Put("Someone disconnected!");
 	    exit;                              -- Meningen är att man kanske kommer tillbaka till menyn.
       end;
       
+      if Choice = 'E' then
+	 exit;
+      end if;
+      
    end loop;
    Cursor_visible;
    Set_Echo(On);
+   Stop_Printer;
+
+   --Innan programmet avslutar stängs socketen, detta genererar ett exception
+   --hos servern, pss kommer denna klient få ett exception när servern avslutas
+   Close(Socket);
+
+   Put("Innan end!");
 
 end Klient;
