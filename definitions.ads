@@ -15,7 +15,7 @@ package Definitions is
    Right           : constant Integer := 1;
    
    Light           : constant Integer := 1;
-   Hard            : constant Integer := 5;
+   Hard            : constant Integer := 2;
    Unbreakable     : constant Integer := 999;
    
    --------------------------------------------------
@@ -103,7 +103,7 @@ package Definitions is
    type Setting_Type is
       record
 	 Generate_Map    : Boolean;     -- Generering av banan Activ/Inaktiv
-	 Gameover        : Integer := 0;
+	 Astroid_Active  : Boolean;     -- Generering av astroider Activ/Inaktiv
 	 Difficulty      : Integer;
       end record;
    ---------------------------------------------------
@@ -143,11 +143,6 @@ package Definitions is
    
    Chatt_Window_X : constant Integer := Gameborder_X;
    Chatt_Window_Y : constant Integer := Gameborder_Y+World_Y_Length+1;
-   Chatt_Window_Heigth : constant Integer := 2;
-
-   Border_Width  : constant Integer := World_X_Length+GameBorder_X + Highscore_Window_Width - 2;
-   Border_Height : constant Integer := World_Y_Length + GameBorder_Y + Chatt_Window_Heigth;
-
    ---------------------------------------------------
    
    ---------------------------------------------------
@@ -177,6 +172,9 @@ package Definitions is
    Hitech_Laser_Colour   : constant Colour_Type := Cyan;
    Explosion_1           : constant Colour_Type := Bright_Yellow;
    Nitro_Shot_Colour     : constant Colour_Type := Green;
+   Obstacle_Light_Colour : constant Colour_Type := Bright_Magenta;
+   Obstacle_Hard_Colour  : constant Colour_Type := Magenta;
+   Obstacle_Unbreakable_Colour: constant Colour_Type := Light_Grey;
    ---------------------------------------------------
    
    
