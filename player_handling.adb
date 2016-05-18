@@ -9,6 +9,233 @@ package body Player_Handling is
       B := C;
    end Swap;
    -------------------------------------------------------------------------------------
+   
+   
+   ------------------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------| Server |--
+   ------------------------------------------------------------------------------------------
+   
+   procedure Put_Game_Data(Socket : Socket_Type;
+		           Data : in Game_Data) is
+      
+      -- Skickar spelarens skeppdata    
+      -------------------------------------------------
+      procedure Put_Ship_Data(Socket : in Socket_Type;
+			      Ship   : in Ship_Spec) is
+      begin
+	 
+	 Put_Line(Socket,Ship.XY(1));
+	 Put_Line(Socket,Ship.XY(2));
+	 
+      end Put_Ship_Data;
+      -------------------------------------------------
+      
+   begin
+      --------------------------------------------------------
+      -- Skickar spelarnas Information
+      --------------------------------------------------------
+      for I in Player_Array'Range loop
+	 
+	 Put(Socket, Data.Players(I).Ship.Health);
+	 
+	 if Data.Players(I).Ship.Health > 0 then
+	    
+	    Put_Ship_Data(Socket,Data.Players(I).Ship);
+	    
+	 end if;
+	 
+	 Put_Line(Socket,Data.Players(I).Score);
+	 
+      end loop;
+      
+      for I in Ranking_List'Range loop
+	 Put_Line(Socket, Data.Ranking(I));
+      end loop;
+      
+   end Put_Game_Data;
+   -------------------------------------------------------------------------------------
+   
+   procedure Add_Player(Listener : in Listener_Type;
+			Socket   : in out Socket_Type;
+		        Player_Num : in integer) is
+      
+   begin
+      
+      Wait_For_Connection(Listener, Socket);
+      
+      Put("Player ");
+      Put(Player_Num, 0);
+      Put(" joined the game.");
+      New_Line;
+      
+   end Add_Player;
+   -------------------------------------------------------------------------------------
+   
+   procedure Remove_Player(Socket     : in out Socket_Type; 
+			   Player_Num : in Integer) is
+      
+   begin
+      
+      Close(Socket);
+      
+      New_Line;
+      Put("Player ");
+      Put(Player_Num, 0);
+      Put(" has left the game");
+      
+   end Remove_Player;
+   -------------------------------------------------------------------------------------
+   
+   procedure Sort_Scoreboard(Game : in out Game_Data;
+			     Num_Players : in Integer) is
+   
+   begin 
+      
+      if Num_Players > 1 then
+	 for I in reverse 2..Num_Players loop
+	    for J in Game.Ranking'Range loop
+	       if Game.Players(  Game.Ranking(I-1)  ).Score < Game.Players(  Game.Ranking(I)  ).Score then
+		  Swap (Game.Ranking(I-1),Game.Ranking(I));
+	       end if;
+	    end loop;
+	 end loop;
+      end if;
+      
+   end Sort_Scoreboard;
+   -------------------------------------------------------------------------------------
+   
+   procedure Add_All_Players(Listener : in Listener_Type;
+			     Sockets : in out Socket_Array;
+			     Num_Players : out Integer) is
+			    
+      Player_Joined : Integer := 0;
+      Player_Choice : Character;
+      Temp_Integer  : Integer;
+      
+   begin
+      loop
+	 Player_Joined := Player_Joined + 1;
+	 Add_Player(Listener, Sockets(Player_Joined), Player_Joined); -- Adding players
+	 
+	 Get(Sockets(Player_Joined), Player_Choice);
+	 Get(Sockets(Player_Joined), Num_Players);
+	 
+	 Skip_Line(Sockets(Player_Joined));
+	 
+	 if Player_Choice = 'C' then      -- Checking if the player is the host
+	    for I in 1 .. Player_Joined loop
+	       Put_Line("Sending the total number of player to those who are waiting");
+	       Put_Line(Sockets(I), Num_Players);  -- Sends the total number of players
+						   -- to the players who are waiting.
+	    end loop;
+	    
+	    if Num_Players > Player_Joined then
+	       while Player_Joined < Num_Players Loop          -- Continues adding player
+		  Player_Joined := Player_Joined + 1;
+		  Add_Player(Listener, Sockets(Player_Joined), Player_Joined);
+		  Get(Sockets(Player_Joined), Player_Choice);
+		  
+		  if Player_Choice = 'C' then                  -- Someone also choose host.
+		     Put_Line(Sockets(Player_Joined), 5);      -- Client are informed.		 
+		  end if;
+		  
+		  Put_Line(Sockets(Player_Joined), Num_Players);
+		  Get(Sockets(Player_Joined), Temp_Integer);
+		  Skip_Line(Sockets(Player_Joined));
+		  
+	       end loop;
+	    end if;
+	    
+	    exit;   -- Done with adding players
+	    
+	 end if;
+      end loop;
+      
+      ----------------------------------- Transmit
+      --------------------------------------------
+      for I in 1..Num_Players loop
+	 Put_Line(Sockets(I), I);               -- Tells the client what number they have.
+      end loop;
+      --------------------------------------------
+      --------------------------------------------
+      
+   end Add_All_Players;
+   -------------------------------------------------------------------------------------
+   
+   procedure Get_Players_Nick_Colour(Socket : in Socket_Type;
+				     Player : in out Player_Type) is
+      
+   begin
+      Get_Line(Socket, Player.Name,    -- Spelarens namn
+   	       Player.NameLength);         -- Spelarens namn längd
+      
+      if Player.NameLength = Player.Name'Last then
+         Skip_Line(Socket);
+      end if;
+      
+      Get_Line(Socket, Player_Colour,           -- Spelarens färgnamn.
+   	       Player_Colour_Length);               -- Spelarens färgnamnlängd.
+      
+      if Player_Colour_Length = Player_Colour'Last then
+   	 Skip_Line(Socket);
+      end if;			     
+      
+   end Get_Players_Nick_Colour;
+   -------------------------------------------------------------------------------------
+   
+   procedure Send_Players_Nick_Colour(Socket : in Socket_Type;
+				      Player : in Player_Type) is
+      
+   begin
+      Put_Line(Socket, Player.Name(1..Player.NameLength));  -- Spelarnas namn
+      Put_Line(Socket, Player_Colour(1..Player_Colour_Length)); -- Spelarnas Färger
+   end Send_Players_Nick_Colour;
+   -------------------------------------------------------------------------------------
+   
+   procedure Get_Players_Choice( Players_Choice : in out Players_Choice_Array;
+				 Sockets        : in Socket_Array;
+				 Num_Players    : in Integer;
+				 Game           : in Game_Data) is
+      
+      Temp_Char : Character;
+      
+   begin
+      for I in 1..Num_Players loop
+	 Get(Sockets(I), Temp_Char);
+	 if Temp_Char = 'R' or Temp_Char = 'E' then 
+	     Players_Choice(I) := Temp_Char;
+	 end if;
+	 
+	 if Temp_Char = 'S' then
+	    Save_Score(Game.Players(I));
+	    
+	 end if;
+	 
+      end loop;
+   end Get_Players_Choice;
+   -------------------------------------------------------------------------------------
+   
+   procedure Send_Players_Choice( Players_Choice : in out Players_Choice_Array;
+				  Sockets        : in Socket_Array;
+				  Num_Players    : in Integer) is
+      
+   begin
+      for I in 1..Num_Players loop
+	 for J in 1..Num_Players loop	 
+	    if not Check_Players_Choice(Players_Choice, 'S', Num_Players)
+	      and not Check_Players_Choice(Players_Choice, 'o', Num_Players) then
+	       
+	       Put(Sockets(I), Players_Choice(J));
+	       
+	    else
+	       Put_Line(Sockets(I), 'o');
+	    end if;   
+	 end loop;
+      end loop;
+   end Send_Players_Choice;
+   ------------------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------| Client |--
+   ------------------------------------------------------------------------------------------
    procedure Get_Input(Key_Board_Input : out Key_Type) is
       
       Input : Boolean;
@@ -91,6 +318,7 @@ package body Player_Handling is
       end if;
    end Is_Esc;
    -------------------------------------------------------------------------------------
+   
    procedure Get_String(Text        : out String;
 			Text_Length : out Integer;
 			Max_Text    : in Integer;
@@ -136,180 +364,7 @@ package body Player_Handling is
 	 
    end Get_String;
    -------------------------------------------------------------------------------------
-   -------------------------------------------------------------------------| Server |--
-   -------------------------------------------------------------------------------------
-   procedure Put_Game_Data(Socket : Socket_Type;
-		           Data : in Game_Data) is
-      
-      -- Skickar spelarens skeppdata    
-      -------------------------------------------------
-      procedure Put_Ship_Data(Socket : in Socket_Type;
-			      Ship   : in Ship_Spec) is
-      begin
-	 
-	 Put_Line(Socket,Ship.XY(1));
-	 Put_Line(Socket,Ship.XY(2));
-	 
-      end Put_Ship_Data;
-      -------------------------------------------------
-      
-   begin
-      --------------------------------------------------------
-      -- Skickar spelarnas Information
-      --------------------------------------------------------
-      for I in Player_Array'Range loop
-	 
-	 Put(Socket, Data.Players(I).Ship.Health);
-	 
-	 if Data.Players(I).Ship.Health > 0 then
-	    
-	    Put_Ship_Data(Socket,Data.Players(I).Ship);
-	    
-	 end if;
-	 
-	 Put_Line(Socket,Data.Players(I).Score);
-	 
-      end loop;
-      
-      for I in Ranking_List'Range loop
-	 Put_Line(Socket, Data.Ranking(I));
-      end loop;
-      
-   end Put_Game_Data;
-   -------------------------------------------------------------------------------------
-   procedure Add_Player(Listener : in Listener_Type;
-			Socket   : in out Socket_Type;
-		        Player_Num : in integer) is
-      
-   begin
-      
-      Wait_For_Connection(Listener, Socket);
-      
-      Put("Player ");
-      Put(Player_Num, 0);
-      Put(" joined the game.");
-      New_Line;
-      
-   end Add_Player;
-   -------------------------------------------------------------------------------------
-   procedure Remove_Player(Socket     : in out Socket_Type; 
-			   Player_Num : in Integer) is
-      
-   begin
-      
-      Close(Socket);
-      
-      New_Line;
-      Put("Player ");
-      Put(Player_Num, 0);
-      Put(" has left the game");
-      
-   end Remove_Player;
-   -------------------------------------------------------------------------------------
-   procedure Sort_Scoreboard(Game : in out Game_Data;
-			     Num_Players : in Integer) is
    
-   begin 
-      
-      if Num_Players > 1 then
-	 for I in reverse 2..Num_Players loop
-	    for J in Game.Ranking'Range loop
-	       if Game.Players(  Game.Ranking(I-1)  ).Score < Game.Players(  Game.Ranking(I)  ).Score then
-		  Swap (Game.Ranking(I-1),Game.Ranking(I));
-	       end if;
-	    end loop;
-	 end loop;
-      end if;
-      
-   end Sort_Scoreboard;
-   -------------------------------------------------------------------------------------
-   procedure Add_All_Players(Listener : in Listener_Type;
-			     Sockets : in out Socket_Array;
-			     Num_Players : out Integer) is
-			    
-      Player_Joined : Integer := 0;
-      Player_Choice : Character;
-      Temp_Integer  : Integer;
-      
-   begin
-      loop
-	 Player_Joined := Player_Joined + 1;
-	 Add_Player(Listener, Sockets(Player_Joined), Player_Joined); -- Adding players
-	 
-	 Get(Sockets(Player_Joined), Player_Choice);
-	 Get(Sockets(Player_Joined), Num_Players);
-	 
-	 Skip_Line(Sockets(Player_Joined));
-	 
-	 if Player_Choice = 'C' then      -- Checking if the player is the host
-	    for I in 1 .. Player_Joined loop
-	       Put_Line("Sending the total number of player to those who are waiting");
-	       Put_Line(Sockets(I), Num_Players);  -- Sends the total number of players
-						   -- to the players who are waiting.
-	    end loop;
-	    
-	    if Num_Players > Player_Joined then
-	       while Player_Joined < Num_Players Loop          -- Continues adding player
-		  Player_Joined := Player_Joined + 1;
-		  Add_Player(Listener, Sockets(Player_Joined), Player_Joined);
-		  Get(Sockets(Player_Joined), Player_Choice);
-		  
-		  if Player_Choice = 'C' then                  -- Someone also choose host.
-		     Put_Line(Sockets(Player_Joined), 5);      -- Client are informed.		 
-		  end if;
-		  
-		  Put_Line(Sockets(Player_Joined), Num_Players);
-		  Get(Sockets(Player_Joined), Temp_Integer);
-		  Skip_Line(Sockets(Player_Joined));
-		  
-	       end loop;
-	    end if;
-	    
-	    exit;   -- Done with adding players
-	    
-	 end if;
-      end loop;
-      
-      ----------------------------------- Transmit
-      --------------------------------------------
-      for I in 1..Num_Players loop
-	 Put_Line(Sockets(I), I);               -- Tells the client what number they have.
-      end loop;
-      --------------------------------------------
-      --------------------------------------------
-      
-   end Add_All_Players;
-   -------------------------------------------------------------------------------------
-   procedure Get_Players_Nick_Colour(Socket : in Socket_Type;
-				     Player : in out Player_Type) is
-      
-   begin
-      Get_Line(Socket, Player.Name,    -- Spelarens namn
-   	       Player.NameLength);         -- Spelarens namn längd
-      
-      if Player.NameLength = Player.Name'Last then
-         Skip_Line(Socket);
-      end if;
-      
-      Get_Line(Socket, Player_Colour,           -- Spelarens färgnamn.
-   	       Player_Colour_Length);               -- Spelarens färgnamnlängd.
-      
-      if Player_Colour_Length = Player_Colour'Last then
-   	 Skip_Line(Socket);
-      end if;			     
-      
-   end Get_Players_Nick_Colour;
-   -------------------------------------------------------------------------------------
-   procedure Send_Players_Nick_Colour(Socket : in Socket_Type;
-				      Player : in Player_Type) is
-      
-   begin
-      Put_Line(Socket, Player.Name(1..Player.NameLength));  -- Spelarnas namn
-      Put_Line(Socket, Player_Colour(1..Player_Colour_Length)); -- Spelarnas Färger
-   end Send_Players_Nick_Colour;
-   -------------------------------------------------------------------------------------
-   -------------------------------------------------------------------------| Client |--
-   -------------------------------------------------------------------------------------
    procedure Get_Game_Data(Socket : Socket_Type;
 			   Data : out Game_Data) is
       
@@ -350,6 +405,7 @@ package body Player_Handling is
       end loop;
    end Get_Game_Data;
    -------------------------------------------------------------------------------------
+   
    procedure Put_Player_Ships (Data : in  Game_Data;
 			       NumPlayers : in Integer) is
       
@@ -373,6 +429,7 @@ package body Player_Handling is
       
    end Put_Player_Ships;
    -------------------------------------------------------------------------------------
+   
    procedure Put_Score(Data        : in Game_Data; 
 		       NumPlayers  : in Integer;
 		       X           : in Integer;
@@ -432,6 +489,7 @@ package body Player_Handling is
       end loop;
    end Put_Score;
    -------------------------------------------------------------------------------------
+   
    procedure Put_Player_Choice(Socket : in Socket_Type;
 			       Choice : in Character;
 			       Num_Players : in Integer) is
@@ -443,6 +501,7 @@ package body Player_Handling is
       
    end Put_Player_Choice;
    -------------------------------------------------------------------------------------
+   
    procedure Waiting_For_Players(Socket : in Socket_Type;
 				 Num_Players : out Integer;
 				 Klient_Number : out Integer) is
@@ -468,6 +527,7 @@ package body Player_Handling is
       Skip_Line(Socket);                      -- Ligger ett entertecken kvar i socketen.
    end Waiting_For_Players;
    -------------------------------------------------------------------------------------
+   
    procedure Send_Player_Nick_Colour(Socket : in Socket_Type;
 				     Player : in out Player_Type;
 				     Klient_Number : in Integer) is
@@ -486,6 +546,7 @@ package body Player_Handling is
 	 end if;      
    end Send_Player_Nick_Colour;
    -------------------------------------------------------------------------------------
+   
    procedure Get_Player_Nick_Colour(Socket : in Socket_Type;
 				    Player : in out Player_Type) is
 			 
@@ -510,11 +571,15 @@ package body Player_Handling is
 	 Player.Colour := Red;
       end if;
    end Get_Player_Nick_Colour;
-   -------------------------------------------------------------------------------------
+   
+   ------------------------------------------------------------------------------------------
+   ---------------------------------------------------------------------| Server & Client |--
+   ------------------------------------------------------------------------------------------
    
    function Check_Players_Choice(Players     : in Players_Choice_Array;
 				 C           : in Character;
 				 Num_Players : in Integer) return Boolean is
+      
       
    begin
       for I in 1..Num_Players loop
@@ -522,31 +587,9 @@ package body Player_Handling is
 	    return True;
 	 end if;
       end loop;
+      
       return False;
    end Check_Players_Choice;
    -------------------------------------------------------------------------------------
-   
-   procedure Get_Players_Choice( Players_Choice : in out Players_Choice_Array;
-				 Sockets        : in Socket_Array;
-				 Num_Players     : in Integer) is
-      
-      Temp_Char : Character;
-      
-   begin
-      for I in 1..Num_Players loop
-	 if Players_Choice(I) = 'o' or Players_Choice(I) = 'S' then
-	    Get(Sockets(I), Players_Choice(I));
-	 else
-	    Get(Sockets(I), Temp_Char);
-	 end if;
-	 
-	 if Players_Choice(I) = 'S' then
-	    -- Save_Score(Game.Players(I));
-	    null;
-	 end if;
-	 
-      end loop;
-   end Get_Players_Choice;
-   -------------------------------------------------------------------------------------
-   
+
 end Player_Handling;
