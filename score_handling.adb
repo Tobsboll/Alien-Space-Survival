@@ -85,14 +85,18 @@ package body Score_Handling is
       Counter      : Integer := 1;
       
    begin
+      Set_Bold_Mode(On);
       Goto_XY(X,Y);
       Put("          HIGHSCORE            ");
       Goto_XY(X,Y+2);
+      Set_Underlined_Mode(On);
       Put("Pos     Name              Score");
+      Set_Underlined_Mode(Off);
+      
       if Does_File_Exist("HIGHSCORE.BIN") then
 	 Open(F1, In_File, "HIGHSCORE.BIN");
 	 
-	 while not End_Of_File(F1) and Total > Counter loop
+	 while not End_Of_File(F1) and Total >= Counter loop
 	    
 	    Read(F1, Saved_Player);
 	    
@@ -110,8 +114,78 @@ package body Score_Handling is
 	 Close(F1);
 	 
       else
-	 Put("No Highscore yet!");
+	 Goto_XY(X,Y+3);
+	 Put("   No Highscore yet   ");
+	 Goto_XY(X,Y+4);
+	 Put("          or          ");
+	 Goto_XY(X,Y+5);
+	 Put("You havent played yet!");
       end if;
+      Set_Bold_Mode(Off);
    end Put_Highscore;
+   
+   
+   
+   
+   procedure Put_Score( Socket : in Socket_Type;
+			Game   : in Game_Data) is
+      
+      F1           : Seq_IO.File_Type;
+      Saved_Player : Player_Type;
+      Count        : Integer := 1;
+      
+   begin
+      if Does_File_Exist("HIGHSCORE.BIN") then
+	 Open(F1, In_File, "HIGHSCORE.BIN");
+	 
+	 while not End_Of_File(F1) loop
+	    Read(F1, Saved_Player);
+	    Put(Socket, 'N');    -- New
+	    Put_Line(Socket, Saved_Player.Name(1..Saved_Player.NameLength));
+	    Put(Socket, Saved_Player.Score);
+	    Count := Count + 1;
+	 end loop;
+	 
+	 Close(F1);
+	 
+      end if;
+      
+      Put(Socket, 'Q');  -- quit
+      
+   end Put_Score;
+   
+   procedure Get_Score(Socket : in Socket_Type) is
+      
+      F1           : Seq_IO.File_Type;
+      Saved_Player : Player_Type;
+      Check        : Character;
+      
+   begin
+      if Does_File_Exist("HIGHSCORE.BIN") then
+	 Open(F1, Out_File, "HIGHSCORE.BIN");
+      else
+	 Create(F1, Out_File, "HIGHSCORE.BIN");
+      end if;
+      
+      loop
+	 Check := 'a';
+	 while Check /= 'Q' and Check /='N' loop  -- Quit/New
+	    Get(Socket, Check);
+	 end loop;
+	 
+	 exit when Check = 'Q';  -- Quit
+	 
+	 if Check = 'N' then     -- New
+	    Get_Line(Socket, Saved_Player.Name, Saved_Player.NameLength);
+	    Get(Socket, Saved_Player.Score);
+	    
+	    Write(F1, Saved_Player);
+	 end if;
+	 
+	 
+      end loop;
+	 
+      Close(F1);
+   end Get_Score;
    
 end Score_Handling;
