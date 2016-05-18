@@ -27,8 +27,6 @@ package Player_Handling is
 			Player_Num : in integer);
    procedure Remove_Player(Socket     : in out Socket_Type; 
 			   Player_Num : in Integer);
-   procedure Sort_Scoreboard(Game : in out Game_Data;
-			     Num_Players : in Integer);
    procedure Add_All_Players(Listener : in Listener_Type;
 			     Sockets : in out Socket_Array;
 			     Num_Players : out Integer);
@@ -61,12 +59,6 @@ package Player_Handling is
 			   Data : out Game_Data);
    procedure Put_Player_Ships (Data : in  Game_Data;
 			       NumPlayers : in Integer);
-   procedure Put_Score(Data        : in Game_Data; 
-		       NumPlayers  : in Integer;
-		       X           : in Integer;
-		       Y           : in Integer;
-		       Back_Colour : in Colour_Type;
-		       Text_Colour : in Colour_Type);
    procedure Put_Player_Choice(Socket : in Socket_Type;
 			       Choice : in Character;
 			       Num_Players : in Integer);
