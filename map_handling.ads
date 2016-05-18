@@ -12,9 +12,14 @@ package Map_Handling is
    Right_Border : Integer := X_Led'Last;
    Spawn_Y      : Integer := GameBorder_Y;
    
-   
    ----------------------------------------------------------
-   --| Tar emot banan från servern
+   --| Återställer variabler
+   ---------------------------------------------------------- 
+   
+   procedure Restore_Maps_Variables;
+     
+     ----------------------------------------------------------
+     --| Tar emot banan från servern
    ----------------------------------------------------------  
    procedure Get_Map(Socket       : in  Socket_Type;
 		     Data         : out Game_Data;
