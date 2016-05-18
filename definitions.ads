@@ -65,6 +65,16 @@ package Definitions is
    type Enemy_Array_Type is array (1..10) of Integer;
    EnemyType : Enemy_Array_Type := (31, 32, 33, 34, 35, 36, 37, 38, 39, 40);
    
+   --------------------------------------------------
+   -- CONSTANTS FOR ENEMIES
+   --------------------------------------------------
+   
+   Minion      : Integer := EnemyType(1);
+   Interceptor : Integer := EnemyType(3);
+   Kamikazee   : Integer := EnemyType(4);
+   
+   ---------------------------------------------------
+   
    type Ranking_List is array (1 .. 4) of Integer;
 
    type Shot_Type is array (1 .. 5) of XY_Type;
