@@ -19,6 +19,7 @@ with Player_Handling;         use Player_Handling;
 with Background_Handling;     use Background_Handling;
 with Menu_Handling;           use Menu_Handling;
 with Window_Handling;         use Window_Handling;
+with Score_Handling;          use Score_Handling;
 with Map_Handling;            use Map_Handling;
 with Task_Printer;            use Task_Printer;
 
@@ -35,6 +36,7 @@ procedure Klient is
    NumPlayers     : Integer := 1;
    Gameover       : Integer := 0;
    Klient_Number  : Integer := 1;               -- Servern skickar klientnumret
+   Klient_Waiting : Character := 'o';
    
    Keyboard_Input : Key_Type;
    Esc            : constant Key_Code_Type := 27;
@@ -67,7 +69,9 @@ begin
    end if;
    
    loop
-
+      
+      
+      
       -------------------------------------------------------------
       --| Start of Menu -------------------------------------------
       -------------------------------------------------------------
@@ -137,7 +141,20 @@ begin
 	 Set_Echo(Off);
 	 Cursor_Invisible;
 	 loop
-	 
+	    
+	    --| Syncing with Server
+	    --------------------------------------|
+	    if Klient_Number = 1 then           --|
+	       Put(Socket, '$');                --|
+	       while Klient_Waiting /= '$' loop --|
+		  Get(Socket, Klient_Waiting);  --|
+	       end loop;                        --|
+	       Klient_Waiting := 'o';           --|
+	    end if;                             --|
+	    
+	    --------------------------------------|
+	    
+	    
 	    ---------------------------------------------------------------------
             -- TA EMOT DATA
             ---------------------------------------------------------------------	    
@@ -173,8 +190,8 @@ begin
             --------------------------------------------------------------------
             -- SKICKA DATA
             --------------------------------------------------------------------
-
-	    delay(0.04);
+	    
+	    delay(0.02);
 	       
 	      	    -- Skickar Till servern
 	       if Gameover /= 1 then
@@ -190,22 +207,23 @@ begin
 			
 			Get_From_Printer(Choice);
 			
-			Put_Line(Socket, Choice);
+			Put(Socket, Choice);
 			
 		     else
-			Put_Line(Socket, 'o');   
+			Put(Socket, 'o');   
 		     end if;
 		 end if;
 		 
 		 if Choice = 'E' or Choice = 'R' then
-		    Put("Waiting for players");
-		    Put_Line(Socket, 'o');
+--		    Put("Waiting for players");
+		    Put(Socket, 'o');
 		 end if;
+		 
 		 
 		 for I in 1..NumPlayers loop
 		       
 		    Get(Socket, Players_Choice(I));
-		       
+		    
 		 end loop;   
 	       end if;
 	       
@@ -213,8 +231,16 @@ begin
 
 	    
 	    end loop;
-	 
+	    
+	    Get_Score(Socket); -- Update highscore 
+	    
+	    Put(Socket, '$');      
+	    
+	    
+	    
 	 end if;
+	 
+
 	 
 	 --Fria allokerat minne
 	 DeleteList(Shot_List);
