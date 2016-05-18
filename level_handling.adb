@@ -119,19 +119,43 @@ package body Level_Handling is
 		       Difficulty,
 		       waves(1));
 	    
-	    Spawn_Wave(Integer(0.5*Float(Difficulty)), --Antal
-		       EnemyType(3), --Typ
-		       3,
-		       1,
-		       Gameborder_X +1,
-		       Gameborder_Y +2,
-		       Difficulty,
-		       waves(2));
+	 --   Spawn_Wave(Integer(0.5*Float(Difficulty)), --Antal
+	--	       EnemyType(3), --Typ
+	--	       3,
+	--	       1,
+	--	       Gameborder_X +1,
+	--	       Gameborder_Y +2,
+	--	       Difficulty,
+	--	       waves(2));
+	  
+	  -- Tror den nedan kan vara ett bättre alternativ i
+	  -- det generella fallet, eftersom interceptors
+	  -- inte fungerar om de ligger i samma lista i nuläget // Tobias
+	    
+	  ---------------  
+
+	    for I in 2..Integer(0.5*Float(Difficulty)) loop
+	       
+	       if I < 4 then
+		  
+		  Spawn_Wave(1, --Antal
+		    EnemyType(3), --Typ
+		    3,
+		    1,
+		    Gameborder_X +1,
+		    Gameborder_Y +2,
+		    Difficulty,
+		    waves(I));
+		  
+	       end if;
+	       
+	    end loop;
+	 -------------------   
 	    
 	 elsif Gen_Level = 2 then
 	    Kamikazee_Level(Waves);
 	 elsif Gen_Level = 3 then
-	    null;
+	    Shifting_Layer_Level(Waves, Difficulty);
 	 elsif Gen_Level = 4 then
 	    null;
 	 elsif Gen_Level = 5 then
