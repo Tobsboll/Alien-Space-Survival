@@ -17,6 +17,7 @@ with Window_Handling;              use Window_Handling;
 with Map_Handling;                 use Map_Handling;
 with Player_Handling;              use Player_Handling;
 with Level_Handling;               use Level_Handling; 
+with Score_Handling;               use Score_Handling;
 with Task_Server_Communication;    use Task_Server_Communication;
 
 procedure Server is
@@ -36,6 +37,7 @@ procedure Server is
    Obstacle_Y             : Integer;
    Level                  : Integer := 0;
    Loop_Counter           : Integer;
+   Server_Waiting         : Character := 'o';
    
    Game                   : Game_Data;
    Waves                  : Enemy_List_Array;
@@ -122,6 +124,16 @@ begin
    
     
    loop 
+      
+      --| Syncing with Klient
+      ---------------------------------------|
+      while Server_Waiting /= '$' loop     --|
+	 Get(Sockets(1), Server_Waiting);  --|
+      end loop;                            --|
+      Server_Waiting := 'o';               --|
+      Put(Sockets(1), '$');                --|
+      
+      ---------------------------------------|
       
       -- Tar bort väggskotten
       DeleteList(Wall_List);
@@ -256,15 +268,15 @@ begin
 	 Game.Settings.Gameover := 1;
       end if;
 
+      --------------------------------
+      --| Skicka till klienterna
+      --------------------------------
       
-      -----------------------------------
-      -- end PUT ENEMY SHIPS
-      ----------------------------------- 
-     -- for I in 1..Num_Players loop
-     --    Put_Data(Sockets(I), Astroid_List, Shot_List, Obstacle_List, Powerup_List, Game, Waves);
-     -- end loop;
-     
-     
+      --  for I in 1..Num_Players loop
+      --  	 Put_Data(Sockets(I), Astroid_List, Shot_List, Obstacle_List, Powerup_List, Game, Waves);
+      --  end loop;
+      
+      
       for I in 1..Num_Players loop
       	 Put(Sockets(I), Astroid_List);
 	 Put(Sockets(I), Shot_List);
@@ -283,14 +295,15 @@ begin
      
       Shot_Movement(Shot_List);
       	 
+      -----------------------------------
       ---| Tar emot från klienterna
+      -----------------------------------
       if Game.Settings.Gameover /= 1 then
-	 Get_Player_Input(Sockets, Num_Players, Game, 
-			  Shot_List, Obstacle_List, Powerup_List);
+      	 Get_Player_Input(Sockets, Num_Players, Game, 
+      			  Shot_List, Obstacle_List, Powerup_List);
       else
-	 
+	 delay(0.1);
 	 Get_Players_Choice( Players_Choice , Sockets, Num_Players, Game);
-	 
 	 Send_Players_Choice( Players_Choice, Sockets, Num_Players);
 	 
       end if;
@@ -303,9 +316,19 @@ begin
       
    end loop;
    
+   
    ----------------------------------------------------------------------------------------------------
    -----------------------------------------------------------------------------------GAME LOOP END----
    ----------------------------------------------------------------------------------------------------
+   
+   
+   for I in 1..Num_Players loop
+      Put_Score(Sockets(I), Game);  -- Update highscore
+      while Server_Waiting /= '$' loop
+	 Get(Sockets(I), Server_Waiting);
+      end loop;
+   end loop;
+   
    
    --Efter spelets slut.
    
