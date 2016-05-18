@@ -32,8 +32,13 @@ with Graphics;               use Graphics;        --
 package Game_Engine is
    --Procedure Set_Default_Values fastställer alla startvärden som behövs innan
    --spelet börjar
-   procedure Set_Default_Values (Num_Players : in Integer;
-				 Game        : in out Game_Data);
+   procedure Set_Default_Values (Num_Players    : in Integer;
+				 Game           : in out Game_Data;
+				 Loop_Counter   : out Integer;
+				 Players_Choice : out Players_Choice_Array;
+				 Level          : out Integer;
+				 Level_Cleared  : out Boolean;
+				 New_Level      : out Boolean);
    
    --Shot_Movement uppdaterar skottens position på banan i rätt riktning.
    --Riktningen anges som attribut till Object_Type när man skapar ett skott
