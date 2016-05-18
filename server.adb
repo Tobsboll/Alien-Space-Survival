@@ -94,8 +94,7 @@ begin
    --| Game loop
    --|
    ----------------------------------------------------------------------------------------------------
-   Set_Default_Values(Num_Players, Game);
-   Loop_Counter := 1;
+   Set_Default_Values(Num_Players, Game, Loop_Counter, Players_Choice, Level, Level_Cleared, New_Level);
    
    
    for I in 1..Num_Players loop
@@ -122,29 +121,6 @@ begin
      Create_Object(PowerUpType(Laser_Upgrade), 97, Obstacle_Y_Pos+6, 0, Powerup_List);
    
     
-        -----------------------------------
-   -- SPAWN FIRST WAVE
-   -----------------------------------
-     Game.Settings.Difficulty := 1;
-   
-     Spawn_Wave(15, --Antal
-		EnemyType(1), --Typ
-		1,
-		1,
-		Gameborder_X +1, 
-		Gameborder_Y +4,
-		Game.Settings.Difficulty, 
-		waves(1));
-     
-     Spawn_Wave(1, --Antal
-		EnemyType(3), --Typ
-		3,
-		1,
-		Gameborder_X +1, 
-		Gameborder_Y +2,
-		Game.Settings.Difficulty, 
-		waves(2));
-   
    loop 
       
       -- Tar bort väggskotten
@@ -161,16 +137,17 @@ begin
 	 Level_Cleared := True;    	    
       end if;
       
+      
+      -- Spawning The New Level
+      if New_Level then
+	 Spawn_Level(Level, Game.Settings.Difficulty, Waves, Level_Cleared, New_Level); 
+      end if; 
+
+      
 
       if Level_Cleared then
 	 -- From CLEARED Level To NEW Level
 	 Between_Levels(Loop_Counter, Game, Astroid_List, Obstacle_List, New_Level); 
-	 
-	 -- Spawning The New Level
-	 if New_Level then
-	    Spawn_Level(Level, Game.Settings.Difficulty, Waves, Level_Cleared, New_Level); 
-	 end if; 
-	 
 	 
       else
 	 -------------------------------------------------- 
@@ -190,6 +167,7 @@ begin
 	    Move_Rows_Down(Game.Map);
 	 end if;
       end if;   
+      
       
       -----------------------------------
       -- Update Enemy ships
@@ -305,31 +283,20 @@ begin
      
       Shot_Movement(Shot_List);
       	 
-      	 ---| Tar emot från klienterna
-	 if Game.Settings.Gameover /= 1 then
-	    Get_Player_Input(Sockets, Num_Players, Game, 
-			     Shot_List, Obstacle_List, Powerup_List);
-	 else
-	    
-	    Get_Players_Choice( Players_Choice , Sockets, Num_Players);
-	    
-	    
-	    for I in 1..Num_Players loop
-	       for J in 1..Num_Players loop	 
-		  if not Check_Players_Choice(Players_Choice, 'S', Num_Players)
-		    and not Check_Players_Choice(Players_Choice, 'o', Num_Players) then
-		     
-		     Put(Players_Choice(1));
-		     
-		     Put(Sockets(I), Players_Choice(J));
-		     
-		  else
-		     Put(Sockets(I), 'o');
-		  end if;   
-	       end loop;
-	    end loop;
-	    
-	 end if;
+      ---| Tar emot från klienterna
+      if Game.Settings.Gameover /= 1 then
+	 Get_Player_Input(Sockets, Num_Players, Game, 
+			  Shot_List, Obstacle_List, Powerup_List);
+      else
+	 
+	 Get_Players_Choice( Players_Choice , Sockets, Num_Players, Game);
+	 
+	 Send_Players_Choice( Players_Choice, Sockets, Num_Players);
+	 
+      end if;
+
+      exit when not Check_Players_Choice(Players_Choice, 'S', Num_Players) 
+	and not Check_Players_Choice(Players_Choice, 'o', Num_Players);
 
       
       Loop_Counter := Loop_Counter + 1;
@@ -347,18 +314,18 @@ begin
       DeleteList(Powerup_List);
       DeleteList(Astroid_List);
       DeleteList(Wall_List);
-   
-        if Check_Players_Choice(Players_Choice, 'E', Num_Players) then
+      
+      for I in Waves'Range loop
+	 DeleteList(Waves(I));
+      end loop;
+      
+      if Check_Players_Choice(Players_Choice, 'E', Num_Players) then
 	 for J in 1..Num_Players loop
 	    Remove_Player(Sockets(J), J);
 	 end loop;
 	 exit;
       end if;
       
-      if Check_Players_Choice(Players_Choice, 'S', Num_Players) then
-	 --	 Save_Score(Game.Players(I));
-	 null;
-      end if;
       
    end loop;
    
@@ -372,6 +339,11 @@ exception
       DeleteList(Powerup_List);
       DeleteList(Astroid_List);
       DeleteList(Wall_List);
+      
+      for I in Waves'Range loop
+	 DeleteList(Waves(I));
+      end loop;
+      
       New_Line;
       Put("Someone disconnected!");
    when STORAGE_ERROR =>
@@ -380,6 +352,11 @@ exception
       DeleteList(Powerup_List);
       DeleteList(Astroid_List);
       DeleteList(Wall_List);
+      
+      for I in Waves'Range loop
+	 DeleteList(Waves(I));
+      end loop;
+      
       New_Line;
       Put("VI HAR EN MINNESLÄCKAA!");
       
