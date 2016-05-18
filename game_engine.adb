@@ -4,12 +4,29 @@ package body Game_Engine is
    --|  DEFAULT VALUES
    --|  Här 
    --------------------------------------------------
-   procedure Set_Default_Values (Num_Players : in Integer;
-				 Game        : in out Game_Data
+   procedure Set_Default_Values (Num_Players    : in Integer;
+				 Game           : in out Game_Data;
+				 Loop_Counter   : out Integer;
+				 Players_Choice : out Players_Choice_Array;
+				 Level          : out Integer;
+				 Level_Cleared  : out Boolean;
+				 New_Level      : out Boolean
 			        ) is
       Xpos : Integer;
       Interval : constant Integer := World_X_Length/(1+Num_Players);
    begin
+      --------------------------------------------------
+      --| Game settings
+      --------------------------------------------------      
+      Loop_Counter := 1;
+      Players_Choice := ('o', 'o', 'o', 'o');
+      Game.Settings.Gameover := 0;
+      Game.Settings.Difficulty := 1;
+      Level := 0;
+      Level_Cleared := False;
+      New_Level := True;
+      Restore_Maps_Variables;
+      
       --------------------------------------------------
       --| Ships
       --------------------------------------------------
