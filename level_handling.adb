@@ -175,5 +175,57 @@ package body Level_Handling is
 
    end Kamikazee_Level;
    
+      -----------------------------------
+      -- SHIFTING_LAYER_LEVEL
+      -----------------------------------
+      
+   procedure Shifting_Layer_Level (Waves : out Enemy_List_Array;
+				   Difficulty : in Integer) is
+	 
+	 
+	 
+      begin
+	 	    
+	 Spawn_Wave(10,
+		    Minion,
+		    1,
+		    1,
+		    Gameborder_X +1,
+		    Gameborder_Y +2,
+		    Difficulty,
+		    Waves(1));
+	 
+	 Spawn_Wave(1,
+		    Kamikazee,
+		    4,
+		    -1,
+		    Gameborder_X +1,
+		    Gameborder_Y +6,
+		    Difficulty,
+		    Waves(2));
+	 
+	 Spawn_Wave(16,
+		    Minion,
+		    1,
+		    -1,
+		    Gameborder_X +1,
+		    Gameborder_Y +10,
+		    Difficulty,
+		    Waves(3));
+	 
+	 Spawn_Wave(1,
+		    Interceptor,
+		    3,
+		    1,
+		    Gameborder_X +1,
+		    Gameborder_Y +16,
+		    Difficulty,
+		    Waves(4));
+
+	 
+	 
+	 
+      end Shifting_Layer_Level;
+      
    
 end Level_Handling;
