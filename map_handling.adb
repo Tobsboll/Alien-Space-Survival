@@ -27,6 +27,24 @@ package body Map_Handling is
    
    
    
+
+   
+   
+   ----------------------------------------------------------
+   --| Återställer variabler
+   ---------------------------------------------------------- 
+   
+   procedure Restore_Maps_Variables is
+      
+   begin
+      Left_Border  := X_Led'First;
+      Right_Border := X_Led'Last;
+      Spawn_Y      := GameBorder_Y;
+   end Restore_Maps_Variables;
+   
+   
+   
+   
    ----------------------------------------------------------
    -- Tar emot banan från servern
    ----------------------------------------------------------  
