@@ -70,7 +70,7 @@ package body Menu_Handling is
       	 
 	 Menu(Option, 1, Position_X, Position_Y   , 13, 2, "   Start   ");
 	 Menu(Option, 2, Position_X, Position_Y+4 , 13, 2, "Multiplayer");
-	 Menu(Option, 3, Position_X, Position_Y+8 , 13, 2, " Settings  ");
+	 Menu(Option, 3, Position_X, Position_Y+8 , 13, 2, " Highscore ");
 	 Menu(Option, 4, Position_X, Position_Y+12, 13, 2, "  Credits  ");
 	 Menu(Option, 5, Position_X, Position_Y+16, 13, 2, "   Exit    ");
 	 
@@ -93,8 +93,9 @@ package body Menu_Handling is
 	    elsif Option = 2 then               -- Multiplayer
 	       Choice := '2';	    
 	       Option := 2;
-	    elsif Option = 3 then               -- Settings
-	       null;
+	    elsif Option = 3 then               -- Highscore
+	       Choice := '4';
+	       Option := 1;
 	    elsif Option = 4 then               -- Credits
 	       null;
 	    elsif Option = 5 then               -- Exit
@@ -184,6 +185,28 @@ package body Menu_Handling is
 	    end if;
 	 end if;
 	 
+      elsif Choice = '4' then                   -- Create Game window
+	 
+	 
+	 Put_Block_Box(Position_X-17, Position_Y, 46, 20, Dark_Grey, Green);      
+	 
+	 Set_Colours(Red, Dark_Grey);
+	 
+	 for I in 1 .. 19 loop
+	    Goto_XY(Position_X-16, Position_Y+I);
+	    Put("                                            ");
+	 end loop;
+	 
+	 Goto_XY(Position_X,Position_Y+1);
+	 Put_Highscore(Position_X-9, Position_Y + 2, 10); -- Top 10
+	 
+	 Menu(Option, 1, Position_X   , Position_Y+16, 13, 2, "   Back    ");
+	 
+	 
+	 if Is_Return(Navigate_Input) then          -- Enter
+	    Choice := '1';
+	    Option := 3;
+	 end if;
 	 
       end if;
       
