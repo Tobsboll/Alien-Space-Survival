@@ -39,13 +39,7 @@ package Enemy_Ship_Handling is
    
    
    
-   --------------------------------------------------
-   -- CONSTANTS
-   --------------------------------------------------
-   
-   Minion      : Integer := EnemyType(1);
-   Interceptor : Integer := EnemyType(3);
-   Kamikazee   : Integer := EnemyType(4);
+
    
    
    --------------------------------------------------
