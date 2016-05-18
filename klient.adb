@@ -90,8 +90,8 @@ begin
       begin
          -- Initierar en socket, detta krävs för att kunna ansluta denna till
 	 -- servern.
-	 if Choice /= 'R' and Choice /= 'E' then
-	 Initiate(Socket);
+	 if not Check_Players_Choice(Players_Choice, 'R', NumPlayers) and Choice /= 'E' then
+	    Initiate(Socket);
 	 
 	 Put_Line("Waiting for connection");
 	 Connect(Socket, Argument(1), Positive'Value(Argument(2)));  -- Connects to the server
@@ -121,6 +121,8 @@ begin
 	 
 	 if Choice /='E' then
 	 Get_Map(Socket, Data, Check_Update => False);
+	    Players_Choice := ('o', 'o', 'o', 'o');
+	    Choice := 'J';
 	 
 	 -------------------------------------------------------------
 	 --| Done with the player setup ------------------------------
@@ -144,23 +146,22 @@ begin
 	    DeleteList(Astroid_List);
 	    Get(Socket,Astroid_List);
 	    DeleteList(Shot_List);
-	    Get(Socket, Shot_List); Put_Line("shot klar");
+	    Get(Socket, Shot_List);
 	    DeleteList(Obstacle_List);
-	    Get(Socket, Obstacle_List); Put_Line("obstacle klar");
+	    Get(Socket, Obstacle_List);
 	    DeleteList(Powerup_List);
 	    Get(Socket, Powerup_List);
 	    
-	    Get_Map(Socket, Data);       Put_Line("Map klar"); -- Map_Handling
-	    Get_Game_Data(Socket,Data);  Put_Line("Game data klar");
+	    Get_Map(Socket, Data);       -- Map_Handling
+	    Get_Game_Data(Socket,Data); 
 	    
             --Enemies tas emot som objekt
 	    for I in 1..4 loop
 	       DeleteList(Waves(I));
-	       Get(Socket, Waves(I)); Put_Line("Wave klar");
+	       Get(Socket, Waves(I)); 
 	    end loop;
 	    
 	    Get(Socket, Gameover);
-	    Skip_Line(Socket);
 	    
             ---------------------------------------------------------------------
             -- SKRIV UT DATA
@@ -175,11 +176,11 @@ begin
 
 	    delay(0.04);
 	       
+	      	    -- Skickar Till servern
 	       if Gameover /= 1 then
 		  Get_Input;
 		  
-		  --Sänder ut användarens input från tangentbordet
-		  Send_Input(Socket);   
+		  Send_Input(Socket); 
 		  
 	       elsif Gameover = 1 then
 		  if (Choice /= 'E' and Choice /= 'R') then
@@ -192,21 +193,19 @@ begin
 			Put_Line(Socket, Choice);
 			
 		     else
-			Send_Input(Socket);   
+			Put_Line(Socket, 'o');   
 		     end if;
 		 end if;
 		 
-		 if Choice = 'E' and Choice = 'R' then
+		 if Choice = 'E' or Choice = 'R' then
 		    Put("Waiting for players");
+		    Put_Line(Socket, 'o');
 		 end if;
 		 
 		 for I in 1..NumPlayers loop
---		    while (Players_Choice(I) /= 'o' or Players_Choice(I) /= 'R')
---		      or Players_Choice(I) /= 'E' loop
 		       
-		       Get(Socket, Players_Choice(I));
+		    Get(Socket, Players_Choice(I));
 		       
---		    end loop;
 		 end loop;   
 	       end if;
 	       
