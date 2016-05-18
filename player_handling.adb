@@ -1,16 +1,5 @@
 package body Player_Handling is
-   -------------------------------------------------------------------------------------
-   procedure Swap(A, B : in out Integer) is
-      
-      C : Integer := A;
-      
-   begin
-      A := B;
-      B := C;
-   end Swap;
-   -------------------------------------------------------------------------------------
-   
-   
+
    ------------------------------------------------------------------------------------------
    ------------------------------------------------------------------------------| Server |--
    ------------------------------------------------------------------------------------------
@@ -84,24 +73,7 @@ package body Player_Handling is
       Put(" has left the game");
       
    end Remove_Player;
-   -------------------------------------------------------------------------------------
-   
-   procedure Sort_Scoreboard(Game : in out Game_Data;
-			     Num_Players : in Integer) is
-   
-   begin 
-      
-      if Num_Players > 1 then
-	 for I in reverse 2..Num_Players loop
-	    for J in Game.Ranking'Range loop
-	       if Game.Players(  Game.Ranking(I-1)  ).Score < Game.Players(  Game.Ranking(I)  ).Score then
-		  Swap (Game.Ranking(I-1),Game.Ranking(I));
-	       end if;
-	    end loop;
-	 end loop;
-      end if;
-      
-   end Sort_Scoreboard;
+
    -------------------------------------------------------------------------------------
    
    procedure Add_All_Players(Listener : in Listener_Type;
@@ -430,65 +402,7 @@ package body Player_Handling is
    end Put_Player_Ships;
    -------------------------------------------------------------------------------------
    
-   procedure Put_Score(Data        : in Game_Data; 
-		       NumPlayers  : in Integer;
-		       X           : in Integer;
-		       Y           : in Integer;
-		       Back_Colour : in Colour_Type;
-		       Text_Colour : in Colour_Type) is
-      
-      Old_Background  : Colour_Type;
-      Old_Text_Colour : Colour_Type;
-      
-   begin
-      Old_Text_Colour := Get_Foreground_Colour;           -- Sparar den tidigare textfärgen
-      Old_Background  := Get_Background_Colour;           -- Sparar den tidigare bakgrundsfärgen
-      Set_Background_Colour(Back_Colour);
-      Goto_XY(X+2,Y);	 
-      Set_Text_Modes(On,Off,Off);  -- Understreck på utskriften
-      Put("Nickname");
-      Goto_XY(X+13,Y);
-      Put(" Health  ");
-      Goto_XY(X+25,Y);
-      Put("Score");
-      Set_Text_Modes(Off,Off,Off); -- Återställer utskrift inställningarna
-      
-      for I in 1 .. NumPlayers loop
-	 Goto_XY(X,Y+I);
-	 Put(I, Width => 0);       -- Skriver ut placeringen
-	 Put('.');
-         Set_Foreground_Colour(Data.Players( Data.Ranking(I) ).Colour);                       -- Ställer in Spelarens färg.
-	 Set_Text_Modes(Off,Off,On);  -- Fet stil på utskriften
-	 Put(Data.Players( Data.Ranking(I) ).Name( 1..Data.Players( Data.Ranking(I) ).NameLength)); -- Skriver ut spelarens namn.
-	 
-	 Set_Foreground_Colour(Red);                             -- Ställer in färgen på hjärtan.
-	 Goto_XY(X+13,Y+I);
-	 
-	 if Data.Players( Data.Ranking(I) ).Ship.Health < 1 then            -- Om död.
-	    Put("R.I.P.");
-	    
-	 elsif Data.Players( Data.Ranking(I) ).Ship.Health > 0 then         -- annars lever
-	    
-	    for J in 1 .. Data.Players( Data.Ranking(I) ).Ship.Health loop
-	       if J = Data.Players( Data.Ranking(I) ).Ship.Health and J mod 2 = 1 then
-		  Set_Foreground_Colour(Dark_Grey);
-		  Put("♥ ");                                -- Ställer in färgen på hjärtan.
-	       else
-		  if J mod 2 = 0 then
-		     Set_Foreground_Colour(Red);                             -- Ställer in färgen på hjärtan.
-		     Put("♥ ");   
-		  end if;
-	       end if;                                            -- Antal liv
-	    end loop;
-	 end if;
-	 Set_Text_Modes(Off,Off,Off);
-	 Set_Foreground_Colour(Old_Text_Colour);                    -- Ställer tillbaka till text färgen.
-	 Goto_XY(X+25,Y+I);
-	 Put(Data.Players( Data.Ranking(I) ).Score, Width => 5);    -- skriver ut spelarens poäng
-	 Set_BackGround_Colour(Old_Background);                     -- Ställer tillbaka till bakgrunds färgen.
-      end loop;
-   end Put_Score;
-   -------------------------------------------------------------------------------------
+  
    
    procedure Put_Player_Choice(Socket : in Socket_Type;
 			       Choice : in Character;
