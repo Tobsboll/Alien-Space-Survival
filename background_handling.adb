@@ -503,18 +503,21 @@ package body Background_Handling is
 	 --| Game Colour Bottom
 	 -------------------------------------------------
 	 Set_Background_Colour(Bottom_BG_Colour);
-	 Goto_XY(2,GameBorder_Y+World_Y_Length);
-	 Put("                                                                                                                                                  ");
 	 
-	 for I in 1 .. 3 loop
-	    Goto_XY(2,GameBorder_Y+World_Y_Length+I);
-	    Put("   ");
-	    Goto_XY(GameBorder_X+World_X_Length, GameBorder_Y+World_Y_Length+I);
-	    Put("                                  ");
+	 for I in 1..5 loop
+	 Goto_XY(2,GameBorder_Y+World_Y_Length-1+I);
+	 Put("                                                                                                                                                  ");
 	 end loop;
 	 
-	 Goto_XY(2,GameBorder_Y+World_Y_Length+4);
-	 Put("                                                                                                                                                  ");
+	 --  for I in 1 .. 3 loop
+	 --     Goto_XY(2,GameBorder_Y+World_Y_Length+I);
+	 --     Put("   ");
+	 --     Goto_XY(GameBorder_X+World_X_Length, GameBorder_Y+World_Y_Length+I);
+	 --     Put("                                  ");
+	 --  end loop;
+	 
+	 --  Goto_XY(2,GameBorder_Y+World_Y_Length+4);
+	 --  Put("                                                                                                                                                  ");
 	 
       end if;
    end Put_Background;
