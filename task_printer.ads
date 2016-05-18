@@ -4,6 +4,7 @@ with TJa.Window.Text;     use TJa.Window.Text;
 with Enemy_ship_handling; use Enemy_Ship_handling;
 with Object_Handling;     use Object_Handling;
 with Player_Handling;     use Player_Handling;
+with Score_Handling;      use Score_Handling;
 with Window_Handling;     use Window_Handling;
 with Background_Handling; use Background_Handling;
 with Menu_Handling;       use Menu_Handling;
