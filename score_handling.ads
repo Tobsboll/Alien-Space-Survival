@@ -8,8 +8,14 @@ with Ada.Sequential_IO;
 
 package Score_Handling is
    
-   
-   
+   procedure Sort_Scoreboard(Game : in out Game_Data;
+			     Num_Players : in Integer);
+   procedure Put_Score(Data        : in Game_Data; 
+		       NumPlayers  : in Integer;
+		       X           : in Integer;
+		       Y           : in Integer;
+		       Back_Colour : in Colour_Type;
+		       Text_Colour : in Colour_Type);
    function Does_File_Exist (Name : in String) return Boolean;
    procedure Save_Score(Player : in Player_Type);
    procedure Put_Highscore(X     : in Integer;
