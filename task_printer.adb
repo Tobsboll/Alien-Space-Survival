@@ -67,19 +67,20 @@ package body Task_Printer is
 	    Put_Space(Highscore_Window_Width-2, HighScore_Background);
 	    Goto_XY(Highscore_Window_X+1, Highscore_Window_Y+2);
 	    Put_Space(Highscore_Window_Width-2, HighScore_Background);
+	    
 	    Put_Score(Data, NumPlayers, Highscore_X, Highscore_Y, 
 		      HighScore_Background, White);    -- Skriver ut den sorterade scorelistan / Eric
 	    
 	    -------------------------------------------------
 	    
-	    -------------------------------------------------
-	    --| Där man skriver för att chatta
-	    -------------------------------------------------
-	    Put_Block_Box(Chatt_Window_X, Chatt_Window_Y,                    -- Ett litet fönster för att skriva i. / Eric 
-			  World_X_Length, 2, Chatt_Background, Chatt_Border); 
-	    Goto_XY(Gameborder_X+1,Gameborder_Y+World_Y_Length+2);
-	    Put("Här skriver man.");
-	    -------------------------------------------------
+	    --  -------------------------------------------------
+	    --  --| Där man skriver för att chatta
+	    --  -------------------------------------------------
+	    --  Put_Block_Box(Chatt_Window_X, Chatt_Window_Y,                    -- Ett litet fönster för att skriva i. / Eric 
+	    --  		  World_X_Length, 2, Chatt_Background, Chatt_Border); 
+	    --  Goto_XY(Gameborder_X+1,Gameborder_Y+World_Y_Length+2);
+	    --  Put("Här skriver man.");
+	    --  -------------------------------------------------
 
 	    Put_World(Data.Map);
 	    
