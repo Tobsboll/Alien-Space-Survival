@@ -11,8 +11,6 @@ wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/map_
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/map_handling.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/window_handling.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/window_handling.ads
-wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/box_hantering.adb
-wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/box_hantering.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/key_codes
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/background_handling.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/background_handling.ads
