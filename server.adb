@@ -139,10 +139,7 @@ begin
       DeleteList(Wall_List);
       
       -- Kontrollerar om leveln är avklarad:
-      if Empty(Waves(1)) and 
-	Empty(Waves(2)) and 
-	Empty(Waves(3)) and 
-	Empty(Waves(4)) then
+      if All_Enemies_Dead(Waves) then
 	 if not Level_Cleared then
 	    Loop_Counter := 1;
 	 end if;
@@ -152,7 +149,7 @@ begin
       
       -- Spawning The New Level
       if New_Level then
-	 Spawn_Level(Level, Game.Settings.Difficulty, Waves, Level_Cleared, New_Level); 
+	 Spawn_Level(Level, Game.Settings.Difficulty, Waves, Level_Cleared, New_Level, Num_Players); 
       end if; 
 
       
