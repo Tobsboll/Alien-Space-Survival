@@ -11,7 +11,7 @@ package body Task_Printer is
       NumPlayers    : Integer;
       Klient_Number : Integer;
       Gameover      : Integer;
-      Choice        : Character;
+      Choice        : Character := 'o';
       Stop_Task     : Boolean := False;
       
    begin
