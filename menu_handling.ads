@@ -6,6 +6,7 @@ with TJa.Window.Text;     use TJa.Window.Text;
 with Definitions;         use Definitions;
 with Player_Handling;     use Player_Handling;
 with Window_Handling;     use Window_Handling;
+with Score_Handling;      use Score_Handling;
 
 
 package Menu_Handling is
@@ -20,6 +21,7 @@ package Menu_Handling is
 		                                     -- 1 = Start Menu
 		                                     -- 2 = Multiplayer Menu
 		                                     -- 3 = Create Game Window
+						     -- 4 = Highscore
 		      NumPlayers : in out Integer;
 		      Portadress : in out Integer;
 		      Ipadress      : in out String; 
