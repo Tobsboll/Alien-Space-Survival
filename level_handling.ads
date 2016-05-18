@@ -34,5 +34,9 @@ subtype One_To_8 is Integer range 1..4;
    --| LEVELS
    ----------------------------------------------------------------------
     procedure Kamikazee_Level ( Wave : out Enemy_List_Array);
+       
+    procedure Shifting_Layer_Level (Waves : out Enemy_List_Array;
+				   Difficulty : in Integer);
+    
    
 end Level_Handling;
