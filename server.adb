@@ -33,7 +33,7 @@ procedure Server is
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
    Listener                           : Listener_Type;
    
-   Num_Players            : Integer;
+   Num_Players            : Integer := 1;
    Obstacle_Y             : Integer;
    Level                  : Integer := 0;
    Loop_Counter           : Integer;
