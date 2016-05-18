@@ -228,7 +228,7 @@ package body Player_Handling is
 	       Put(Sockets(I), Players_Choice(J));
 	       
 	    else
-	       Put_Line(Sockets(I), 'o');
+	       Put(Sockets(I), 'o');
 	    end if;   
 	 end loop;
       end loop;
@@ -291,16 +291,16 @@ package body Player_Handling is
       
    begin
       
-      if Is_Up_Arrow(Keyboard_input) then Put_Line(Socket, 'w'); 
-      elsif Is_Down_Arrow(Keyboard_input) then Put_Line(Socket, 's');
-      elsif Is_Left_Arrow(Keyboard_input) then Put_Line(Socket, 'a');
-      elsif Is_Right_Arrow(Keyboard_input) then Put_Line(Socket, 'd');
+      if Is_Up_Arrow(Keyboard_input) then Put(Socket, 'w'); 
+      elsif Is_Down_Arrow(Keyboard_input) then Put(Socket, 's');
+      elsif Is_Left_Arrow(Keyboard_input) then Put(Socket, 'a');
+      elsif Is_Right_Arrow(Keyboard_input) then Put(Socket, 'd');
       elsif (Is_Character(Keyboard_Input) and then To_Character(Keyboard_Input)='m') then 
-	 Put_Line(Socket, 'm');
+	 Put(Socket, 'm');
       elsif (Is_Character(Keyboard_Input) and then To_Character(Keyboard_Input)=' ') then 
-	 Put_Line(Socket, ' '); 
+	 Put(Socket, ' '); 
 	 
-      else Put_Line(Socket, 'o'); -- betyder "ingen input" för servern.
+      else Put(Socket, 'o'); -- betyder "ingen input" för servern.
       end if;
       
    exception
