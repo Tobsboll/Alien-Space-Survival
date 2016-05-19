@@ -67,10 +67,10 @@ package Graphics is
 					"(o)", --Laser upgrade
 					"(X)", --Hitech laser
 					"(3)", --Tri-Laser
-					"(D)", --Diagonal-laser
+					"(V)", --Diagonal-laser
 					"(N)", --Nitro-shot
 					"(M)", --Super Missile
-					"( )",
+					"<|>", --Revive Friend
 					"( )"
 				      );
    
