@@ -37,6 +37,7 @@ procedure Server is
    Obstacle_Y             : Integer;
    Level                  : Integer := 0;
    Loop_Counter           : Integer;
+   Player_To_Revive       : Integer;
    Server_Waiting         : Character := 'o';
    
    Game                   : Game_Data;
@@ -121,7 +122,7 @@ begin
      Create_Object(PowerUpType(health), 80, Obstacle_Y_Pos+6, 0, Powerup_List);
      Create_Object(PowerUpType(Super_Missile), 90, Obstacle_Y_Pos+6, 0, Powerup_List);
      Create_Object(PowerUpType(Laser_Upgrade), 97, Obstacle_Y_Pos+6, 0, Powerup_List);
-   
+     Create_Object(PowerUpType(Hitech_Laser), 110, Obstacle_Y_Pos+6, 0, Powerup_List);
     
    loop 
       
@@ -230,6 +231,8 @@ begin
 				      Game.Players(I).Ship, --Uppdaterar ship_spec
 				      Powerup_List);        --Om spelare träffas
 							    --Av powerup
+							    
+	   Revive_Player(Player_To_Revive, Game.Players);
 	   
 	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				     Game.Players(I).Ship.XY(2),
