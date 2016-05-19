@@ -2,6 +2,7 @@ wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/defi
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/enemy_ship_handling.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/enemy_ship_handling.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/klient.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/klient2.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/server.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/graphics.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/graphics.ads
