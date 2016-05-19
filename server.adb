@@ -303,6 +303,9 @@ begin
       end loop;
      
       Shot_Movement(Shot_List);
+      for I in Waves'Range loop
+	 Delete_Object_In_List(Waves(I), ShotType(Explosion) );
+      end loop;
       	 
       -----------------------------------
       ---| Tar emot från klienterna
