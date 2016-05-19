@@ -233,7 +233,7 @@ begin
 							    
 	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				      Game.Players(I).Ship.XY(2),
-				      Game.Players(I).Ship, --Uppdaterar ship_spec
+				      Game.Players(I),      --Uppdaterar ship_spec
 				      Powerup_List,         --Om spelare träffas
 				      Player_To_Revive      --Av powerup
 				      );
