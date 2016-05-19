@@ -99,8 +99,10 @@ package Game_Engine is
    --med olika objekt på spelplanen. (allt är specialfall)
    --Varje typ av objekt ger unika konsekvenser
    procedure Player_Collide_In_Object ( X,Y         : in Integer;
-					Player_Ship : in out Ship_Spec;
-					L           : in out Object_List);
+					Player      : in out Player_Type;
+					L           : in out Object_List;
+					Player_To_Revive    : out Integer
+				      );
    
    function Shot_Collide (Shot, obj : in Object_List) return boolean;
    procedure A_Shot_Collide_In_Object (Shot, Obj2 : in out Object_List;
@@ -132,14 +134,27 @@ package Game_Engine is
    procedure Update_Player_Recharge (Player : in out Player_Type);
    
    --Som det låter:
+   procedure Kill_Player (Player : in out Player_Type;
+			  Player_Number : in Integer;
+			  Explosion_List : in out Object_List;
+			  PowerUp_List   : in out Object_List);
+   
+   procedure Revive_Player(PlayerNumber : in Integer;
+			   Player       : in out Player_Array);
+   
    procedure Create_Explosion_Big (L : in out Object_List;
-				   X, Y : in Integer);
-   procedure Create_Explosion_Small ( L : in out Object_List;
-				      X , Y : in Integer);
-   procedure Create_Ricochet ( L : in out Object_List;
-			       X , Y : in Integer);
+					   X, Y : in Integer);
+   
+   procedure Create_Explosion_Medium (L : in out Object_List;
+				        X, Y : in Integer);
+   procedure Create_Explosion_Small (L : in out Object_List;
+				      X , Y  : in Integer);
+   procedure Create_Ricochet (L             : in out Object_List;
+			       X , Y         : in Integer);
    procedure Create_Nitro_Explosion (L : in out Object_List;
-				     X, Y : in Integer);
-   procedure Create_Side_Thrust ( L : in out Object_List;
-				  X , Y : in Integer);
+				     X, Y    : in Integer);
+   procedure Create_Hitech_Explosion ( L     : in out Object_List;
+				       X , Y : in Integer);
+   procedure Create_Side_Thrust ( L          : in out Object_List;
+				  X , Y      : in Integer);
 end Game_Engine;
