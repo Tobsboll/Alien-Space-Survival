@@ -217,34 +217,43 @@ begin
 	 if Game.Players(I).Playing then
 	    Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				      Game.Players(I).Ship.XY(2),
-				      Game.Players(I).Ship, --Uppdaterar ship_spec
-				      Shot_List);           --Om spelare träffas
-							    --Av skott.
+				      Game.Players(I),      --Uppdaterar ship_spec
+				      Shot_List,             --Om spelare träffas
+				      Player_To_Revive           --Av skott.
+				    );
+				      
 	    Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				      Game.Players(I).Ship.XY(2),
-				      Game.Players(I).Ship, --Uppdaterar ship_spec
-				      Astroid_List);        --Om spelare träffas
-							    --Av asteroid
+				      Game.Players(I),      --Uppdaterar ship_spec
+				      Astroid_List,        --Om spelare träffas
+				      Player_To_Revive	    --Av asteroid
+				    );
+							    
+	   
 							    
 	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				      Game.Players(I).Ship.XY(2),
 				      Game.Players(I).Ship, --Uppdaterar ship_spec
-				      Powerup_List);        --Om spelare träffas
-							    --Av powerup
+				      Powerup_List,         --Om spelare träffas
+				      Player_To_Revive      --Av powerup
+				      );
 							    
 	   Revive_Player(Player_To_Revive, Game.Players);
 	   
 	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				     Game.Players(I).Ship.XY(2),
-				     Game.Players(I).Ship, --Uppdaterar ship_spec
-				     Wall_List);           --Om spelare träffas
-							   --Av Vägg
+				     Game.Players(I),     --Uppdaterar ship_spec
+				     Wall_List,           --Om spelare träffas
+				     Player_To_Revive      --Av Vägg
+				   );
 
 	    for K in 1..4 loop
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 					 Game.Players(I).Ship.XY(2),
-					 Game.Players(I).Ship, --Uppdaterar ship_spec
-					 Waves(K));        -- Om spelare krashar i fiende
+					 Game.Players(I), --Uppdaterar ship_spec
+					 Waves(K),         -- Om spelare krashar i fiende
+					 Player_To_Revive  
+				       );
 	       
 	       Update_Player_Recharge(Game.Players(I));
 	    end loop;
