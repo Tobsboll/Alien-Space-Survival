@@ -28,6 +28,7 @@ package Definitions is
    Diagonal_Laser : constant Integer := 6;
    Nitro_Upgrade  : constant Integer := 7;
    Super_Missile  : constant Integer := 8;
+   Revive_Friend  : constant Integer := 9;
    
    --------------------------------------------------
    --Shots
