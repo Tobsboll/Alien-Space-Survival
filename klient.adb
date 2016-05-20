@@ -211,7 +211,7 @@ begin
 		     
 		     if Is_Return(Navigate_Input) then
 			
-			Get_From_Printer(Choice);
+--			Get_From_Printer(Choice);
 			
 			Put(Socket, Choice);
 			
