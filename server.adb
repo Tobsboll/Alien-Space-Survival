@@ -252,7 +252,6 @@ begin
 				       );
 	       
 	    end loop;
-	       Update_Player_Recharge(Game.Players(I));	
 	       
 	       --Thrusters:
 	       if Level_Cleared and then Loop_Counter mod 2 = 0 then
@@ -307,8 +306,16 @@ begin
 	 Put_Line(Sockets(I), Loop_Counter);
 
       end loop;
-     
+      
+      ------------------------------------------------------------
+      --| Efter Put i socket (uppdatera):
+      
+      for I in 1..Num_Players loop
+	 Update_Player_Recharge(Game.Players(I));
+      end loop;
+      
       Shot_Movement(Shot_List);
+      
       for I in Waves'Range loop
 	 Delete_Object_In_List(Waves(I), ShotType(Explosion) );
       end loop;
