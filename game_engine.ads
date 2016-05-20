@@ -155,6 +155,10 @@ package Game_Engine is
 				     X, Y    : in Integer);
    procedure Create_Hitech_Explosion ( L     : in out Object_List;
 				       X , Y : in Integer);
+   procedure Create_Nuke (L : in out Object_List;
+			  X, Y : in Integer);
+   procedure Activate_Thrusters (L : in out Object_List;
+				 X, Y : in Integer);
    procedure Create_Side_Thrust ( L          : in out Object_List;
 				  X , Y      : in Integer);
 end Game_Engine;
