@@ -24,6 +24,8 @@ package body Player_Handling is
 	 
 	 Put_Line(Socket, Ship.Missile_Ammo);
 	 
+	 Put_Line(Socket, Ship.Laser_Recharge);
+	 
 	 if Ship.Tri_Laser then
 	    Put_Line(Socket, 1);
 	 else
@@ -390,6 +392,8 @@ package body Player_Handling is
 	 Get(Socket, Ship.Laser_Type);
 	 
 	 Get(Socket, Ship.Missile_Ammo);
+	 
+	 Get(Socket, Ship.Laser_Recharge);
 	 
 	 Get(Socket, Check_Active);
 	 if Check_Active = 1 then
