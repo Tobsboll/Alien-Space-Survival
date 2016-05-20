@@ -87,6 +87,8 @@ package Definitions is
   	 Laser_Type : Integer;
 	 Missile_Ammo : Integer;
 	 Laser_Recharge : Integer;
+	 
+	 Hitech_Laser   : Boolean;
 	 Tri_Laser      : Boolean;
 	 Diagonal_Laser : Boolean;
 	 Super_Missile  : Boolean;
