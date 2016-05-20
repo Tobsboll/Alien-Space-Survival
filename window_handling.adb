@@ -186,6 +186,57 @@ package body Window_Handling is
    end Put_Space_Box;
    
    
+   procedure Put_Line_Space_Box(X           : in Integer;     
+				Y           : in Integer; 
+				Width       : in Integer;
+				Height      : in Integer;
+				Background  : in Colour_Type;
+				Text_Colour : in Colour_Type) is
+      
+      Old_Background  : Colour_Type;
+      Old_Text_Colour : Colour_Type;
+      
+      
+   begin
+      Old_Text_Colour := Get_Foreground_Colour;
+      Old_Background  := Get_Background_Colour; 
+      
+      Set_Colours(Text_Colour, Background); 
+      
+      Goto_XY(X,Y);
+      Put("┌");
+      for I in 1 .. (Width/2)-1 loop
+	 Put(" ─");
+      end loop;
+      Put(" ┐");
+      
+      for I in 1 .. Height-1 loop
+	 Goto_XY(X,Y+I);
+	 if I mod 2 = 0 then
+	   Put("╷");
+	 else
+	    Put("╵");
+	 end if;
+	 Goto_XY(X+Width-1,Y+I);
+	 if I mod 2 = 0 then
+	   Put("╷");
+	 else
+	    Put("╵");
+	 end if;
+      end loop;
+      
+      Goto_XY(X,Y+Height);
+      Put("└");
+      for I in 1 .. (Width/2)-1 loop
+	 Put(" ─");
+      end loop;
+      Put(" ┘");
+      
+      Set_Colours(Old_Text_Colour, Old_Background);
+      
+   end Put_Line_Space_Box;
+   
+   
    ---------------------------------------------
    procedure Clear_Window is
       
