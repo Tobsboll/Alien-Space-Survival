@@ -49,7 +49,8 @@ package body Graphics is
 	 	--	       Put("╰╯"); 
 
 	       elsif L.Object_Type = ShotType(Explosion)
-		 or L.Object_Type = ShotType(Ricochet) then -- explosion
+		 or L.Object_Type = ShotType(Ricochet)
+		 or L.Object_Type = ShotType(Special_Explosion) then -- explosion
 		  Set_Background_Colour(Explosion_1);
 		  Put(' ');
 		  Set_Background_Colour(Old_Bg_Colour);
@@ -80,6 +81,11 @@ package body Graphics is
 		  else
 		     Put('\');
 		  end if;
+		  Set_Foreground_Colour(Old_Text_Colour);
+		  
+	       elsif L.Object_Type = ShotType(Thrust) then
+		  Set_Foreground_Colour(Thrust_Colour);
+		  Put("*");
 		  Set_Foreground_Colour(Old_Text_Colour);
 		  
 	       else  
@@ -131,27 +137,7 @@ package body Graphics is
 
       
    end Put_Objects;
-   
-    --------------------------------------------------
-   --| Put Enemies
-   --|
-   --| Allmän procedur som ritar ut fiender beroende på vilken typ det är 
-   --------------------------------------------------
-   --  procedure Put_Enemies (L : in Enemy_List) is
-      
-   --  begin
-   --     if not Empty(L) then
-   --        if L.XY(1) > 1 then        -- Hindrar koden från att gå utanför vänstra kanten på terminalen
-   --  	 Goto_XY(L.XY(1), L.XY(2)); --Här blir det CONSTRAINT_ERROR lite då och då av någon anledning...
-   --  	 Put( Enemy_1(1) );
-   --  	 Goto_XY(L.XY(1), L.XY(2)+1);
-   --  	 Put( Enemy_1(2) );
-	 
-   --  	 Put_Enemies(L.Next);
-   --  	 end if;
-   --     end if;
-      
-   --  end Put_Enemies;
+
    
    
 end Graphics;
