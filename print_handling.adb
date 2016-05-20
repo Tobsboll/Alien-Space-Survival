@@ -13,6 +13,8 @@ package body Print_Handling is
 		     Choice        : in out Character) is
       
       Super_Missile : Boolean := Game.Players(Klient_Number).Ship.Super_Missile;
+      Cooldown      : Integer := 0;
+      Power_Time    : Integer := 0;
       
    begin
       Clear_Window;
@@ -114,14 +116,19 @@ package body Print_Handling is
       
       Goto_XY(Gameborder_X+World_X_Length+1, Gameborder_Y+Highscore_Window_Height+Num_Players+4);
       Put("Weapon Type: ");
+      Set_Foreground_Colour(Red);
       if Game.Players(Klient_Number).Ship.Laser_Type = Normal_Laser_Shot then
 	 Put("Normal Laser");
+	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*10;
       elsif Game.Players(Klient_Number).Ship.Laser_Type = Laser_Upgraded_Shot then
 	 Put("Upgraded Laser");
+	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*10;
       elsif Game.Players(Klient_Number).Ship.Laser_Type = Hitech_Laser_Shot then
 	 Put("Hitech Laser");
+	 Power_Time := Game.Players(Klient_Number).Ship.Laser_Recharge/10;
       elsif Game.Players(Klient_Number).Ship.Laser_Type = Nitro_Shot then
 	 Put("Nitro");
+	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge/10;
       end if;
       
       if Game.Players(Klient_Number).Ship.Laser_Type in 1 .. 2 then
@@ -144,10 +151,43 @@ package body Print_Handling is
       end if;
       -----------------------------------------------------------------
       
+      Set_Bold_Mode(Off); -- Måste stänga av annars är färgen Dark_Grey på boxen under
+      Put_Double_Line_Box(Gameborder_X+World_X_Length+2, Gameborder_Y+Highscore_Window_Height+10, Highscore_Window_Width-2, 2, Game_Wall_Background, Black);
+
+      
+      Set_Foreground_Colour(Red);
+      Goto_XY(Gameborder_X+World_X_Length+3, Gameborder_Y+Highscore_Window_Height+11);
+      for I in 1 .. Cooldown loop
+	 Put("▌");
+      end loop;
+      Set_Foreground_Colour(Black);
+      Goto_XY(Gameborder_X+World_X_Length+13, Gameborder_Y+Highscore_Window_Height+10);
+      Put("COOLDOWN");
+      Set_Foreground_Colour(White);
+      Set_Bold_Mode(On);
+      
+      -----------------------------------------------------------------
+      --| Power TIME BOX
+      -----------------------------------------------------------------
+      Set_Bold_Mode(Off); -- Måste stänga av annars är färgen Dark_Grey på boxen under
+      Put_Double_Line_Box(Gameborder_X+World_X_Length+2, Gameborder_Y+Highscore_Window_Height+13, Highscore_Window_Width-2, 2, Game_Wall_Background, Black);
+      
+      Goto_XY(Gameborder_X+World_X_Length+3, Gameborder_Y+Highscore_Window_Height+14);
+      Set_Foreground_Colour(Red);
+      for I in 1 .. Power_Time loop
+	 Put("▌");
+      end loop;
+      Set_Foreground_Colour(Black);
+      Goto_XY(Gameborder_X+World_X_Length+12, Gameborder_Y+Highscore_Window_Height+13);
+      Put("POWER LEVEL");
+      Set_Foreground_Colour(White);
+      Set_Bold_Mode(On);
+      
       
       -----------------------------------------------------------------
       --| Powerup info box
       -----------------------------------------------------------------
+      Set_Foreground_Colour(White);
       Put_Line_Space_Box(Gameborder_X+World_X_Length+2, Gameborder_Y+Highscore_Window_Height+16, Highscore_Window_Width-2, 10, Game_Wall_Background, White);
       Goto_XY(Gameborder_X+World_X_Length+11, Gameborder_Y+Highscore_Window_Height+17); 
       Set_Underlined_Mode(On);
