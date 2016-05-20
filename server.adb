@@ -136,6 +136,11 @@ begin
       
       ---------------------------------------|
       
+      -- Spawning The New Level
+      if New_Level then
+	 Spawn_Level(Level, Game.Settings.Difficulty, Waves, Level_Cleared, New_Level, Num_Players); 
+      end if; 
+      
       -- Tar bort väggskotten
       DeleteList(Wall_List);
       
@@ -147,14 +152,6 @@ begin
 	 Level_Cleared := True;    	    
       end if;
       
-      
-      -- Spawning The New Level
-      if New_Level then
-	 Spawn_Level(Level, Game.Settings.Difficulty, Waves, Level_Cleared, New_Level, Num_Players); 
-      end if; 
-
-      
-
       if Level_Cleared then
 	 -- From CLEARED Level To NEW Level
 	 Between_Levels(Loop_Counter, Game, Astroid_List, Obstacle_List, New_Level); 
