@@ -21,7 +21,8 @@ with Menu_Handling;           use Menu_Handling;
 with Window_Handling;         use Window_Handling;
 with Score_Handling;          use Score_Handling;
 with Map_Handling;            use Map_Handling;
-with Task_Printer;            use Task_Printer;
+--with Task_Printer;            use Task_Printer;
+with Print_Handling;          use Print_Handling;
 
 procedure Klient is
 
@@ -35,12 +36,14 @@ procedure Klient is
 
    NumPlayers     : Integer := 1;
    Gameover       : Integer := 0;
+   Level          : Integer;
+   Loop_Counter   : Integer;
    Klient_Number  : Integer := 1;               -- Servern skickar klientnumret
    Klient_Waiting : Character := 'o';
    
    Keyboard_Input : Key_Type;
    Esc            : constant Key_Code_Type := 27;
-   Data           : Game_Data;    -- Spelinformation som tas emot från servern.
+   Game           : Game_Data;    -- Spelinformation som tas emot från servern.
    Shot_List      : Object_List;
    Astroid_List   : Object_List;
    Obstacle_List  : Object_List;
@@ -70,8 +73,6 @@ begin
    
    loop
       
-      
-      
       -------------------------------------------------------------
       --| Start of Menu -------------------------------------------
       -------------------------------------------------------------
@@ -83,7 +84,7 @@ begin
       			 World_X_Length, World_Y_Length);
 	 
       	 Put_Menu(Choice, NumPlayers, Portadress, Ipadress, 
-      		  Data.Players(1).Name, Data.Players(1).NameLength);
+      		  Game.Players(1).Name, Game.Players(1).NameLength);
 	 
       end loop;
       -------------------------------------------------------------
@@ -114,17 +115,17 @@ begin
 	 
 	 Set_Window_Title("Klient",Klient_Number);  -- Change the window title
 	 
-	 Send_Player_Nick_Colour(Socket, Data.Players(1), Klient_Number); 
+	 Send_Player_Nick_Colour(Socket, Game.Players(1), Klient_Number); 
 	 
 	 --      Put_Waiting_For_Players(Socket);    -- A screen that waits for players
 	 
 	 for I in 1 .. NumPlayers loop
-	    Get_Player_Nick_Colour(Socket, Data.Players(I));
+	    Get_Player_Nick_Colour(Socket, Game.Players(I));
 	 end loop;
 	 end if;
 	 
 	 if Choice /='E' then
-	 Get_Map(Socket, Data, Check_Update => False);
+	 Get_Map(Socket, Game, Check_Update => False);
 	    Players_Choice := ('o', 'o', 'o', 'o');
 	    Choice := 'J';
 	 
@@ -169,8 +170,8 @@ begin
 	    DeleteList(Powerup_List);
 	    Get(Socket, Powerup_List);
 	    
-	    Get_Map(Socket, Data);       -- Map_Handling
-	    Get_Game_Data(Socket,Data); 
+	    Get_Map(Socket, Game);       -- Map_Handling
+	    Get_Game_Data(Socket, Game); 
 	    
             --Enemies tas emot som objekt
 	    for I in 1..4 loop
@@ -178,30 +179,35 @@ begin
 	       Get(Socket, Waves(I)); 
 	    end loop;
 	    
-	    Get(Socket, Gameover);
+	    Get(Socket, Level);
+	    Get(Socket, Loop_Counter);
 	    
             ---------------------------------------------------------------------
             -- SKRIV UT DATA
             ---------------------------------------------------------------------
             
             -- Task_Printer
-	    Printer(Data, Waves, Astroid_List, Shot_List, Obstacle_List, Powerup_List, NumPlayers, Gameover, Klient_Number);
+--	    Printer(Game, Waves, Powerup_List, Astroid_List, Obstacle_List, Shot_List, NumPlayers, Klient_Number, Level, Loop_Counter);
 	    
+	    -- Utan Task_Printer
+	    Put_All(Game, Waves, Powerup_List, Astroid_List, Obstacle_List, Shot_List, NumPlayers, Klient_Number, Level, Loop_Counter, Choice);
+	   	    
             --------------------------------------------------------------------
             -- SKICKA DATA
             --------------------------------------------------------------------
 	    
-	    delay(0.02);
+	    delay(0.01);
 	       
 	      	    -- Skickar Till servern
-	       if Gameover /= 1 then
+	       if Game.Settings.Gameover /= 1 then
 		  Get_Input;
 		  
 		  Send_Input(Socket); 
 		  
-	       elsif Gameover = 1 then
-		  if (Choice /= 'E' and Choice /= 'R') then
-		     
+	       elsif Game.Settings.Gameover = 1 then
+--		  if (Choice /= 'E' and Choice /= 'R') then
+		  if Players_Choice(Klient_Number) /= 'E' and	
+		    Players_Choice(Klient_Number) /= 'R' then
 		     
 		     if Is_Return(Navigate_Input) then
 			
@@ -215,7 +221,6 @@ begin
 		 end if;
 		 
 		 if Choice = 'E' or Choice = 'R' then
---		    Put("Waiting for players");
 		    Put(Socket, 'o');
 		 end if;
 		 
@@ -236,12 +241,30 @@ begin
 	    
 	    Put(Socket, '$');      
 	    
+	    if Check_Players_Choice(Players_Choice, 'E', NumPlayers) then
+	       delay(0.2);
+	       --Innan programmet avslutar stängs socketen, detta genererar ett exception
+	       --hos servern, pss kommer denna klient få ett exception när servern avslutas
+	       Close(Socket);
+	    end if;
+	       
+	 end if;
+	 
+	 Clear_Window;
+	 if Choice = 'E' then
+	    Put("Closing the program.");
+	    for I in 1..3 loop
+	       delay(0.5);
+	       Put('.');
+	    end loop;
+	    exit;
+	 elsif Check_Players_Choice(Players_Choice, 'E', NumPlayers) then
 	    
-	    
+	    Put("Someone has closed the game!");
+	    exit;
 	 end if;
 	 
 
-	 
 	 --Fria allokerat minne
 	 DeleteList(Shot_List);
 	 DeleteList(Obstacle_List);
@@ -262,29 +285,9 @@ begin
 	    exit;                              -- Meningen är att man kanske kommer tillbaka till menyn.
       end;
       
-      Clear_Window;
-      if Choice = 'E' then
-	 Put("Closing the program.");
-	 for I in 1..3 loop
-	    delay(0.5);
-	    Put('.');
-	 end loop;
-	 exit;
-      elsif Check_Players_Choice(Players_Choice, 'E', NumPlayers) then
-      
-	 Put("Someone has closed the game!");
-	 exit;
-      end if;
-      
    end loop;
    Cursor_visible;
    Set_Echo(On);
-   Stop_Printer;
-
-   --Innan programmet avslutar stängs socketen, detta genererar ett exception
-   --hos servern, pss kommer denna klient få ett exception när servern avslutas
-   Close(Socket);
-
-   Put("Innan end!");
+--   Stop_Printer;
 
 end Klient;
