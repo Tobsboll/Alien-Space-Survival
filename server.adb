@@ -204,8 +204,7 @@ begin
       -- Skickar information till klienterna. / Eric
       for I in 1..Num_Players loop
 	 if Game.Players(I).Ship.Health <= 0 then
-	    Game.Players(I).Playing := False;
-	    Game.Players(I).Ship.Laser_Recharge := 1; --Nu kan man inte skjuta mera
+	     Kill_Player(Game.Players(I), I, Shot_List, PowerUp_List);	
 	 end if;
 	 
 	 --------------------------------------------------
