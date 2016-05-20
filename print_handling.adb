@@ -117,18 +117,18 @@ package body Print_Handling is
       Goto_XY(Gameborder_X+World_X_Length+1, Gameborder_Y+Highscore_Window_Height+Num_Players+4);
       Put("Weapon Type: ");
       Set_Foreground_Colour(Red);
-      if Game.Players(Klient_Number).Ship.Laser_Type = Normal_Laser_Shot then
+      if Game.Players(Klient_Number).Ship.Hitech_Laser then
+	 Put("Hitech Laser");
+	 Power_Time := Game.Players(Klient_Number).Ship.Laser_Recharge/4;
+      elsif Game.Players(Klient_Number).Ship.Laser_Type = Normal_Laser_Shot then
 	 Put("Normal Laser");
-	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*10;
+	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*5;
       elsif Game.Players(Klient_Number).Ship.Laser_Type = Laser_Upgraded_Shot then
 	 Put("Upgraded Laser");
 	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*10;
-      elsif Game.Players(Klient_Number).Ship.Laser_Type = Hitech_Laser_Shot then
-	 Put("Hitech Laser");
-	 Power_Time := Game.Players(Klient_Number).Ship.Laser_Recharge/10;
       elsif Game.Players(Klient_Number).Ship.Laser_Type = Nitro_Shot then
 	 Put("Nitro");
-	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge/10;
+	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*5;
       end if;
       
       if Game.Players(Klient_Number).Ship.Laser_Type in 1 .. 2 then
