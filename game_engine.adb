@@ -544,7 +544,7 @@ package body Game_Engine is
 		  
 	       elsif L.Object_Type = PowerUpType(Hitech_Laser) then --hitech laser
 		  Player_Ship.Hitech_Laser := True;
-		  Player_Ship.Laser_Recharge := 120;
+		  Player_Ship.Laser_Recharge := 100;
 		  
 	       elsif L.Object_Type = PowerUpType(Tri_Laser) then 
 		  Player_Ship.Tri_Laser := True;
@@ -706,13 +706,17 @@ package body Game_Engine is
 	       --------------------------------------------------
 	       --| VAD FÖR NÅGOT TRÄFFADE?
 	       if Shot.Object_Type = ShotType(Missile_Shot) then --Om det är en missil
-	       	  Create_Explosion_Big(Shot, X, Y);              --Skapa en explosion
+		  if Shot.Direction = 1 then
+		     Create_Nuke(Shot, X, Y);                    --Super missile skapar nuke
+		  else
+		     Create_Explosion_Big(Shot, X, Y);              --vanlig missile Skapar en explosion
+		  end if;
 		  
-	       elsif Shot.Object_Type = ShotType(Nitro_Shot) then --Om det är en nitrobomb
-		  Create_Nitro_Explosion(Shot,X ,Y);              --Skapa en nitroexplosion
+	       elsif Shot.Object_Type = ShotType(Nitro_Shot)            --Om det är en nitrobomb
+		 or Shot.Object_Type = ShotType(Special_Explosion) then -- Eller om det är en explosion från
+									--nuke (för kedjereaktion).
+		  Create_Nitro_Explosion(Shot,X ,Y);                    --Skapa en nitroexplosion
 		  
-	       --  elsif Shot.Object_Type = ShotType(Special_Explosion) then
-	       --  	  Create_Nuke(Shot, X ,Y);
 		  
 	       elsif Shot.Object_Type = ShotType(Hitech_Laser_Shot) then
 		  Create_Hitech_Explosion(Shot, Obj2.XY_Pos(1)+1, Obj2.XY_Pos(2)+1 );
@@ -1160,12 +1164,85 @@ package body Game_Engine is
       
    end Create_Hitech_Explosion;
    
+   procedure Create_Nuke (L : in out Object_List;
+			  X, Y : in Integer) is
+      Player : Integer;
+   begin
+      --
+      --  \A/
+      --  < >
+      --  /V\
+      --
+      if Empty(L) then
+	 --Om listan är tom måste player def enskilt.
+	 Player := 0;
+	 --Direction := 0;
+      else
+	 Player := L.Player;
+      end if;
+	 
+      --------------------------------------------------
+      
+      for I in -1..1 loop
+	 -- \A/ :
+	 Insert_Last  (ShotType(Special_Explosion),
+		       X+I,
+		       Y-1,
+		       Up,
+		       L,
+		       Player,
+		       Right*I);
+	 --  < >  :
+	 if I /= 0 then
+	    Insert_Last  (ShotType(Special_Explosion),
+			  X+I,
+			  Y,
+			  0,
+			  L,
+			  Player,
+			  Right*I);
+	 end if;
+	 
+	 --  /V\  :
+         Insert_Last  (ShotType(Special_Explosion),
+		       X+I,
+		       Y+1,
+		       Down,
+		       L,
+		       Player,
+		       Right*I);
+	 
+      end loop;
+      
+      --------------------------------------------------
+      
+      
+      
+   end Create_Nuke;
+   
+   procedure Activate_Thrusters (L : in out Object_List;
+				 X, Y : in Integer) is
+   begin
+      Insert_Last  (ShotType(Thrust),
+		    X,
+		    Y+2,
+		    Down,
+		    L);
+      
+      Insert_Last  (ShotType(Thrust),
+		    X+4,
+		    Y+2,
+		    Down,
+		    L);
+      
+   end Activate_Thrusters;
+   
    procedure Create_Side_Thrust ( L : in out Object_List;
 				  X , Y : in Integer) is
    begin
       for I in -1..1 loop
 	 if I /=0 then
-	    Insert_Last  (ShotType(5),
+	    Insert_Last  (ShotType(Thrust),
 			  X+I,
 			  Y,
 			  0,
