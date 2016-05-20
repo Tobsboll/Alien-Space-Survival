@@ -298,7 +298,8 @@ begin
 	    Put(Sockets(I), Waves(J));
 	 end loop;
 
-         Put_line(Sockets(I), Game.Settings.Gameover);
+	 Put_Line(Sockets(I), Level);
+	 Put_Line(Sockets(I), Loop_Counter);
 
       end loop;
      
