@@ -33,6 +33,13 @@ package Window_Handling is
 			   Height      : in Integer;
 			   Background  : in Colour_Type);
    
+   procedure Put_Line_Space_Box(X           : in Integer;     
+				Y           : in Integer; 
+				Width       : in Integer;
+				Height      : in Integer;
+				Background  : in Colour_Type;
+				Text_Colour : in Colour_Type);
+   
    procedure Clear_Window;
    
    procedure Goto_XY(X, Y : in Positive);
