@@ -253,6 +253,15 @@ begin
 	       
 	    end loop;
 	       Update_Player_Recharge(Game.Players(I));	
+	       
+	       --Thrusters:
+	       if Level_Cleared and then Loop_Counter mod 2 = 0 then
+	       Activate_Thrusters(Shot_List,
+				  Game.Players(I).Ship.XY(1),
+				  Game.Players(I).Ship.XY(2)
+				 );
+	       end if;
+	    
 	 end if;                                         
 
       end loop;
