@@ -18,7 +18,7 @@ package body Game_Engine is
       --------------------------------------------------
       --| Game settings
       --------------------------------------------------      
-      Loop_Counter := 1;
+      Loop_Counter := 300;
       Players_Choice := ('o', 'o', 'o', 'o');
       Game.Settings.Gameover := 0;
       Game.Settings.Difficulty := 1;
