@@ -251,8 +251,8 @@ begin
 					 Player_To_Revive  
 				       );
 	       
-	       Update_Player_Recharge(Game.Players(I));
 	    end loop;
+	       Update_Player_Recharge(Game.Players(I));	
 	 end if;                                         
 
       end loop;
