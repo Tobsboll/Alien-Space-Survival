@@ -13,8 +13,35 @@ package body Player_Handling is
 			      Ship   : in Ship_Spec) is
       begin
 	 
-	 Put_Line(Socket,Ship.XY(1));
-	 Put_Line(Socket,Ship.XY(2));
+	 Put_Line(Socket, Ship.XY(1));
+	 Put_Line(Socket, Ship.XY(2));
+	 
+	 
+	 ---------------------------------------|
+	 --| Weapons |--------------------------|
+	 ---------------------------------------|
+	 Put_Line(Socket, Ship.Laser_Type);
+	 
+	 Put_Line(Socket, Ship.Missile_Ammo);
+	 
+	 if Ship.Tri_Laser then
+	    Put_Line(Socket, 1);
+	 else
+	    Put_Line(Socket, 0);
+	 end if;
+	 
+	 if Ship.Diagonal_Laser then
+	    Put_Line(Socket, 1);
+	 else
+	    Put_Line(Socket, 0);
+	 end if;
+	 
+	 if Ship.Super_Missile then
+	    Put_Line(Socket, 1);
+	 else
+	    Put_Line(Socket, 0);
+	 end if;
+	 
 	 
       end Put_Ship_Data;
       -------------------------------------------------
@@ -40,6 +67,8 @@ package body Player_Handling is
       for I in Ranking_List'Range loop
 	 Put_Line(Socket, Data.Ranking(I));
       end loop;
+      
+      Put_Line(Socket, Data.Settings.GameOver);
       
    end Put_Game_Data;
    -------------------------------------------------------------------------------------
@@ -345,10 +374,44 @@ package body Player_Handling is
       -------------------------------------------------
       procedure Get_Ship_Data(Socket : in Socket_Type;
 			      Ship   : out Ship_Spec) is
+	 
+	 Check_Active  : Integer;
+	 
       begin
 	 
 	 Get(Socket,Ship.XY(1));
 	 Get(Socket,Ship.XY(2));
+	 
+	 
+	 
+	 ---------------------------------------|
+	 --| Weapons |--------------------------|
+	 ---------------------------------------|
+	 Get(Socket, Ship.Laser_Type);
+	 
+	 Get(Socket, Ship.Missile_Ammo);
+	 
+	 Get(Socket, Check_Active);
+	 if Check_Active = 1 then
+	    Ship.Tri_Laser := True;
+	 else
+	    Ship.Tri_Laser := False;
+	 end if;
+	 
+	 Get(Socket, Check_Active);
+	 if Check_Active = 1 then
+	    Ship.Diagonal_Laser := True;
+	 else
+	    Ship.Diagonal_Laser := False;
+	 end if;
+	 
+	 Get(Socket, Check_Active);
+	 if Check_Active = 1 then
+	    Ship.Super_Missile := True;
+	 else
+	    Ship.Super_Missile := False;
+	 end if;
+	 
 	 
       end Get_Ship_Data;
       -------------------------------------------------
@@ -375,6 +438,9 @@ package body Player_Handling is
       for I in Ranking_List'Range loop
 	 Get(Socket, Data.Ranking(I));
       end loop;
+      
+      Get(Socket, Data.Settings.Gameover);
+      
    end Get_Game_Data;
    -------------------------------------------------------------------------------------
    
