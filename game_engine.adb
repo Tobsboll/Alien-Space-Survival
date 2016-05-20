@@ -567,14 +567,17 @@ package body Game_Engine is
 	    --------------------------------------------------
 	    --| HITECH LASER:
 	    if Shot.Object_Type = ShotType(Hitech_Laser_Shot) then
-	       return Overlapping_X(X, Object_X, 
+	       if Object_Y > 1 then -- Spawnar annars explosion utanför skärmen = crash
+		  return Overlapping_X(X, Object_X, 
 				    
-				    --skottets bredd:
-				    1,
+				       --skottets bredd:
+				       1,
 				    
-				    --objektets bredd:
-				    3);
-	       
+				       --objektets bredd:
+				       3);
+	       else
+		  return False;
+	       end if;
 	       --------------------------------------------------
 	       --| ASTROID:
 	    elsif Shot.Object_Type = ShotType(Asteroid) then
@@ -665,8 +668,7 @@ package body Game_Engine is
 	       --  	  Create_Nuke(Shot, X ,Y);
 		  
 	       elsif Shot.Object_Type = ShotType(Hitech_Laser_Shot) then
-		  --Create_Hitech_Explosion(Shot, Obj2.XY_Pos(1)+1, Obj2.XY_Pos(2)+1 );
-		  null;
+		  Create_Hitech_Explosion(Shot, Obj2.XY_Pos(1)+1, Obj2.XY_Pos(2)+1 );
 	       end if;
 	       
 	       --------------------------------------------------
@@ -728,7 +730,7 @@ package body Game_Engine is
 	       --------------------------------------------------
 	       --| TA BORT SKOTT
 	       if Shot.Object_Type = ShotType(Hitech_Laser_Shot) then
-		  if not Empty(Obj2.Next) then
+		  if not Empty(Obj2) then
 		     A_Shot_Collide_In_Object(Shot, Obj2.Next, Game); --Rekursion så att hitech laser
 	       							   --träffar fler fiender med
 		  end if;						   --ett skott
