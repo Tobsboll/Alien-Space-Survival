@@ -42,6 +42,8 @@ package Definitions is
    Asteroid                : constant Integer := 8;
    L_Wall                  : constant Integer := 9;
    R_Wall                  : constant Integer := 10;
+   Special_Explosion       : constant Integer := 11;
+   Thrust                  : constant Integer := 14;
    Ricochet                : constant Integer := 15;
    
    Move_Horisontal : constant Integer := 2;
@@ -194,6 +196,7 @@ package Definitions is
    Obstacle_Light_Colour : constant Colour_Type := Bright_Magenta;
    Obstacle_Hard_Colour  : constant Colour_Type := Magenta;
    Obstacle_Unbreakable_Colour: constant Colour_Type := Light_Grey;
+   Thrust_Colour         : constant Colour_Type := Yellow;
    ---------------------------------------------------
    
    
