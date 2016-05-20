@@ -27,6 +27,8 @@ wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/task
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/task_printer.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/score_handling.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/score_handling.ads
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/print_handling.adb
+wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/print_handling.ads
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/task_server_communication.adb
 wget https://raw.githubusercontent.com/Tobsboll/Alien-Space-Survival/master/task_server_communication.ads
 
