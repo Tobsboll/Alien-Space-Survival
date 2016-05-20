@@ -26,6 +26,12 @@ package body Player_Handling is
 	 
 	 Put_Line(Socket, Ship.Laser_Recharge);
 	 
+	 if Ship.Hitech_Laser then
+	    Put_Line(Socket, 1);
+	 else
+	    Put_Line(Socket, 0);
+	 end if;
+	 
 	 if Ship.Tri_Laser then
 	    Put_Line(Socket, 1);
 	 else
@@ -394,6 +400,14 @@ package body Player_Handling is
 	 Get(Socket, Ship.Missile_Ammo);
 	 
 	 Get(Socket, Ship.Laser_Recharge);
+	 
+	 
+	 Get(Socket, Check_Active);
+	 if Check_Active = 1 then
+	    Ship.Hitech_Laser := True;
+	 else
+	    Ship.Hitech_Laser := False;
+	 end if;
 	 
 	 Get(Socket, Check_Active);
 	 if Check_Active = 1 then
