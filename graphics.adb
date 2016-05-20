@@ -113,7 +113,7 @@ package body Graphics is
 	    
 	    --Om det är en powerup:
 	 elsif L.Object_Type in PowerUp'Range then
-	    Goto_XY(L.XY_Pos(1)-1 , L.XY_Pos(2));
+	    Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
 	    if L.Object_Type = PowerUpType(Health) then
 	       Put("(♥)");
 	    else
