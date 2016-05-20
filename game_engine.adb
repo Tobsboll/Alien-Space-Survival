@@ -544,7 +544,7 @@ package body Game_Engine is
 		  
 	       elsif L.Object_Type = PowerUpType(Hitech_Laser) then --hitech laser
 		  Player_Ship.Hitech_Laser := True;
-		  Player_Ship.Laser_Recharge := 100;
+		  Player_Ship.Laser_Recharge := 120;
 		  
 	       elsif L.Object_Type = PowerUpType(Tri_Laser) then 
 		  Player_Ship.Tri_Laser := True;
