@@ -27,9 +27,18 @@ with TJa.Sockets;            use TJa.Sockets;     --
 with Ada.Text_IO;            use Ada.Text_IO;     --
 with TJa.Keyboard;           use TJa.Keyboard;    --
 with Graphics;               use Graphics;        --
+with Ada.Numerics.Discrete_Random;
 ----------------------------------------------------
 
 package Game_Engine is
+   
+   subtype One_To_ten is Integer range 1..10;
+   package Powerup_random is
+      new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_Ten);
+   use Powerup_Random;
+     
+   Gen       : Generator;
+   
    --Procedure Set_Default_Values fastställer alla startvärden som behövs innan
    --spelet börjar
    procedure Set_Default_Values (Num_Players    : in Integer;
@@ -105,10 +114,12 @@ package Game_Engine is
 				      );
    
    function Shot_Collide (Shot, obj : in Object_List) return boolean;
-   procedure A_Shot_Collide_In_Object (Shot, Obj2 : in out Object_List;
-				       Game        : in out Game_Data);
-   procedure Shots_Collide_In_Objects (Obj1, Obj2 : in out Object_List;
-				       Game        : in out Game_Data);
+   procedure A_Shot_Collide_In_Object (Shot, Obj2   : in out Object_List;
+				       Game         : in out Game_Data;
+				       Powerup_List : in out Object_List);
+   procedure Shots_Collide_In_Objects (Obj1, Obj2   : in out Object_List;
+				       Game         : in out Game_Data;
+				       Powerup_List : in out Object_List);
    
    --BETA:
    --Players_Are_Dead ska returnera true om ALLA spelare är döda
@@ -161,4 +172,7 @@ package Game_Engine is
 				 X, Y : in Integer);
    procedure Create_Side_Thrust ( L          : in out Object_List;
 				  X , Y      : in Integer);
+   
+   procedure Spawn_Powerup(X, Y         : in Integer;
+			   Powerup_List : in out Object_List);
 end Game_Engine;
