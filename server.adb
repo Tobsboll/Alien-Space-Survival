@@ -108,22 +108,7 @@ begin
    end loop;    
    
    Obstacle_Y := Obstacle_Y_Pos; --konstant från definitions, men kan varieras nedan. (Jag har en plan)
-   
-   --for I in 1..6 loop
-   --Create_Wall(Obstacle_List, Obstacle_Y-(I*2));
-   -- end loop;
-   --Create_Wall(Obstacle_List, Obstacle_Y);
-   
-     Create_Object(PowerUpType(Missile_Ammo), 40, Obstacle_Y_Pos+3, 0, Powerup_List);
-     Create_Object(PowerUpType(Hitech_Laser), 50, Obstacle_Y_Pos+5, 0, Powerup_List);
-     Create_Object(PowerUpType(Tri_Laser), 60, Obstacle_Y_Pos+5, 0, Powerup_List);
-     Create_Object(PowerUpType(Diagonal_Laser), 30, Obstacle_Y_Pos+5, 0, Powerup_List);
-     Create_Object(PowerUpType(Nitro_Upgrade), 70, Obstacle_Y_Pos+2, 0, Powerup_List);
-     Create_Object(PowerUpType(health), 80, Obstacle_Y_Pos+6, 0, Powerup_List);
-     Create_Object(PowerUpType(Super_Missile), 90, Obstacle_Y_Pos+6, 0, Powerup_List);
-     Create_Object(PowerUpType(Laser_Upgrade), 97, Obstacle_Y_Pos+6, 0, Powerup_List);
-     Create_Object(PowerUpType(Hitech_Laser), 110, Obstacle_Y_Pos+6, 0, Powerup_List);
-    
+  
    loop 
       
       --| Syncing with Klient
@@ -187,8 +172,8 @@ begin
       
       Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players, Game.Map);
       
-     
-	 
+      
+      
       -- Uppdaterar astroidernas position.
       Shot_Movement(Astroid_List);
 	 
@@ -226,14 +211,16 @@ begin
 				    );
 							    
 	   
-							    
+		        
+	    
 	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 				      Game.Players(I).Ship.XY(2),
 				      Game.Players(I),      --Uppdaterar ship_spec
 				      Powerup_List,         --Om spelare träffas
 				      Player_To_Revive      --Av powerup
 				      );
-							    
+	        
+	   
 	   Revive_Player(Player_To_Revive, Game.Players);
 	   
 	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
@@ -252,7 +239,9 @@ begin
 				       );
 	       
 	    end loop;
-	       
+	    
+	        
+	    
 	       --Thrusters:
 	       if Level_Cleared and then Loop_Counter mod 2 = 0 then
 	       Activate_Thrusters(Shot_List,
@@ -265,17 +254,19 @@ begin
 
       end loop;
       
+      
       --Shot_Movement(Shot_List);
-      Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game);
-      Shots_Collide_In_Objects(Shot_List, Astroid_List, Game);
-      Shots_Collide_In_Objects(Shot_List, Wall_List, Game);
-      Shots_Collide_In_Objects(Astroid_List, Obstacle_List, Game);
-      Shots_Collide_In_Objects(Astroid_List, Wall_List, Game);
-      Shots_Collide_In_Objects(Obstacle_List, Wall_List, Game);
+      Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game, Powerup_List);
+      Shots_Collide_In_Objects(Shot_List, Astroid_List, Game, Powerup_List);
+      Shots_Collide_In_Objects(Shot_List, Wall_List, Game, Powerup_List);
+      Shots_Collide_In_Objects(Astroid_List, Obstacle_List, Game, Powerup_List);
+      Shots_Collide_In_Objects(Astroid_List, Wall_List, Game, Powerup_List);
+      Shots_Collide_In_Objects(Obstacle_List, Wall_List, Game, Powerup_List);
       
       for B in Waves'Range loop
-	 Shots_Collide_In_Objects(Shot_List, Waves(B), Game);
+	 Shots_Collide_In_Objects(Shot_List, Waves(B), Game, Powerup_List);
       end loop;
+
       
       if Players_Are_Dead (Game.Players) then
 	 Game.Settings.Gameover := 1;
@@ -315,6 +306,11 @@ begin
       end loop;
       
       Shot_Movement(Shot_List);
+      
+            -- Uppdaterar PowerUp Position
+      if Loop_Counter mod 2 = 0 then
+	 Shot_Movement(Powerup_List);
+      end if;
       
       for I in Waves'Range loop
 	 Delete_Object_In_List(Waves(I), ShotType(Explosion) );
