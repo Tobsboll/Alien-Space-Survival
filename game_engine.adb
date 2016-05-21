@@ -78,7 +78,7 @@ package body Game_Engine is
       Xdiff     : constant Integer := 1;
    begin
       
-      if not Empty(L) and then L.Object_Type in 1..15  then
+      if not Empty(L) and then (L.Object_Type in 1..15 or L.Object_Type in 21..30)  then
 	 Direction := L.Attribute;
 	 Strafe    := L.Direction;
 	 L.XY_Pos(2) := L.XY_Pos(2) + Ydiff*Direction;
@@ -477,8 +477,8 @@ package body Game_Engine is
 					) is
       Player_Ship : Ship_Spec := Player.Ship;
    begin
+      Player_To_Revive := 0;
       if not Empty(L) then
-	 Player_To_Revive := 0;
 	 
 	 if Player_Collide (X, Y, L) then
 	    
@@ -688,8 +688,9 @@ package body Game_Engine is
    --| (SINGLE) SHOT COLLIDE IN ANY OBJECT
    --| kommer att användas till skott främst tror jag
    --------------------------------------------------
-   procedure A_Shot_Collide_In_Object (Shot, Obj2 : in out Object_List;
-				      Game        : in out Game_Data) is
+   procedure A_Shot_Collide_In_Object (Shot, Obj2   : in out Object_List;
+				       Game         : in out Game_Data;
+				       Powerup_List : in out Object_List) is
 
       X, Y : Integer;
    begin
@@ -759,6 +760,7 @@ package body Game_Engine is
 		  --Ta bort fiende:
 		  if Obj2.Attribute <= 0 or Shot.Object_Type = ShotType(Hitech_Laser_Shot) then
 		     Create_Explosion_Medium(Shot, Obj2.XY_Pos(1), Obj2.XY_Pos(2) );
+		     Spawn_Powerup(Obj2.XY_Pos(1), Obj2.XY_Pos(2), Powerup_List);
 		     Remove(Obj2);
 		  end if;
 		  
@@ -782,7 +784,7 @@ package body Game_Engine is
 	       --| TA BORT SKOTT
 	       if Shot.Object_Type = ShotType(Hitech_Laser_Shot) then
 		  if not Empty(Obj2) then
-		     A_Shot_Collide_In_Object(Shot, Obj2.Next, Game); --Rekursion så att hitech laser
+		     A_Shot_Collide_In_Object(Shot, Obj2.Next, Game, Powerup_List); --Rekursion så att hitech laser
 	       							   --träffar fler fiender med
 		  end if;						   --ett skott
 	       end if;
@@ -800,7 +802,7 @@ package body Game_Engine is
 	       
 	       --Create_Explosion_Small(Shot, X, Y);
 	    else
-	       A_Shot_Collide_In_Object(Shot, Obj2.Next, Game);
+	       A_Shot_Collide_In_Object(Shot, Obj2.Next, Game, Powerup_List);
 	    end if;
 	    
 	 end if;
@@ -814,15 +816,16 @@ package body Game_Engine is
    --| (MULTIPLE) SHOTS COLLIDE IN ANY OBJECT
    --| kommer att användas till skott främst tror jag
    --------------------------------------------------
-   procedure Shots_Collide_In_Objects (Obj1, Obj2 : in out Object_List;
-				      Game        : in out Game_Data) is
+   procedure Shots_Collide_In_Objects (Obj1, Obj2  : in out Object_List;
+				      Game         : in out Game_Data;
+				      Powerup_List : in out Object_List) is
       
    begin
       if not Empty(Obj1) and not Empty(Obj2) then
-	 A_Shot_Collide_In_Object(Obj1, Obj2, Game);
+	 A_Shot_Collide_In_Object(Obj1, Obj2, Game, Powerup_List);
 
          if not Empty(Obj1) then
-            Shots_Collide_In_Objects(Obj1.Next, Obj2, Game);
+            Shots_Collide_In_Objects(Obj1.Next, Obj2, Game, Powerup_List);
          end if;
       end if;
       
@@ -1252,6 +1255,27 @@ package body Game_Engine is
 	 end if;
       end loop;
    end Create_Side_Thrust;
+   
+   procedure Spawn_Powerup(X, Y         : in Integer;
+			   Powerup_List : in out Object_List) is
       
+      Spawn_Chance : Integer;
+      Powerup_type : Integer;
+      
+      
+      
+   begin
+      Reset(Gen);
+      Spawn_Chance  := Random(Gen);
+      Powerup_Type  := Random(Gen);
+      
+      if Spawn_Chance in 1..1 and Powerup_Type not in 9..10 -- and Powerup_Type /= 9
+      then
+	 Create_Object(PowerUpType(Powerup_Type), X, Y, Down, Powerup_List);
+      end if;
+      
+      
+   end Spawn_Powerup;
+   
 
 end Game_Engine;
