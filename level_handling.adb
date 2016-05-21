@@ -100,63 +100,57 @@ package body Level_Handling is
       ---------------------------------------------------------
       --| LEVELS
       ---------------------------------------------------------
-      if Level = 5 then   	 -- Spawn MID Boss
-	 null;
-      elsif Level = 10 then 	 -- Spawn BIG boss
-	 null;
-	 
-      else
-	 Reset(Gen);
-	 Gen_Level  := Random(Gen);
-	   if Gen_Level = 1 or level = 1 then
-	    Spawn_Wave(10*Difficulty, --Antal
-		       EnemyType(1), --Typ
-		       1,
-		       1,
-		       Gameborder_X +1,
-		       Gameborder_Y +4,
-		       Difficulty,
-		       waves(1));
-	  
-	  -- Tror den nedan kan vara ett bättre alternativ i
-	  -- det generella fallet, eftersom interceptors
-	  -- inte fungerar om de ligger i samma lista i nuläget // Tobias
-	    
-	  ---------------  
 
-	    for I in 2..Integer(0.5*Float(Difficulty)) loop
-	       
-	       if I < 4 then
-		  
-		  Spawn_Wave(1, --Antal
-		    EnemyType(3), --Typ
-		    3,
+      Reset(Gen);
+      Gen_Level  := Random(Gen);
+      if Gen_Level = 1 or level = 1 then
+	 Spawn_Wave(10*Difficulty, --Antal
+		    EnemyType(1), --Typ
+		    1,
 		    1,
 		    Gameborder_X +1,
-		    Gameborder_Y +2,
+		    Gameborder_Y +4,
 		    Difficulty,
-		    waves(I));
-		  
-	       end if;
-	       
-	    end loop;
-	 -------------------   
+		    waves(1));
+	 
+	 -- Tror den nedan kan vara ett bättre alternativ i
+	 -- det generella fallet, eftersom interceptors
+	 -- inte fungerar om de ligger i samma lista i nuläget // Tobias
+	 
+	 ---------------  
+
+	 for I in 2..Integer(0.5*Float(Difficulty)) loop
 	    
-	 elsif Gen_Level = 2 then
-	    Kamikazee_Level(Waves);
-	 elsif Gen_Level = 3 then
-	    Shifting_Layer_Level(Waves, Difficulty);
-	 elsif Gen_Level = 4 then
-	    Hunter_Level(Waves, Difficulty, Num_Players);
-	 elsif Gen_Level = 5 then
-	    null;
-	 elsif Gen_Level = 6 then
-	    null;
-	 elsif Gen_Level = 7 then
-	    null;
-	 elsif Gen_Level = 8 then
-	    null;
-	 end if;
+	    if I < 4 then
+	       
+	       Spawn_Wave(1, --Antal
+			  EnemyType(3), --Typ
+			  3,
+			  1,
+			  Gameborder_X +1,
+			  Gameborder_Y +2,
+			  Difficulty,
+			  waves(I));
+	       
+	    end if;
+	    
+	 end loop;
+	 -------------------   
+	 
+      elsif Gen_Level = 2 then
+	 Kamikazee_Level(Waves);
+      elsif Gen_Level = 3 then
+	 Shifting_Layer_Level(Waves, Difficulty);
+      elsif Gen_Level = 4 then
+	 Hunter_Level(Waves, Difficulty, Num_Players);
+      elsif Gen_Level = 5 then
+	 null;
+      elsif Gen_Level = 6 then
+	 null;
+      elsif Gen_Level = 7 then
+	 null;
+      elsif Gen_Level = 8 then
+	 null;
       end if;
       
    end Spawn_Level;
