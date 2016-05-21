@@ -492,7 +492,7 @@ package body Background_Handling is
 	    Put(' ');
 	 end loop;
 	 
-	 for I in GameBorder_Y+HighScore_Window_Height+NumPlayers .. World_Y_Length loop
+	 for I in GameBorder_Y+HighScore_Window_Height+NumPlayers .. World_Y_Length+5 loop
 	    Goto_XY(Gameborder_X+World_X_Length, GameBorder_Y+I-1);
 	    Put("                                  ");
 	 end loop;
@@ -506,7 +506,7 @@ package body Background_Handling is
 	 
 	 for I in 1..5 loop
 	 Goto_XY(2,GameBorder_Y+World_Y_Length-1+I);
-	 Put("                                                                                                                                                  ");
+	 Put("                                                                                                                ");
 	 end loop;
 	 
 	 --  for I in 1 .. 3 loop
