@@ -81,278 +81,303 @@ begin
 	 end loop;
 	 
       end if;
-   -------------------------------------------------------------
-   --| Done with the player setup ------------------------------
-   -------------------------------------------------------------
-   
-   
-   
-   Put_line("Spelet är igång!");
-   --------------------------------------------------
-   --------------------------------------------------
-   
-   
-   ----------------------------------------------------------------------------------------------------
-   --|
-   --| Game loop
-   --|
-   ----------------------------------------------------------------------------------------------------
-   Set_Default_Values(Num_Players, Game, Loop_Counter, Players_Choice, Level, Level_Cleared, New_Level);
-   
-   
-   for I in 1..Num_Players loop
-      Game.Ranking(I) := I;  -- Ställer bara in poängplaceringen.
-      
-      -- Skickar startbanan till alla klienter 
-      Send_Map(Sockets(I), Game, Check_Update => False);     -- Map_Handling
-   end loop;    
-   
-   Obstacle_Y := Obstacle_Y_Pos; --konstant från definitions, men kan varieras nedan. (Jag har en plan)
-  
-   loop 
-      
-      --| Syncing with Klient
-      ---------------------------------------|
-      while Server_Waiting /= '$' loop     --|
-	 Get(Sockets(1), Server_Waiting);  --|
-      end loop;                            --|
-      Server_Waiting := 'o';               --|
-      Put(Sockets(1), '$');                --|
-      
-      ---------------------------------------|
-      
-      -- Spawning The New Level
-      if New_Level then
-	 Spawn_Level(Level, Game.Settings.Difficulty, Waves, Level_Cleared, New_Level, Num_Players); 
-      end if; 
-      
-      -- Tar bort väggskotten
-      DeleteList(Wall_List);
-      
-      -- Kontrollerar om leveln är avklarad:
-      if All_Enemies_Dead(Waves) then
-	 if not Level_Cleared then
-	    Loop_Counter := 1;
-	 end if;
-	 Level_Cleared := True;    	    
-      end if;
-      
-      if Level_Cleared then
-	 -- From CLEARED Level To NEW Level
-	 Between_Levels(Loop_Counter, Game, Astroid_List, Obstacle_List, New_Level); 
-	 
-      else
-	 -------------------------------------------------- 
-	 --| SCROLLING MAP  
-	 -------------------------------------------------- 
-	 if Loop_Counter mod 8 = 0 then
-	    if Highest_X_Position(Waves(1))-Lowest_X_Position(Waves(1))+20 <= Border_Difference(Game.Map) then 
-	       New_Top_Row(Game.Map);                 -- Vanlig randomisering 
-	       
-	    else
-	       if Loop_Counter mod 3 = 1 then 
-		  New_Top_Row(Game.Map, Open => True); 
-	       else
-		  New_Top_Row(Game.Map); 
-	       end if;
-	    end if;
-	    Move_Rows_Down(Game.Map);
-	 end if;
-      end if;   
-      
-      
-      -----------------------------------
-      -- Update Enemy ships
-      -----------------------------------
-      if not Empty(Obstacle_List) then
-	 Obstacle_y := Highest_Y_Position(Obstacle_List);
-      else
-	 Obstacle_Y := Obstacle_Y_Pos; --definitions
-      end if;
-      
-      Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players, Game.Map);
+      -------------------------------------------------------------
+      --| Done with the player setup ------------------------------
+      -------------------------------------------------------------
       
       
       
-      -- Uppdaterar astroidernas position.
-      Shot_Movement(Astroid_List);
-	 
-      -- Sorterar Scoreboard.
-      Sort_Scoreboard(Game, Num_Players);
+      Put_line("Spelet är igång!");
+      --------------------------------------------------
+      --------------------------------------------------
       
       
-      for I in World'first..World'Last-1 loop -- Väggskott
-	 Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Wall_List);
-	 Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Wall_List);
-      end loop;
+      ----------------------------------------------------------------------------------------------------
+      --|
+      --| Game loop
+      --|
+      ----------------------------------------------------------------------------------------------------
+      Set_Default_Values(Num_Players,
+			 Game, 
+			 Loop_Counter,
+			 Players_Choice,
+			 Level,
+			 Level_Cleared,
+			 New_Level,
+			 Obstacle_List
+			);
       
-      -- Skickar information till klienterna. / Eric
+      
       for I in 1..Num_Players loop
-	 if Game.Players(I).Ship.Health <= 0 then
-	     Kill_Player(Game.Players(I), I, Shot_List, PowerUp_List);	
+	 Game.Ranking(I) := I;  -- Ställer bara in poängplaceringen.
+	 
+	 -- Skickar startbanan till alla klienter 
+	 Send_Map(Sockets(I), Game, Check_Update => False);     -- Map_Handling
+      end loop;    
+      
+      Obstacle_Y := Obstacle_Y_Pos; --konstant från definitions, men kan varieras nedan. (Jag har en plan)
+      
+
+      
+      -----------------------------------------------------------------------------------------
+      --| Dessa behövs när man provar grejer:
+      --
+      --  Create_Object(PowerUpType(Missile_Ammo), 40, Obstacle_Y_Pos+3, 0, Powerup_List);
+      --  Create_Object(PowerUpType(Hitech_Laser), 50, Obstacle_Y_Pos+5, 0, Powerup_List);
+      --  Create_Object(PowerUpType(Tri_Laser), 60, Obstacle_Y_Pos+5, 0, Powerup_List);
+      --  Create_Object(PowerUpType(Diagonal_Laser), 30, Obstacle_Y_Pos+5, 0, Powerup_List);
+      --  Create_Object(PowerUpType(Nitro_Upgrade), 70, Obstacle_Y_Pos+2, 0, Powerup_List);
+      --  Create_Object(PowerUpType(health), 80, Obstacle_Y_Pos+6, 0, Powerup_List);
+      --  Create_Object(PowerUpType(Super_Missile), 90, Obstacle_Y_Pos+6, 0, Powerup_List);
+      --  Create_Object(PowerUpType(Laser_Upgrade), 97, Obstacle_Y_Pos+6, 0, Powerup_List);
+      --  Create_Object(PowerUpType(Hitech_Laser), 110, Obstacle_Y_Pos+6, 0, Powerup_List);
+      ------------------------------------------------------------------------------------------
+      loop 
+	 
+	 --| Syncing with Klient
+	 ---------------------------------------|
+	 while Server_Waiting /= '$' loop     --|
+	    Get(Sockets(1), Server_Waiting);  --|
+	 end loop;                            --|
+	 Server_Waiting := 'o';               --|
+	 Put(Sockets(1), '$');                --|
+	 
+	 ---------------------------------------|
+	 
+	 -- Spawning The New Level
+	 if New_Level then
+	    Spawn_Level(Level, Game.Settings.Difficulty, Waves, Level_Cleared, New_Level, Num_Players); 
+	 end if; 
+	 
+	 -- Tar bort väggskotten
+	 DeleteList(Wall_List);
+	 
+	 -- Kontrollerar om leveln är avklarad:
+	 if All_Enemies_Dead(Waves) then
+	    if not Level_Cleared then
+	       Loop_Counter := 1;
+	       Put_Line("Level complete!");
+	    end if;
+	    Level_Cleared := True;    	    
 	 end if;
 	 
-	 --------------------------------------------------
-	 --Uppdaterar spelarna om de spelar:
-	 --------------------------------------------------
-	 if Game.Players(I).Playing then
-	    Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
-				      Game.Players(I).Ship.XY(2),
-				      Game.Players(I),      --Uppdaterar ship_spec
-				      Shot_List,             --Om spelare träffas
-				      Player_To_Revive           --Av skott.
-				    );
-				      
-	    Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
-				      Game.Players(I).Ship.XY(2),
-				      Game.Players(I),      --Uppdaterar ship_spec
-				      Astroid_List,        --Om spelare träffas
-				      Player_To_Revive	    --Av asteroid
-				    );
-							    
-	   
-		        
+	 if Level_Cleared then
+	    -- From CLEARED Level To NEW Level
+	    Between_Levels(Loop_Counter, Game, Astroid_List, Obstacle_List, New_Level);
 	    
-	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
-				      Game.Players(I).Ship.XY(2),
-				      Game.Players(I),      --Uppdaterar ship_spec
-				      Powerup_List,         --Om spelare träffas
-				      Player_To_Revive      --Av powerup
-				      );
-	        
-	   
-	   Revive_Player(Player_To_Revive, Game.Players);
-	   
-	   Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
-				     Game.Players(I).Ship.XY(2),
-				     Game.Players(I),     --Uppdaterar ship_spec
-				     Wall_List,           --Om spelare träffas
-				     Player_To_Revive      --Av Vägg
-				   );
-
-	    for K in 1..4 loop
+	    if Loop_Counter mod 2 = 0 then
+	       Detonate(Obstacle_List, Shot_List);
+	    end if;
+	    
+	 else
+	    -------------------------------------------------- 
+	    --| SCROLLING MAP  
+	    -------------------------------------------------- 
+	    if Loop_Counter mod 8 = 0 then
+	       if Highest_X_Position(Waves(1))-Lowest_X_Position(Waves(1))+20 <= Border_Difference(Game.Map) then 
+		  New_Top_Row(Game.Map);                 -- Vanlig randomisering 
+		  
+	       else
+		  if Loop_Counter mod 3 = 1 then 
+		     New_Top_Row(Game.Map, Open => True); 
+		  else
+		     New_Top_Row(Game.Map); 
+		  end if;
+	       end if;
+	       Move_Rows_Down(Game.Map);
+	    end if;
+	 end if;   
+	 
+	 
+	 -----------------------------------
+	 -- Update Enemy ships
+	 -----------------------------------
+	 if not Empty(Obstacle_List) then
+	    Obstacle_y := Highest_Y_Position(Obstacle_List);
+	 else
+	    Obstacle_Y := Obstacle_Y_Pos; --definitions
+	 end if;
+	 
+	 Update_Enemy_Position(Waves, Shot_List, Obstacle_Y, Game.Players, Game.Map);
+	 
+	 
+	 
+	 -- Uppdaterar astroidernas position.
+	 Shot_Movement(Astroid_List);
+	 
+	 -- Sorterar Scoreboard.
+	 Sort_Scoreboard(Game, Num_Players);
+	 
+	 
+	 for I in World'first..World'Last-1 loop -- Väggskott
+	    Create_Object(ShotType(9),GameBorder_X+Border_Left(Game.Map, I)-1, GameBorder_Y+I, Down, Wall_List);
+	    Create_Object(ShotType(10),GameBorder_X+Border_Right(Game.Map, I)-1, GameBorder_Y+I, Down, Wall_List);
+	 end loop;
+	 
+	 -- Skickar information till klienterna. / Eric
+	 for I in 1..Num_Players loop
+	    if Game.Players(I).Ship.Health <= 0 then
+	       Kill_Player(Game.Players(I), I, Shot_List, PowerUp_List);	
+	    end if;
+	    
+	    --------------------------------------------------
+	    --Uppdaterar spelarna om de spelar:
+	    --------------------------------------------------
+	    if Game.Players(I).Playing then
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 					 Game.Players(I).Ship.XY(2),
-					 Game.Players(I), --Uppdaterar ship_spec
-					 Waves(K),         -- Om spelare krashar i fiende
-					 Player_To_Revive  
+					 Game.Players(I),      --Uppdaterar ship_spec
+					 Shot_List,             --Om spelare träffas
+					 Player_To_Revive           --Av skott.
 				       );
 	       
-	    end loop;
-	    
-	        
-	    
+	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
+					 Game.Players(I).Ship.XY(2),
+					 Game.Players(I),      --Uppdaterar ship_spec
+					 Astroid_List,        --Om spelare träffas
+					 Player_To_Revive	    --Av asteroid
+				       );
+	       
+	       
+	       
+	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
+					 Game.Players(I).Ship.XY(2),
+					 Game.Players(I),      --Uppdaterar ship_spec
+					 Powerup_List,         --Om spelare träffas
+					 Player_To_Revive      --Av powerup
+				       );
+	       
+	       Revive_Player(Player_To_Revive, Game.Players);
+	       
+	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
+					 Game.Players(I).Ship.XY(2),
+					 Game.Players(I),     --Uppdaterar ship_spec
+					 Wall_List,           --Om spelare träffas
+					 Player_To_Revive      --Av Vägg
+				       );
+
+	       for K in 1..4 loop
+		  Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
+					    Game.Players(I).Ship.XY(2),
+					    Game.Players(I), --Uppdaterar ship_spec
+					    Waves(K),         -- Om spelare krashar i fiende
+					    Player_To_Revive  
+					  );
+		  
+	       end loop;
+	       
 	       --Thrusters:
 	       if Level_Cleared and then Loop_Counter mod 2 = 0 then
-	       Activate_Thrusters(Shot_List,
-				  Game.Players(I).Ship.XY(1),
-				  Game.Players(I).Ship.XY(2)
-				 );
+		  Activate_Thrusters(Shot_List,
+				     Game.Players(I).Ship.XY(1),
+				     Game.Players(I).Ship.XY(2)
+				    );
 	       end if;
-	    
-	 end if;                                         
+	       
+	    end if;                                         
 
-      end loop;
-      
-      
-      --Shot_Movement(Shot_List);
-      Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game, Powerup_List);
-      Shots_Collide_In_Objects(Shot_List, Astroid_List, Game, Powerup_List);
-      Shots_Collide_In_Objects(Shot_List, Wall_List, Game, Powerup_List);
-      Shots_Collide_In_Objects(Astroid_List, Obstacle_List, Game, Powerup_List);
-      Shots_Collide_In_Objects(Astroid_List, Wall_List, Game, Powerup_List);
-      Shots_Collide_In_Objects(Obstacle_List, Wall_List, Game, Powerup_List);
-      
-      for B in Waves'Range loop
-	 Shots_Collide_In_Objects(Shot_List, Waves(B), Game, Powerup_List);
-      end loop;
-
-      
-      if Players_Are_Dead (Game.Players) then
-	 Game.Settings.Gameover := 1;
-      end if;
-
-      --------------------------------
-      --| Skicka till klienterna
-      --------------------------------
-      
-      --  for I in 1..Num_Players loop
-      --  	 Put_Data(Sockets(I), Astroid_List, Shot_List, Obstacle_List, Powerup_List, Game, Waves);
-      --  end loop;
-      
-      
-      for I in 1..Num_Players loop
-      	 Put(Sockets(I), Astroid_List);
-	 Put(Sockets(I), Shot_List);
-	 Put(Sockets(I), Obstacle_List);
-	 Put(Sockets(I), Powerup_List);
-	 Send_Map(Sockets(I), Game);      -- Map_Handling
-	 Put_Game_Data(Sockets(I),Game);
-
-	 for J in Waves'Range loop
-	    Put(Sockets(I), Waves(J));
 	 end loop;
+	 
+	 --Shot_Movement(Shot_List);
+	 Shots_Collide_In_Objects(Shot_List, Obstacle_List, Game, Powerup_List);
+	 Shots_Collide_In_Objects(Shot_List, Astroid_List, Game, Powerup_List);
+	 Shots_Collide_In_Objects(Shot_List, Wall_List, Game, Powerup_List);
+	 Shots_Collide_In_Objects(Astroid_List, Obstacle_List, Game, Powerup_List);
+	 Shots_Collide_In_Objects(Astroid_List, Wall_List, Game, Powerup_List);
+	 Shots_Collide_In_Objects(Obstacle_List, Wall_List, Game, Powerup_List);
+	 
+	 for B in Waves'Range loop
+	    Shots_Collide_In_Objects(Shot_List, Waves(B), Game, Powerup_List);
+	 end loop;
+	 
+	 if Players_Are_Dead (Game.Players) then
+	    Game.Settings.Gameover := 1;
+	 end if;
 
-	 Put_Line(Sockets(I), Level);
-	 Put_Line(Sockets(I), Loop_Counter);
+	 --------------------------------
+	 --| Skicka till klienterna
+	 --------------------------------
+	 
+	 --  for I in 1..Num_Players loop
+	 --  	 Put_Data(Sockets(I), Astroid_List, Shot_List, Obstacle_List, Powerup_List, Game, Waves);
+	 --  end loop;
+	 
+	 
+	 for I in 1..Num_Players loop
+	    Put(Sockets(I), Astroid_List);
+	    Put(Sockets(I), Shot_List);
+	    Put(Sockets(I), Obstacle_List);
+	    Put(Sockets(I), Powerup_List);
+	    Send_Map(Sockets(I), Game);      -- Map_Handling
+	    Put_Game_Data(Sockets(I),Game);
 
+	    for J in Waves'Range loop
+	       Put(Sockets(I), Waves(J));
+	    end loop;
+
+	    Put_Line(Sockets(I), Level);
+	    Put_Line(Sockets(I), Loop_Counter);
+
+	 end loop;
+	 
+	 ------------------------------------------------------------
+	 --| Efter Put i socket (uppdatera):
+	 
+	 -- Uppdaterar PowerUp Position
+	 if Loop_Counter mod 2 = 0 then
+	    Shot_Movement(Powerup_List);
+	 end if;
+	 
+	 --Uppdaterar Cooldown på laser
+	 for I in 1..Num_Players loop
+	    Update_Player_Recharge(Game.Players(I));
+	 end loop;
+	 
+	 --Uppdaterar skottens positioner
+	 Shot_Movement(Shot_List);
+	 
+	 --Tar bort explosioner som hamnar i waves
+	 for I in Waves'Range loop
+	    Delete_Object_In_List(Waves(I), ShotType(Explosion) );
+	 end loop;
+      	 
+	 -----------------------------------
+	 ---| Tar emot från klienterna
+	 -----------------------------------
+	 if Game.Settings.Gameover /= 1 then
+	    Get_Player_Input(Sockets, Num_Players, Game, 
+			     Shot_List, Obstacle_List, Powerup_List);
+	 else
+	    delay(0.1);
+	    Get_Players_Choice( Players_Choice , Sockets, Num_Players, Game);
+	    Send_Players_Choice( Players_Choice, Sockets, Num_Players);
+	    
+	 end if;
+
+	 exit when not Check_Players_Choice(Players_Choice, 'S', Num_Players) 
+	   and not Check_Players_Choice(Players_Choice, 'o', Num_Players);
+
+	 
+	 Loop_Counter := Loop_Counter + 1;
+	 
       end loop;
       
-      ------------------------------------------------------------
-      --| Efter Put i socket (uppdatera):
+      
+      ----------------------------------------------------------------------------------------------------
+      -----------------------------------------------------------------------------------GAME LOOP END----
+      ----------------------------------------------------------------------------------------------------
+      
       
       for I in 1..Num_Players loop
-	 Update_Player_Recharge(Game.Players(I));
+	 Put_Score(Sockets(I), Game);  -- Update highscore
+	 while Server_Waiting /= '$' loop
+	    Get(Sockets(I), Server_Waiting);
+	 end loop;
       end loop;
       
-      Shot_Movement(Shot_List);
       
-            -- Uppdaterar PowerUp Position
-      if Loop_Counter mod 2 = 0 then
-	 Shot_Movement(Powerup_List);
-      end if;
+      --Efter spelets slut.
       
-      for I in Waves'Range loop
-	 Delete_Object_In_List(Waves(I), ShotType(Explosion) );
-      end loop;
-      	 
-      -----------------------------------
-      ---| Tar emot från klienterna
-      -----------------------------------
-      if Game.Settings.Gameover /= 1 then
-      	 Get_Player_Input(Sockets, Num_Players, Game, 
-      			  Shot_List, Obstacle_List, Powerup_List);
-      else
-	 delay(0.1);
-	 Get_Players_Choice( Players_Choice , Sockets, Num_Players, Game);
-	 Send_Players_Choice( Players_Choice, Sockets, Num_Players);
-	 
-      end if;
-
-      exit when not Check_Players_Choice(Players_Choice, 'S', Num_Players) 
-	and not Check_Players_Choice(Players_Choice, 'o', Num_Players);
-
-      
-      Loop_Counter := Loop_Counter + 1;
-      
-   end loop;
-   
-   
-   ----------------------------------------------------------------------------------------------------
-   -----------------------------------------------------------------------------------GAME LOOP END----
-   ----------------------------------------------------------------------------------------------------
-   
-   
-   for I in 1..Num_Players loop
-      Put_Score(Sockets(I), Game);  -- Update highscore
-      while Server_Waiting /= '$' loop
-	 Get(Sockets(I), Server_Waiting);
-      end loop;
-   end loop;
-   
-   
-   --Efter spelets slut.
-   
       DeleteList(Shot_List);
       DeleteList(Obstacle_List);
       DeleteList(Powerup_List);
