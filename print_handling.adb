@@ -126,7 +126,7 @@ package body Print_Handling is
 	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*5;
       elsif Game.Players(Klient_Number).Ship.Laser_Type = Laser_Upgraded_Shot then
 	 Put("Upgraded Laser");
-	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*10;
+	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*5;
       elsif Game.Players(Klient_Number).Ship.Laser_Type = Nitro_Shot then
 	 Put("Nitro");
 	 Cooldown := Game.Players(Klient_Number).Ship.Laser_Recharge*5;
