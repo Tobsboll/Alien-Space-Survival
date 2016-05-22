@@ -163,8 +163,8 @@ package body Level_Handling is
 	    Ambush_Level(Waves);
 	    
 	 elsif Gen_Level = 8 then
-	    Put("No level here (8)");
-	    null;
+	    Enemy_Frontline_Level(Waves);
+	    
 	 end if;
       end if;
       
@@ -324,6 +324,14 @@ package body Level_Handling is
 		 1, --direction
 		 3, --movement type
 		 Wave(1));
+		 
+      Spawn_Ship(Interceptor2, Gameborder_X+(World_X_Length*4/5), 
+		 Gameborder_Y+7,
+		 1, --Difficulty
+		 5, --health
+		 -1, --direction
+		 3, --movement type
+		 Wave(3));
       
       Spawn_Ship(Interceptor2, Gameborder_X+(World_X_Length*2/5), 
 		 Gameborder_Y+12,
@@ -341,13 +349,7 @@ package body Level_Handling is
 		 3, --movement type
 		 Wave(1));
       
-      Spawn_Ship(Interceptor2, Gameborder_X+(World_X_Length*4/5), 
-		 Gameborder_Y+7,
-		 1, --Difficulty
-		 5, --health
-		 -1, --direction
-		 3, --movement type
-		 Wave(3));
+      
 
 
       
@@ -428,6 +430,26 @@ package body Level_Handling is
 		 Wave(4));
       
    end Ambush_Level;
+   
+   -----------------------------------
+   -- ENEMY_FRONTLINE_LEVEL
+   -----------------------------------
+   procedure Enemy_Frontline_Level  ( Wave : out Enemy_List_Array) is
+   begin
+      for I in 0..10 loop
+      Spawn_Ship(Support, 
+		    Gameborder_X +(6*I) +8,
+		    Gameborder_Y +8, 
+		    
+		    3, --Difficulty
+		    10, --health
+		    1, --Direction
+		    2, --Movement type
+		 Wave(1));
+      
+      end loop;
+      
+   end Enemy_Frontline_Level;
    
    ----------------------------------------------------------------------
    --| BOSS LEVELS / SPECIAL LEVELS
