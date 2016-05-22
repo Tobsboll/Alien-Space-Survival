@@ -27,7 +27,7 @@ package body Graphics is
       Old_Bg_Colour   : Colour_Type;
    begin
       
-    
+      
       if not Empty(L) and then (L.XY_Pos(1) > 0 and L.XY_Pos(2) > 0) then
 	 Old_Text_Colour := Get_Foreground_Colour;
 	 Old_Bg_Colour   := Get_Background_Colour;
@@ -38,15 +38,15 @@ package body Graphics is
 	       Goto_XY(L.XY_Pos(1) , L.XY_Pos(2));
 	       
 	       if L.Object_Type = ShotType(Missile_Shot) then --Speciallösning för String
-					 --Eftersom att î råkade vara det ty specialtecken
+							      --Eftersom att î råkade vara det ty specialtecken
 		  Put("î");
 	       elsif L.Object_Type = ShotType(Asteroid) then --| Astroider
 		  
-		    Put("╱╲"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
-	            Put("╲╱"); 
-	        
-		--	       Put("╭╮"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
-	 	--	       Put("╰╯"); 
+		  Put("╱╲"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
+		  Put("╲╱"); 
+		  
+		  --	       Put("╭╮"); Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1); 
+		  --	       Put("╰╯"); 
 
 	       elsif L.Object_Type = ShotType(Explosion)
 		 or L.Object_Type = ShotType(Ricochet)
@@ -64,11 +64,27 @@ package body Graphics is
 		  Set_Background_Colour(Old_Bg_Colour);
 		  
 	       elsif L.Object_Type = ShotType(Diagonal_Laser) then
-		  Set_Foreground_Colour(Player_Laser_1);
+		  --------------------------------------------------
+		  --| Colour
+		  if L.Attribute = Up then
+		     Set_Foreground_Colour(Player_Laser_1);
+		  else 
+		     Set_Foreground_Colour(Enemy_Laser_1);
+		  end if;
+		  --------------------------------------------------
+		  --| Symbol
 		  if L.Direction = Left then
-		     Put('\');
+		     if L.Attribute = Up then
+			Put('\');
+		     else
+			Put('/');
+		     end if;
 		  elsif L.Direction = Right then
-		     Put('/');
+		     if L.Attribute = Up then
+			Put('/');
+		     else
+			Put('\');
+		     end if;
 		  else
 		     Put('|');
 		  end if;
@@ -117,18 +133,40 @@ package body Graphics is
 	    if L.Object_Type = PowerUpType(Health) then
 	       Put("(♥)");
 	    else
-	    Put(PowerUp(L.Object_Type));
+	       Put(PowerUp(L.Object_Type));
 	    end if;
 	    
 	    --Om det är en fiende:
 	 elsif L.Object_Type in Enemy'Range then
 	    
-	       --Enemy type 1 only:
+	    if L.Object_Type = Minion then
 	       Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
-	       Put( Enemy_1(1) );
-	       Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
-	       Put( Enemy_1(2) );
-	 
+	       Put("⎛⸆⎞");  Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+	       Put("╲.╱");
+	       
+	    elsif L.Object_Type = Nitro_Bomber then
+	       Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
+	       Put("\=/");  Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+	       Put("⎩.⎭");
+	       
+	    elsif L.Object_Type = Interceptor or
+	      L.Object_Type = Interceptor2 Then
+	       Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
+	       Put("⎨:⎬");  Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+	       Put("⎠V⎝");
+	       
+	    elsif  L.Object_Type = Kamikazee then
+	       Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
+	       Put("\⸆/");  Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+	       Put("⎝⌄⎠");
+	       
+	    elsif L.Object_Type = Support then
+	       Goto_XY(L.XY_Pos(1), L.XY_Pos(2));
+	       Put("╱:╲");  Goto_XY(L.XY_Pos(1), L.XY_Pos(2)+1);
+	       Put("╲|╱");
+	       
+	    end if;
+	    
 	 end if;
 	 Put_Objects(L.Next);
       end if;
