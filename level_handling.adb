@@ -145,8 +145,8 @@ package body Level_Handling is
 	    -------------------   
 	    
 	 elsif Gen_Level = 2 then
-	    --Kamikazee_Level(Waves);
-	    Ambush_Level(Waves);
+	    Kamikazee_Level(Waves);
+
 	 elsif Gen_Level = 3 then
 	    Shifting_Layer_Level(Waves, Difficulty);
 	    
