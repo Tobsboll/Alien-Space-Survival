@@ -53,12 +53,12 @@ package Definitions is
    type XY_Type is array(1 .. 2) of Integer;
    
    type Socket_Array is
-	array (1..4) of Socket_Type;
+     array (1..4) of Socket_Type;
    
-    --Types represented by integerz
+   --Types represented by integerz
    type Shot_Array_Type is array (1..15) of Integer;
    ShotType : Shot_Array_Type := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15); 
-     
+   
    type Obstacle_Array_Type is array (1..5) of Integer;
    ObstacleType : Obstacle_Array_Type := (16, 17, 18, 19, 20);
    
@@ -72,9 +72,12 @@ package Definitions is
    -- CONSTANTS FOR ENEMIES
    --------------------------------------------------
    
-   Minion      : Integer := EnemyType(1);
-   Interceptor : Integer := EnemyType(3);
-   Kamikazee   : Integer := EnemyType(4);
+   Minion        : Integer := EnemyType(1);
+   Nitro_Bomber  : Integer := EnemyType(2);
+   Interceptor   : Integer := EnemyType(3);
+   Interceptor2  : Integer := EnemyType(5);
+   Kamikazee     : Integer := EnemyType(4);
+   Support       : Integer := EnemyType(6);
    
    ---------------------------------------------------
    
@@ -128,7 +131,7 @@ package Definitions is
    --| Game_Data
    ---------------------------------------------------
    
-      type Game_Data is
+   type Game_Data is
       record
    	 Map      : World;             -- Banan är i packetet så att både klienten och servern 
    	                               -- hanterar samma datatyp / Eric
