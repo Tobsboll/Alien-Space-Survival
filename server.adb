@@ -184,9 +184,9 @@ begin
 	    --------------------------------------------------
 	    --Spawn Powerup bland asteroider:
 	    if Loop_Counter = 230 or
-	      (Loop_Counter = 225 or
-	      (Loop_Counter = 237 or 
-	      (Loop_Counter = 220 Then
+	      Loop_Counter = 225 or
+	      Loop_Counter = 237 or 
+	      Loop_Counter = 220 Then
 
 	       Reset(GenX);
 	       Powerup_X := Random(GenX);
