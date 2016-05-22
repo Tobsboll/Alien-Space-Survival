@@ -1019,9 +1019,9 @@ package body Game_Engine is
       
       
    begin
-      Reset(Gen10);
-      Spawn_Chance  := Random(Gen10);
-      Powerup_Type  := Random(Gen10);
+      Reset(Gen);
+      Spawn_Chance  := Random(Gen);
+      Powerup_Type  := Random(Gen);
       
       
       if Spawn_Chance in 1..1 -- and Powerup_Type /= 9
