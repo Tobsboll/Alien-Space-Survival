@@ -8,7 +8,7 @@ with Ada.Numerics.Discrete_Random;
 package Level_Handling is
    
    
-   subtype One_To_8 is Integer range 1..7;
+   subtype One_To_8 is Integer range 1..8;
    package One_To_8_Random is
       new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_8);
    use One_To_8_Random;
@@ -48,6 +48,8 @@ package Level_Handling is
    procedure Nitro_Bomber_Level  ( Wave : out Enemy_List_Array);
    
    procedure Ambush_Level  ( Wave : out Enemy_List_Array);
+   
+   procedure Enemy_Frontline_Level  ( Wave : out Enemy_List_Array);
    
    ----------------------------------------------------------------------
    --| BOSS LEVELS
