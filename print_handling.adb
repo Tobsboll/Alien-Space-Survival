@@ -117,7 +117,7 @@ package body Print_Handling is
       
       Goto_XY(Gameborder_X+World_X_Length+1, Gameborder_Y+Highscore_Window_Height+Num_Players+4);
       Put("Weapon Type: ");
-      Set_Foreground_Colour(Red);
+      Set_Foreground_Colour(Green);
       if Game.Players(Klient_Number).Ship.Hitech_Laser then
 	 Put("Hitech Laser");
 	 Power_Time := Game.Players(Klient_Number).Ship.Laser_Recharge/4;
@@ -215,7 +215,7 @@ package body Print_Handling is
       Goto_XY(Gameborder_X+World_X_Length+7, Gameborder_Y+Highscore_Window_Height+29);
       Put("(3) - Tri-Laser");
       Goto_XY(Gameborder_X+World_X_Length+7, Gameborder_Y+Highscore_Window_Height+30); 
-      Put("(D) - Diagonal-laser");
+      Put("(V) - Diagonal-laser");
       Goto_XY(Gameborder_X+World_X_Length+7, Gameborder_Y+Highscore_Window_Height+31); 
       Put("(N) - Nitro-shot");
       -----------------------------------------------------------------
