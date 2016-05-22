@@ -111,6 +111,7 @@ package Game_Engine is
    --Varje typ av objekt ger unika konsekvenser
    procedure Player_Collide_In_Object ( X,Y         : in Integer;
 					Player      : in out Player_Type;
+					PlayerNum   : in Integer;
 					L           : in out Object_List;
 					Player_To_Revive    : out Integer
 				      );
