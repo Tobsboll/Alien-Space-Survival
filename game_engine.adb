@@ -484,6 +484,7 @@ package body Game_Engine is
    procedure Player_Collide_In_Object ( X,Y              : in Integer;
 					--Data              : out Integer;
 					Player              : in out Player_Type;
+					PlayerNum           : in Integer;
 					L                   : in out Object_List;
 					Player_To_Revive    : out Integer
 				      ) is
@@ -498,7 +499,7 @@ package body Game_Engine is
 	    --------------------------------------------------
 	    --Beskjuten?
 	    --------------------------------------------------
-	    if L.Object_Type in 1..15 then
+	    if L.Object_Type in 1..15 and then PlayerNum /= L.Player then
 	       if L.Object_Type = ShotType(Normal_Laser_Shot) then
 		  Player_Ship.Health := Player_Ship.Health-1;
 		  
@@ -594,7 +595,7 @@ package body Game_Engine is
 	    
 	    --Remove(L); --ersätter alla remove ovan
 	 else
-	    Player_Collide_In_Object(X,Y,Player, L.Next, Player_To_Revive);
+	    Player_Collide_In_Object(X,Y,Player,PlayerNum, L.Next, Player_To_Revive);
 	 end if;
       end if;
       
@@ -1018,14 +1019,18 @@ package body Game_Engine is
       
       
    begin
-      Reset(Gen);
-      Spawn_Chance  := Random(Gen);
-      Powerup_Type  := Random(Gen);
+      Reset(Gen10);
+      Spawn_Chance  := Random(Gen10);
+      Powerup_Type  := Random(Gen10);
       
       
-      if Spawn_Chance in 1..1 and Powerup_Type not in 9..10 -- and Powerup_Type /= 9
+      if Spawn_Chance in 1..1 -- and Powerup_Type /= 9
       then
-	 Create_Object(PowerUpType(Powerup_Type), X, Y, Down, Powerup_List);
+	 if Powerup_Type in 9..10 then
+	    Create_Object(PowerUpType(Health), X, Y, Down, Powerup_List);
+	 else
+	    Create_Object(PowerUpType(Powerup_Type), X, Y, Down, Powerup_List);
+	 end if;
       end if;
       
       
