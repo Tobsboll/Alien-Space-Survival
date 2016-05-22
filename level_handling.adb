@@ -69,7 +69,7 @@ package body Level_Handling is
       
       Data.Map                 := Map;
       Data.Settings.Difficulty := Difficulty;
-	
+      
    end Between_Levels;
    
    
@@ -100,72 +100,88 @@ package body Level_Handling is
       ---------------------------------------------------------
       --| LEVELS
       ---------------------------------------------------------
-
-      Reset(Gen);
-      Gen_Level  := Random(Gen);
-      if Gen_Level = 1 or level = 1 then
-	 Spawn_Wave(10*Difficulty, --Antal
-		    EnemyType(1), --Typ
-		    1,
-		    1,
-		    Gameborder_X +1,
-		    Gameborder_Y +4,
-		    Difficulty,
-		    waves(1));
+      if Level = 5 then   	 -- Spawn MID Boss
+	 Spawn_Super_Inceptor(Waves);
 	 
-	 -- Tror den nedan kan vara ett bättre alternativ i
-	 -- det generella fallet, eftersom interceptors
-	 -- inte fungerar om de ligger i samma lista i nuläget // Tobias
+      elsif Level = 10 then 	 -- Spawn BIG boss
+	 null;
 	 
-	 ---------------  
-
-	 for I in 2..Integer(0.5*Float(Difficulty)) loop
+      else
+	 Reset(Gen);
+	 Gen_Level  := Random(Gen);
+	 if Gen_Level = 1 or level = 1 then
+	    Put_Line("Spawn ""Default"" Level! ");
+	    Spawn_Wave(10*Difficulty, --Antal
+		       EnemyType(1), --Typ
+		       1,
+		       1,
+		       Gameborder_X +1,
+		       Gameborder_Y +4,
+		       Difficulty,
+		       waves(1));
 	    
-	    if I < 4 then
-	       
-	       Spawn_Wave(1, --Antal
-			  EnemyType(3), --Typ
-			  3,
-			  1,
-			  Gameborder_X +1,
-			  Gameborder_Y +2,
-			  Difficulty,
-			  waves(I));
-	       
-	    end if;
+	    -- Tror den nedan kan vara ett bättre alternativ i
+	    -- det generella fallet, eftersom interceptors
+	    -- inte fungerar om de ligger i samma lista i nuläget // Tobias
 	    
-	 end loop;
-	 -------------------   
-	 
-      elsif Gen_Level = 2 then
-	 Kamikazee_Level(Waves);
-      elsif Gen_Level = 3 then
-	 Shifting_Layer_Level(Waves, Difficulty);
-      elsif Gen_Level = 4 then
-	 Hunter_Level(Waves, Difficulty, Num_Players);
-      elsif Gen_Level = 5 then
-	 null;
-      elsif Gen_Level = 6 then
-	 null;
-      elsif Gen_Level = 7 then
-	 null;
-      elsif Gen_Level = 8 then
-	 null;
+	    ---------------  
+
+	    for I in 2..Integer(0.5*Float(Difficulty)) loop
+	       
+	       if I < 4 then
+		  
+		  Spawn_Wave(1, --Antal
+			     EnemyType(3), --Typ
+			     3,
+			     1,
+			     Gameborder_X +1,
+			     Gameborder_Y +2,
+			     Difficulty,
+			     waves(I));
+		  
+	       end if;
+	       
+	    end loop;
+	    -------------------   
+	    
+	 elsif Gen_Level = 2 then
+	    --Kamikazee_Level(Waves);
+	    Ambush_Level(Waves);
+	 elsif Gen_Level = 3 then
+	    Shifting_Layer_Level(Waves, Difficulty);
+	    
+	 elsif Gen_Level = 4 then
+	    Hunter_Level(Waves, Difficulty, Num_Players);
+	    
+	 elsif Gen_Level = 5 then
+	    Bully_Level(Waves);
+	    
+	 elsif Gen_Level = 6 then
+	    Nitro_Bomber_Level(Waves);
+	    
+	 elsif Gen_Level = 7 then
+	    Ambush_Level(Waves);
+	    
+	 elsif Gen_Level = 8 then
+	    Put("No level here (8)");
+	    null;
+	 end if;
       end if;
       
    end Spawn_Level;
    
-    ----------------------------------------------------------------------
+   ----------------------------------------------------------------------
    --| DIFFERENT LEVELS:
    ----------------------------------------------------------------------
    
    procedure Kamikazee_Level ( Wave : out Enemy_List_Array) is
       
    begin
+      Put_Line("Spawn ""Kamikazee"" Level!");
       for I in 0..1 loop
 	 Spawn_Ship(EnemyType(4), Gameborder_X + (World_X_Length/4),
 		    Gameborder_Y-10   - 20*I, 
-		   
+		    
 		    1, --Difficulty
 		    5, --health
 		    1,
@@ -183,62 +199,62 @@ package body Level_Handling is
 
    end Kamikazee_Level;
    
-      -----------------------------------
-      -- SHIFTING_LAYER_LEVEL
-      -----------------------------------
-      
+   -----------------------------------
+   -- SHIFTING_LAYER_LEVEL
+   -----------------------------------
+   
    procedure Shifting_Layer_Level (Waves : out Enemy_List_Array;
 				   Difficulty : in Integer) is
-	 
-	 
-	 
-      begin
-	 	    
-	 Spawn_Wave(10,
-		    Minion,
-		    1,
-		    1,
-		    Gameborder_X +1,
-		    Gameborder_Y +2,
-		    Difficulty,
-		    Waves(1));
-	 
-	 Spawn_Wave(1,
-		    Kamikazee,
-		    4,
-		    -1,
-		    Gameborder_X +1,
-		    Gameborder_Y +6,
-		    Difficulty,
-		    Waves(2));
-	 
-	 Spawn_Wave(16,
-		    Minion,
-		    1,
-		    -1,
-		    Gameborder_X +1,
-		    Gameborder_Y +10,
-		    Difficulty,
-		    Waves(3));
-	 
-	 Spawn_Wave(1,
-		    Interceptor,
-		    3,
-		    1,
-		    Gameborder_X +1,
-		    Gameborder_Y +16,
-		    Difficulty,
-		    Waves(4));
+      
+      
+      
+   begin
+      Put_Line("Spawn ""Shifting Layer"" Level!");	    
+      Spawn_Wave(10,
+		 Minion,
+		 1,
+		 1,
+		 Gameborder_X +1,
+		 Gameborder_Y +2,
+		 Difficulty,
+		 Waves(1));
+      
+      Spawn_Wave(1,
+		 Kamikazee,
+		 4,
+		 -1,
+		 Gameborder_X +1,
+		 Gameborder_Y +6,
+		 Difficulty,
+		 Waves(2));
+      
+      Spawn_Wave(16,
+		 Minion,
+		 1,
+		 -1,
+		 Gameborder_X +1,
+		 Gameborder_Y +10,
+		 Difficulty,
+		 Waves(3));
+      
+      Spawn_Wave(1,
+		 Interceptor,
+		 3,
+		 1,
+		 Gameborder_X +1,
+		 Gameborder_Y +16,
+		 Difficulty,
+		 Waves(4));
 
-	 
-	 
-	 
-      end Shifting_Layer_Level;
       
-            -----------------------------------
-      -- SHIFTING_LAYER_LEVEL
-      -----------------------------------
       
+      
+   end Shifting_Layer_Level;
+   
+   -----------------------------------
+   -- HUNTER_LEVEL
+   -----------------------------------
+   
    procedure Hunter_Level (Waves       : out Enemy_List_Array;
 			   Difficulty  : in Integer;
 			   Num_Players : in Integer) is
@@ -253,6 +269,7 @@ package body Level_Handling is
       New_Difficulty : Integer := Integer(Float'Ceiling(0.2 * Float(Difficulty)));
       
    begin
+      Put_Line("Spawn ""Hunter"" Level!");
       for J in 1 .. Num_Players loop
 	 Spawn_Wave(1,
 		    Interceptor,
@@ -288,7 +305,150 @@ package body Level_Handling is
 	 end if;
       end loop;
       
+      
+   end Hunter_Level;
+   
+   -----------------------------------
+   -- BULLY_LEVEL
+   -----------------------------------
+   procedure Bully_Level  ( Wave : out Enemy_List_Array) is
+   begin
+      Put_Line("Spawn ""Bully"" Level!");
+      
+
+      Spawn_Ship(Interceptor2, Gameborder_X + (World_X_Length/5),
+		 Gameborder_Y+2, 
+		 
+		 1, --Difficulty
+		 5, --health
+		 1, --direction
+		 3, --movement type
+		 Wave(1));
+      
+      Spawn_Ship(Interceptor2, Gameborder_X+(World_X_Length*2/5), 
+		 Gameborder_Y+12,
+		 1, --Difficulty
+		 5, --health
+		 1, --direction
+		 3, --movement type
+		 Wave(3));
+      Spawn_Ship(Interceptor2, Gameborder_X + (World_X_Length*3/5),
+		 Gameborder_Y+17, 
+		 
+		 1, --Difficulty
+		 5, --health
+		 -1, --direction
+		 3, --movement type
+		 Wave(1));
+      
+      Spawn_Ship(Interceptor2, Gameborder_X+(World_X_Length*4/5), 
+		 Gameborder_Y+7,
+		 1, --Difficulty
+		 5, --health
+		 -1, --direction
+		 3, --movement type
+		 Wave(3));
+
+
+      
+   end Bully_Level;
+   
+   -----------------------------------
+   -- NITRO_BOMBER_LEVEL
+   -----------------------------------
+   procedure Nitro_Bomber_Level  ( Wave : out Enemy_List_Array) is
+   begin
+      Put_Line("Spawn ""Nitro Bomber"" Level!");
+      Spawn_Wave(50,            --Antal
+		 Nitro_Bomber,  --Typ
+		 1,             --movement type
+		 1,             --direction
+		 Gameborder_X +1, --X
+		 Gameborder_Y +4, --Y
+		 2,              --Difficulty
+		 wave(1));
+   end Nitro_Bomber_Level;
+   
+   -----------------------------------
+   -- AMBUSH_LEVEL
+   -----------------------------------
+   procedure Ambush_Level  ( Wave : out Enemy_List_Array) is
+   begin
+      Put_Line("Spawn ""Ambush"" Level!");
+      
+      --------------------------------------------------
+      --| Staircase formation:
+      
+      for I in 0..4 loop
+	 Spawn_Ship(Support, 
+		    Gameborder_X +(3*I) +8,
+		    Gameborder_Y +20 -(4*I), 
+		    
+		    3, --Difficulty
+		    10, --health
+		    1, --Direction
+		    0, --Movement type
+		    Wave(1));
 	 
-      end Hunter_Level;
+	 Spawn_Ship(Support, 
+		    Gameborder_X +(3*I) + (World_X_Length - 20),
+		    Gameborder_Y +4 +(4*I), 
+		    
+		    3, --Difficulty
+		    5, --health
+		    1, --Direction
+		    0, --Movement type
+		    Wave(1));
+
+      end loop;
+      
+      --------------------------------------------------
+      --| Hidden Kamikazee
+      
+      for I in 0..1 loop
+	 Spawn_Ship(Kamikazee, Gameborder_X + (World_X_Length/2),
+		    Gameborder_Y-10   - 20*I, 
+		    
+		    1, --Difficulty
+		    5, --health
+		    1,
+		    4,
+		    Wave(2+I));
+      end loop;
+      
+      --------------------------------------------------
+      --| Interceptor
+      Spawn_Ship(Interceptor, Gameborder_X +1,
+		 Gameborder_Y+1, 
+		 
+		 1, --Difficulty
+		 5, --health
+		 1,
+		 3,
+		 Wave(4));
+      
+   end Ambush_Level;
+   
+   ----------------------------------------------------------------------
+   --| BOSS LEVELS / SPECIAL LEVELS
+   ----------------------------------------------------------------------
+   
+   -----------------------------------
+   -- SUPER_INCEPTOR
+   -----------------------------------
+   procedure Spawn_Super_Inceptor  ( Wave : out Enemy_List_Array) is
+   begin
+      Put_Line("Spawn ""Super Inceptor"" Boss!");
+      
+      Spawn_Ship(Interceptor2, Gameborder_X + (World_X_Length/2),
+		 Gameborder_Y+5, 
+		 
+		 1, --Difficulty
+		 20, --health
+		 1, --Direction
+		 3, --Movement type
+		 Wave(1));
+      
+   end Spawn_Super_Inceptor;
    
 end Level_Handling;
