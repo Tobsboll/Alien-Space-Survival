@@ -54,12 +54,12 @@ package Graphics is
    
    type Obstacle_Graphics_Type is array (16..18) of Colour_Type;
    Obstacle : Obstacle_Graphics_Type := (Obstacle_Light_Colour,
-					  Obstacle_Hard_Colour, 
-					  Obstacle_Unbreakable_Colour
-					    --"   ",
-					 --"   " --2st lediga
-			        
-					 );
+					 Obstacle_Hard_Colour, 
+					 Obstacle_Unbreakable_Colour
+					   --"   ",
+					   --"   " --2st lediga
+					   
+					);
    
    type PowerUp_Graphics_Type is array (21..30) of String(1..3);
    PowerUp : PowerUp_Graphics_Type := ( "(h)", --Health
@@ -79,20 +79,30 @@ package Graphics is
    Enemy_1 : Ship_Parts := ("|'|",
 			    "\V/");
    
+   --  Minion_Ship : Ship_Parts := ("\=/",
+   --  				"⎩.⎭");
+   
+   --  Interceptor_Ship_1 : Ship_Parts := ("⎨:⎬",
+   --  				       "⎠V⎝");
+   
+   --  Kamikazee_Ship : Ship_Parts := ("\⸆/",
+   --  				   "⎝⌄⎠");
+   
+   
    type Enemy_Graphics_Type is array(31..40) of Ship_Parts;
-   Enemy : Enemy_Graphics_Type; --:= (Enemy_1,
-				   --  Enemy_1,
-				   --  Enemy_1,
-				   --  Enemy_1,
-				   --  Enemy_1,
-				   --  Enemy_1,
-				   --  Enemy_1,
-				   --  Enemy_1,
-				   --  Enemy_1,
-				   --  Enemy_1);
-			      
+   Enemy : Enemy_Graphics_Type;   --:=  (Minion_Ship,
+				  --    Enemy_1,
+				  --    Interceptor_Ship_1,
+				  --    Kamikazee_Ship,
+				  --    Enemy_1,
+				  --    Enemy_1,
+				  --    Enemy_1,
+				  --    Enemy_1,
+				  --    Enemy_1,
+				  --    Enemy_1);
+   
    ---
-     
+   
    --  Ship_Width_Type is array (1..Player_Width) of Character;
    --  Ship_Type is array (1..Player_Height) of Ship_Width_Type;
    --  --Ships is array (1..Num_Different_Ships) of Ship_Type   --Olika skepp i framtiden?
@@ -105,17 +115,60 @@ package Graphics is
    --  |*_*|
    --  |'|'|
    --      
-   --       
-   --      
+   --  ● ⚫ ⚙  ■  ▼ ▲ ◆ ✖ ❂ ✹ ✸ ✸ ☀ ☒ ♦    
+   --      ☨ ♟ ⚕ 
    --
+   -- ﹀ ︱ ﹁ ﹂ s ︳s ﹃﹄︴︵︶︷︸ ﹇﹈ ︹︺ ‾ ︻︼ ︽︾ 
    --
+   -- 【D】  〒 〼 《》『』〓〓 ⸬ ⸫ ⸨⸩ ⸆ ⎫⎧ ⎛⎞ ⎭⎩ ⎝⎠ ⎨⎬ ⌈⌉⌊⌋ ⌤ ⌇
    --
+   -- ⌅ ⌆ ⌄ ⌘ ⏚ ◣﹏ ◢◥▄◤ █▬█ █ ▀█▀ ❚ ━┻ ▀ ▄ ▬ ▓▓▓▓▓  █▇▅▃▂
    --
+   -- ◗◖ ┏┓┗┛ ⌶ ⎢ ▛ ▜ ▙▟ ─
    --
+   --  Interceptor
+   --     ⎨:⎬          ⎫⸆⎧   
+   --	  ⎠V⎝          ┛|┗   ⎛ ⎞ 
    --
+   --     ⎨:⎬
+   --	  /V\
+   
+   --  Kamikaze
+   --    \|/   \⸆/  \*/
+   --    ⎝⌄⎠   ⎝⌄⎠  ⎝⌄⎠
+   --
+   --    \⌶/
+   --    (⌄)
+   
+   -- Nitro bomber
+   --    \=/
+   --    ⎩.⎭ 
    --
    
-   
+   -- Minions
+   --    ⎫⸆⎧    
+   --    \./     
+   --
+   --    ⎫⸆⎧
+   --    ⎝.⎠
+   --
+   --    ⎛⸆⎞
+   --    ╲.╱
+   --
+   --    \⸆/  
+   --    ⎝.⎠
+   --
+   -- 
+   -- Support
+   --
+   -- ╱:╲
+   -- ╲|╱
+   --    
+   --  ⎛⸆⎞ 
+   --  ╲.╱
+   --
+   --
+   --
    
    
 end Graphics;
