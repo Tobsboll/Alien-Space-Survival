@@ -98,9 +98,6 @@ package Enemy_Ship_Handling is
    
    procedure Change_Direction(Enemies : in out Object_List);
 
-   procedure Put_Enemy_Ships(Enemies : in Object_List;
-			     Socket  : in Socket_Type);
-
    procedure Create_Enemy_Shot(Enemy_Type, X, Y : in Integer;
    			       Shot_List : in out Object_List);
    procedure Shot_Generator(Enemies : in out Object_List;
