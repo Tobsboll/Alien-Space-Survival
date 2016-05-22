@@ -27,7 +27,19 @@ procedure Server is
    --|
    --| DECLARATIONS
    --|
-   ----------------------------------------------------------------------------------------------------				 
+   ----------------------------------------------------------------------------------------------------	
+   
+   subtype Spawn_Width is Integer range 1..World_X_Length*2/3;
+   package Powerup_Random_X is
+      new Ada.Numerics.Discrete_Random(Result_Subtype => Spawn_Width);
+   use Powerup_Random_X;
+   
+   GenX : Generator;
+   Powerup_X_Offset : Integer := World_X_Length*1/6;
+   
+   Powerup_X : Integer;
+   
+   ----------------------------------------------------------------------
    
    Socket1, Socket2, Socket3, Socket4 : Socket_Type;
    Sockets : Socket_Array             := (Socket1, Socket2, Socket3, Socket4);
@@ -169,6 +181,31 @@ begin
 	       Detonate(Obstacle_List, Shot_List);
 	    end if;
 	    
+	    --------------------------------------------------
+	    --Spawn Powerup bland asteroider:
+	    if Loop_Counter = 230 or
+	      (Loop_Counter = 225 and Num_Players > 1) or
+	      (Loop_Counter = 237 and Num_Players > 2) or 
+	      (Loop_Counter = 220 and Num_Players > 3) Then
+
+	       Reset(GenX);
+	       Powerup_X := Random(GenX);
+
+	       Spawn_Powerup(Powerup_X+Powerup_X_Offset, Gameborder_Y+1, Powerup_List);
+	       
+	    end if;
+	    
+	    --------------------------------------------------
+	    --Thruster Boost Forward
+	    for I in 1..Num_Players loop
+	       if Game.Players(I).Ship.XY(2) > (Gameborder_Y+World_Y_Length)-5 then
+		  if Loop_Counter mod 2 = 0 then
+		     Game.Players(I).Ship.XY(2) := Game.Players(I).Ship.XY(2)-1;
+		  end if;
+	       end if;
+	    end loop;
+	    --------------------------------------------------
+	    
 	 else
 	    -------------------------------------------------- 
 	    --| SCROLLING MAP  
@@ -227,6 +264,7 @@ begin
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 					 Game.Players(I).Ship.XY(2),
 					 Game.Players(I),      --Uppdaterar ship_spec
+					 I,
 					 Shot_List,             --Om spelare träffas
 					 Player_To_Revive           --Av skott.
 				       );
@@ -234,6 +272,7 @@ begin
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 					 Game.Players(I).Ship.XY(2),
 					 Game.Players(I),      --Uppdaterar ship_spec
+					 I,
 					 Astroid_List,        --Om spelare träffas
 					 Player_To_Revive	    --Av asteroid
 				       );
@@ -243,6 +282,7 @@ begin
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 					 Game.Players(I).Ship.XY(2),
 					 Game.Players(I),      --Uppdaterar ship_spec
+					 I,
 					 Powerup_List,         --Om spelare träffas
 					 Player_To_Revive      --Av powerup
 				       );
@@ -252,6 +292,7 @@ begin
 	       Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 					 Game.Players(I).Ship.XY(2),
 					 Game.Players(I),     --Uppdaterar ship_spec
+					 I,
 					 Wall_List,           --Om spelare träffas
 					 Player_To_Revive      --Av Vägg
 				       );
@@ -260,6 +301,7 @@ begin
 		  Player_Collide_In_Object( Game.Players(I).Ship.XY(1),
 					    Game.Players(I).Ship.XY(2),
 					    Game.Players(I), --Uppdaterar ship_spec
+					    I,
 					    Waves(K),         -- Om spelare krashar i fiende
 					    Player_To_Revive  
 					  );
