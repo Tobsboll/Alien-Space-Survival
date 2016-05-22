@@ -8,7 +8,7 @@ with Ada.Numerics.Discrete_Random;
 package Level_Handling is
    
    
-subtype One_To_8 is Integer range 1..4;
+   subtype One_To_8 is Integer range 1..7;
    package One_To_8_Random is
       new Ada.Numerics.Discrete_Random(Result_Subtype => One_To_8);
    use One_To_8_Random;
@@ -34,14 +34,24 @@ subtype One_To_8 is Integer range 1..4;
    ----------------------------------------------------------------------
    --| LEVELS
    ----------------------------------------------------------------------
-    procedure Kamikazee_Level ( Wave : out Enemy_List_Array);
-       
-    procedure Shifting_Layer_Level (Waves : out Enemy_List_Array;
-				    Difficulty : in Integer);
-    
-    procedure Hunter_Level (Waves       : out Enemy_List_Array;
-			    Difficulty  : in Integer;
-			    Num_Players : in Integer);
-    
+   procedure Kamikazee_Level ( Wave : out Enemy_List_Array);
+   
+   procedure Shifting_Layer_Level (Waves : out Enemy_List_Array;
+				   Difficulty : in Integer);
+   
+   procedure Hunter_Level (Waves       : out Enemy_List_Array;
+			   Difficulty  : in Integer;
+			   Num_Players : in Integer);
+   
+   procedure Bully_Level ( Wave : out Enemy_List_Array);
+   
+   procedure Nitro_Bomber_Level  ( Wave : out Enemy_List_Array);
+   
+   procedure Ambush_Level  ( Wave : out Enemy_List_Array);
+   
+   ----------------------------------------------------------------------
+   --| BOSS LEVELS
+   ----------------------------------------------------------------------
+   procedure Spawn_Super_Inceptor  ( Wave : out Enemy_List_Array);
    
 end Level_Handling;
