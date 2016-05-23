@@ -157,16 +157,16 @@ package body Print_Handling is
       -----------------------------------------------------------------
       
       Set_Bold_Mode(Off); -- Måste stänga av annars är färgen Dark_Grey på boxen under
-      Put_Double_Line_Box(Gameborder_X+World_X_Length+1, Gameborder_Y+Highscore_Window_Height+15, Highscore_Window_Width-1, 2, Game_Wall_Background, Black);
+      Put_Double_Line_Box(Gameborder_X+World_X_Length+1, Gameborder_Y+Highscore_Window_Height+16, Highscore_Window_Width-1, 2, Game_Wall_Background, Black);
 
       
       Set_Foreground_Colour(Red);
-      Goto_XY(Gameborder_X+World_X_Length+2, Gameborder_Y+Highscore_Window_Height+16);
+      Goto_XY(Gameborder_X+World_X_Length+2, Gameborder_Y+Highscore_Window_Height+17);
       for I in 1 .. Cooldown loop
 	 Put("▌");
       end loop;
       Set_Foreground_Colour(Black);
-      Goto_XY(Gameborder_X+World_X_Length+11, Gameborder_Y+Highscore_Window_Height+15);
+      Goto_XY(Gameborder_X+World_X_Length+13, Gameborder_Y+Highscore_Window_Height+16);
       Put("COOLDOWN");
       Set_Foreground_Colour(White);
       Set_Bold_Mode(On);
@@ -175,15 +175,15 @@ package body Print_Handling is
       --| Power TIME BOX
       -----------------------------------------------------------------
       Set_Bold_Mode(Off); -- Måste stänga av annars är färgen Dark_Grey på boxen under
-      Put_Double_Line_Box(Gameborder_X+World_X_Length+1, Gameborder_Y+Highscore_Window_Height+18, Highscore_Window_Width-1, 2, Game_Wall_Background, Black);
+      Put_Double_Line_Box(Gameborder_X+World_X_Length+1, Gameborder_Y+Highscore_Window_Height+19, Highscore_Window_Width-1, 2, Game_Wall_Background, Black);
       
-      Goto_XY(Gameborder_X+World_X_Length+2, Gameborder_Y+Highscore_Window_Height+19);
+      Goto_XY(Gameborder_X+World_X_Length+2, Gameborder_Y+Highscore_Window_Height+20);
       Set_Foreground_Colour(Red);
       for I in 1 .. Power_Time loop
 	 Put("▌");
       end loop;
       Set_Foreground_Colour(Black);
-      Goto_XY(Gameborder_X+World_X_Length+10, Gameborder_Y+Highscore_Window_Height+18);
+      Goto_XY(Gameborder_X+World_X_Length+12, Gameborder_Y+Highscore_Window_Height+19);
       Put("POWER LEVEL");
       Set_Foreground_Colour(White);
       Set_Bold_Mode(On);
