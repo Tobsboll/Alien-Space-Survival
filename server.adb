@@ -18,7 +18,7 @@ with Map_Handling;                 use Map_Handling;
 with Player_Handling;              use Player_Handling;
 with Level_Handling;               use Level_Handling; 
 with Score_Handling;               use Score_Handling;
-with Task_Server_Communication;    use Task_Server_Communication;
+--with Task_Server_Communication;    use Task_Server_Communication;
 
 procedure Server is
    
@@ -330,6 +330,7 @@ begin
 	 
 	 for B in Waves'Range loop
 	    Shots_Collide_In_Objects(Shot_List, Waves(B), Game, Powerup_List);
+	    Shots_Collide_In_Objects(Wall_List, Waves(B), Game, Powerup_List);
 	 end loop;
 	 
 	 if Players_Are_Dead (Game.Players) then
