@@ -331,7 +331,7 @@ package body Level_Handling is
 		 5, --health
 		 -1, --direction
 		 3, --movement type
-		 Wave(3));
+		 Wave(2));
       
       Spawn_Ship(Interceptor2, Gameborder_X+(World_X_Length*2/5), 
 		 Gameborder_Y+12,
@@ -347,7 +347,7 @@ package body Level_Handling is
 		 5, --health
 		 -1, --direction
 		 3, --movement type
-		 Wave(1));
+		 Wave(4));
       
       
 
